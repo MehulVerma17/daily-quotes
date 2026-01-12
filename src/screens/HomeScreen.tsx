@@ -11,7 +11,6 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { TagChip } from '../components/TagChip';
 import { useQuotes } from '../hooks/useQuotes';
 import { useFavoritesContext } from '../context';
 import Toast from 'react-native-toast-message';
@@ -90,15 +89,6 @@ export const HomeScreen: React.FC = () => {
           <>
             <Text style={styles.quoteText}>"{currentQuote.content}"</Text>
             <Text style={styles.authorText}>{currentQuote.author.toUpperCase()}</Text>
-
-            {/* Tags */}
-            {currentQuote.tags.length > 0 && (
-              <View style={styles.tagsContainer}>
-                {currentQuote.tags.slice(0, 3).map((tag) => (
-                  <TagChip key={tag} label={tag} variant="home" />
-                ))}
-              </View>
-            )}
           </>
         ) : (
           <Text style={styles.errorText}>Tap refresh to load a quote</Text>
@@ -186,12 +176,6 @@ const styles = StyleSheet.create({
     color: 'rgba(45, 45, 45, 0.7)',
     letterSpacing: 3,
     marginBottom: height * 0.02,
-  },
-  tagsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    flexWrap: 'wrap',
-    gap: 8,
   },
   errorText: {
     fontSize: 16,
