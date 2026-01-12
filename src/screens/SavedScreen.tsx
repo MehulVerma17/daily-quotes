@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import {
   View,
   Text,
@@ -8,8 +8,12 @@ import {
   ActivityIndicator,
   ScrollView,
   Dimensions,
+  Pressable,
+  TextInput,
+  Animated,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 import { QuoteCard } from '../components/QuoteCard';
 import { TagChip } from '../components/TagChip';
 import { useFavoritesContext } from '../context';
@@ -22,20 +26,79 @@ export const SavedScreen: React.FC = () => {
   const insets = useSafeAreaInsets();
   const { favorites, loading, removeFavoriteById, getUniqueTags } = useFavoritesContext();
   const [activeFilter, setActiveFilter] = useState<string>('All');
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [isSearchVisible, setIsSearchVisible] = useState<boolean>(false);
+  const searchInputRef = useRef<TextInput>(null);
+  const searchBarHeight = useRef(new Animated.Value(0)).current;
 
   const tags = useMemo(() => {
     const uniqueTags = getUniqueTags();
     return ['All', ...uniqueTags];
   }, [getUniqueTags]);
 
+  const formatDateForSearch = (dateString: string): string => {
+    const date = new Date(dateString);
+    const months = [
+      'january', 'february', 'march', 'april', 'may', 'june',
+      'july', 'august', 'september', 'october', 'november', 'december'
+    ];
+    const shortMonths = [
+      'jan', 'feb', 'mar', 'apr', 'may', 'jun',
+      'jul', 'aug', 'sept', 'oct', 'nov', 'dec'
+    ];
+    const day = date.getDate().toString();
+    const month = months[date.getMonth()];
+    const shortMonth = shortMonths[date.getMonth()];
+    const year = date.getFullYear().toString();
+    return `${month} ${shortMonth} ${day} ${year}`;
+  };
+
   const filteredFavorites = useMemo(() => {
-    if (activeFilter === 'All') {
-      return favorites;
+    let results = favorites;
+
+    // Apply tag filter
+    if (activeFilter !== 'All') {
+      results = results.filter((quote) =>
+        quote.tags.some((tag) => tag.toLowerCase() === activeFilter.toLowerCase())
+      );
     }
-    return favorites.filter((quote) =>
-      quote.tags.some((tag) => tag.toLowerCase() === activeFilter.toLowerCase())
-    );
-  }, [favorites, activeFilter]);
+
+    // Apply search filter
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase().trim();
+      results = results.filter((quote) => {
+        const contentMatch = quote.content.toLowerCase().includes(query);
+        const authorMatch = quote.author.toLowerCase().includes(query);
+        const tagMatch = quote.tags.some((tag) => tag.toLowerCase().includes(query));
+        const dateMatch = formatDateForSearch(quote.savedAt).includes(query);
+        return contentMatch || authorMatch || tagMatch || dateMatch;
+      });
+    }
+
+    return results;
+  }, [favorites, activeFilter, searchQuery]);
+
+  const toggleSearch = () => {
+    if (isSearchVisible) {
+      // Hide search
+      setSearchQuery('');
+      Animated.timing(searchBarHeight, {
+        toValue: 0,
+        duration: 200,
+        useNativeDriver: false,
+      }).start(() => setIsSearchVisible(false));
+    } else {
+      // Show search
+      setIsSearchVisible(true);
+      Animated.timing(searchBarHeight, {
+        toValue: 50,
+        duration: 200,
+        useNativeDriver: false,
+      }).start(() => {
+        searchInputRef.current?.focus();
+      });
+    }
+  };
 
   const handleRemoveFavorite = async (quoteId: string) => {
     await removeFavoriteById(quoteId);
@@ -69,7 +132,9 @@ export const SavedScreen: React.FC = () => {
     <View style={styles.emptyContainer}>
       <Text style={styles.emptyTitle}>No quotes found</Text>
       <Text style={styles.emptySubtitle}>
-        No quotes with the "{activeFilter}" tag
+        {searchQuery
+          ? `No quotes matching "${searchQuery}"`
+          : `No quotes with the "${activeFilter}" tag`}
       </Text>
     </View>
   );
@@ -78,8 +143,40 @@ export const SavedScreen: React.FC = () => {
     <View style={[styles.container, { paddingTop: insets.top }]}>
       {/* Header */}
       <View style={styles.header}>
+        <View style={styles.headerSpacer} />
         <Text style={styles.headerTitle}>Saved Favorites</Text>
+        <Pressable onPress={toggleSearch} style={styles.searchButton}>
+          <Ionicons
+            name={isSearchVisible ? 'close' : 'search'}
+            size={24}
+            color="#2D2D2D"
+          />
+        </Pressable>
       </View>
+
+      {/* Search Bar */}
+      <Animated.View style={[styles.searchBarContainer, { height: searchBarHeight }]}>
+        {isSearchVisible && (
+          <View style={styles.searchInputWrapper}>
+            <Ionicons name="search" size={18} color="#9B8579" style={styles.searchIcon} />
+            <TextInput
+              ref={searchInputRef}
+              style={styles.searchInput}
+              placeholder="Search by quote, author, tag, or date..."
+              placeholderTextColor="#9B8579"
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              autoCapitalize="none"
+              autoCorrect={false}
+            />
+            {searchQuery.length > 0 && (
+              <Pressable onPress={() => setSearchQuery('')} style={styles.clearButton}>
+                <Ionicons name="close-circle" size={18} color="#9B8579" />
+              </Pressable>
+            )}
+          </View>
+        )}
+      </Animated.View>
 
       {/* Tag Filters */}
       {favorites.length > 0 && (
@@ -139,16 +236,47 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: 'row',
-    justifyContent: 'center',
+    justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 20,
     paddingVertical: height * 0.02,
+  },
+  headerSpacer: {
+    width: 24,
   },
   headerTitle: {
     fontSize: Math.min(24, width * 0.06),
     fontWeight: '600',
     color: '#2D2D2D',
     letterSpacing: 0.5,
+  },
+  searchButton: {
+    padding: 4,
+  },
+  searchBarContainer: {
+    overflow: 'hidden',
+    paddingHorizontal: 20,
+  },
+  searchInputWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    height: 44,
+    borderWidth: 1,
+    borderColor: '#F0EBE3',
+  },
+  searchIcon: {
+    marginRight: 8,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 15,
+    color: '#2D2D2D',
+  },
+  clearButton: {
+    padding: 4,
   },
   filtersWrapper: {
     marginBottom: 8,
