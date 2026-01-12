@@ -108,7 +108,9 @@ export const SavedScreen: React.FC = () => {
           <ActivityIndicator size="large" color="#C4785A" />
         </View>
       ) : favorites.length === 0 ? (
-        renderEmptyState()
+        <ScrollView contentContainerStyle={styles.emptyScrollContainer}>
+          {renderEmptyState()}
+        </ScrollView>
       ) : filteredFavorites.length === 0 ? (
         renderFilteredEmptyState()
       ) : (
@@ -143,9 +145,10 @@ const styles = StyleSheet.create({
     paddingVertical: height * 0.02,
   },
   headerTitle: {
-    fontSize: Math.min(22, width * 0.055),
+    fontSize: Math.min(24, width * 0.06),
     fontWeight: '600',
     color: '#2D2D2D',
+    letterSpacing: 0.5,
   },
   filtersWrapper: {
     marginBottom: 8,
@@ -157,12 +160,15 @@ const styles = StyleSheet.create({
   },
   listContent: {
     paddingVertical: 8,
-    paddingBottom: 16,
+    paddingBottom: 20,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  emptyScrollContainer: {
+    flex: 1,
   },
   emptyContainer: {
     flex: 1,
@@ -172,18 +178,18 @@ const styles = StyleSheet.create({
   },
   emptyIcon: {
     fontSize: Math.min(64, width * 0.16),
-    marginBottom: 20,
+    marginBottom: 24,
   },
   emptyTitle: {
-    fontSize: Math.min(20, width * 0.05),
+    fontSize: Math.min(22, width * 0.055),
     fontWeight: '600',
     color: '#2D2D2D',
-    marginBottom: 8,
+    marginBottom: 10,
   },
   emptySubtitle: {
     fontSize: Math.min(15, width * 0.038),
     color: '#8B8B8B',
     textAlign: 'center',
-    lineHeight: 22,
+    lineHeight: 24,
   },
 });
