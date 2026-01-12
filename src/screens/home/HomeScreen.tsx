@@ -2,6 +2,7 @@
  * Home Screen
  *
  * Main home screen with Quote of the Day, categories, and discover feed.
+ * Features infinite scrolling for the Discover More section.
  * Matches design from image 4.
  */
 
@@ -10,11 +11,12 @@ import {
   View,
   Text,
   StyleSheet,
-  ScrollView,
+  FlatList,
   RefreshControl,
   Pressable,
   ActivityIndicator,
   Share,
+  ScrollView,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -33,6 +35,8 @@ type HomeStackParamList = {
   Category: { category: string };
 };
 
+const PAGE_SIZE = 10;
+
 export const HomeScreen: React.FC = () => {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<NativeStackNavigationProp<HomeStackParamList>>();
@@ -42,10 +46,14 @@ export const HomeScreen: React.FC = () => {
   const user = useAuthStore((state) => state.user);
   const { toggleFavorite, isFavorite, loadFavorites } = useFavoritesStore();
 
+  // State
   const [quoteOfDay, setQuoteOfDay] = useState<Quote | null>(null);
   const [discoverQuotes, setDiscoverQuotes] = useState<Quote[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
 
   // Get greeting based on time of day
   const getGreeting = () => {
@@ -57,14 +65,17 @@ export const HomeScreen: React.FC = () => {
 
   const firstName = profile?.full_name?.split(' ')[0] || 'Friend';
 
-  const loadData = useCallback(async () => {
+  // Load initial data
+  const loadInitialData = useCallback(async () => {
     try {
       const [qotd, quotes] = await Promise.all([
         getQuoteOfDay(),
-        getQuotes(1, 10),
+        getQuotes(1, PAGE_SIZE),
       ]);
       setQuoteOfDay(qotd);
       setDiscoverQuotes(quotes.data);
+      setHasMore(quotes.hasMore);
+      setPage(1);
     } catch (error) {
       console.error('Error loading home data:', error);
     } finally {
@@ -72,9 +83,27 @@ export const HomeScreen: React.FC = () => {
     }
   }, []);
 
+  // Load more quotes for infinite scroll
+  const loadMoreQuotes = useCallback(async () => {
+    if (loadingMore || !hasMore) return;
+
+    setLoadingMore(true);
+    try {
+      const nextPage = page + 1;
+      const quotes = await getQuotes(nextPage, PAGE_SIZE);
+      setDiscoverQuotes((prev) => [...prev, ...quotes.data]);
+      setHasMore(quotes.hasMore);
+      setPage(nextPage);
+    } catch (error) {
+      console.error('Error loading more quotes:', error);
+    } finally {
+      setLoadingMore(false);
+    }
+  }, [page, hasMore, loadingMore]);
+
   useEffect(() => {
-    loadData();
-  }, [loadData]);
+    loadInitialData();
+  }, [loadInitialData]);
 
   // Load favorites when user changes
   useEffect(() => {
@@ -85,9 +114,9 @@ export const HomeScreen: React.FC = () => {
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    await loadData();
+    await loadInitialData();
     setRefreshing(false);
-  }, [loadData]);
+  }, [loadInitialData]);
 
   const handleCategoryPress = (category: string) => {
     navigation.navigate('Category', { category });
@@ -113,6 +142,126 @@ export const HomeScreen: React.FC = () => {
     }
   };
 
+  // Render header with greeting, QOTD, and categories
+  const renderHeader = () => (
+    <View>
+      {/* Header */}
+      <View style={styles.header}>
+        <View>
+          <Text style={styles.greeting}>{getGreeting()},</Text>
+          <Text style={styles.userName}>{firstName}</Text>
+        </View>
+        <Pressable onPress={handleSearchPress} style={styles.searchButton}>
+          <Ionicons name="search" size={24} color={COLORS.textPrimary} />
+        </Pressable>
+      </View>
+
+      {/* Quote of the Day */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Quote of the Day</Text>
+        {quoteOfDay && (
+          <LinearGradient
+            colors={['#E8A87C', '#D4A5A5']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.qotdCard}
+          >
+            <View style={styles.quoteIcon}>
+              <Text style={styles.quoteIconText}>"</Text>
+            </View>
+            <Text style={styles.qotdText}>{quoteOfDay.content}</Text>
+            <Text style={styles.qotdAuthor}>— {quoteOfDay.author}</Text>
+            <View style={styles.qotdActions}>
+              <Pressable style={styles.qotdButton} onPress={() => handleToggleFavorite(quoteOfDay)}>
+                <Ionicons
+                  name={isFavorite(quoteOfDay.id) ? 'heart' : 'heart-outline'}
+                  size={20}
+                  color="#FFFFFF"
+                />
+              </Pressable>
+              <Pressable
+                style={styles.qotdButton}
+                onPress={() => handleShareQuote(quoteOfDay)}
+              >
+                <Ionicons name="share-outline" size={20} color="#FFFFFF" />
+              </Pressable>
+            </View>
+          </LinearGradient>
+        )}
+      </View>
+
+      {/* Categories */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Today's Categories</Text>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.categoriesContainer}
+        >
+          {CATEGORIES.map((category) => (
+            <Pressable
+              key={category}
+              style={styles.categoryChip}
+              onPress={() => handleCategoryPress(category)}
+            >
+              <Text style={styles.categoryChipText}>{category}</Text>
+            </Pressable>
+          ))}
+        </ScrollView>
+      </View>
+
+      {/* Discover More Title */}
+      <View style={styles.discoverHeader}>
+        <Text style={styles.sectionTitle}>Discover More</Text>
+      </View>
+    </View>
+  );
+
+  // Render each quote card
+  const renderQuoteCard = ({ item, index }: { item: Quote; index: number }) => (
+    <View style={[styles.discoverCard, index % 2 === 0 ? styles.cardLeft : styles.cardRight]}>
+      <View style={styles.discoverCardInner}>
+        <Text style={styles.discoverQuote} numberOfLines={3}>
+          "{item.content}"
+        </Text>
+        <Text style={styles.discoverAuthor}>— {item.author}</Text>
+        <View style={styles.discoverFooter}>
+          <View style={styles.discoverCategory}>
+            <Text style={styles.discoverCategoryText}>{item.category}</Text>
+          </View>
+          <View style={styles.discoverActions}>
+            <Pressable
+              style={styles.discoverActionBtn}
+              onPress={() => handleToggleFavorite(item)}
+            >
+              <Ionicons
+                name={isFavorite(item.id) ? 'heart' : 'heart-outline'}
+                size={16}
+                color={isFavorite(item.id) ? COLORS.terracotta : COLORS.textMuted}
+              />
+            </Pressable>
+            <Pressable
+              style={styles.discoverActionBtn}
+              onPress={() => handleShareQuote(item)}
+            >
+              <Ionicons name="share-outline" size={16} color={COLORS.textMuted} />
+            </Pressable>
+          </View>
+        </View>
+      </View>
+    </View>
+  );
+
+  // Render footer with loading indicator
+  const renderFooter = () => {
+    if (!loadingMore) return null;
+    return (
+      <View style={styles.footerLoader}>
+        <ActivityIndicator size="small" color={COLORS.terracotta} />
+      </View>
+    );
+  };
+
   if (loading) {
     return (
       <View style={[styles.loadingContainer, { paddingTop: insets.top }]}>
@@ -123,13 +272,19 @@ export const HomeScreen: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      <ScrollView
-        style={styles.scrollView}
+      <FlatList
+        data={discoverQuotes}
+        keyExtractor={(item) => item.id}
+        renderItem={renderQuoteCard}
+        numColumns={2}
+        columnWrapperStyle={styles.row}
         contentContainerStyle={[
-          styles.scrollContent,
+          styles.listContent,
           { paddingTop: insets.top + SPACING.base, paddingBottom: SPACING.xxl },
         ]}
         showsVerticalScrollIndicator={false}
+        ListHeaderComponent={renderHeader}
+        ListFooterComponent={renderFooter}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -137,112 +292,9 @@ export const HomeScreen: React.FC = () => {
             tintColor={COLORS.terracotta}
           />
         }
-      >
-        {/* Header */}
-        <View style={styles.header}>
-          <View>
-            <Text style={styles.greeting}>{getGreeting()},</Text>
-            <Text style={styles.userName}>{firstName}</Text>
-          </View>
-          <Pressable onPress={handleSearchPress} style={styles.searchButton}>
-            <Ionicons name="search" size={24} color={COLORS.textPrimary} />
-          </Pressable>
-        </View>
-
-        {/* Quote of the Day */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Quote of the Day</Text>
-          {quoteOfDay && (
-            <LinearGradient
-              colors={['#E8A87C', '#D4A5A5']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={styles.qotdCard}
-            >
-              <View style={styles.quoteIcon}>
-                <Text style={styles.quoteIconText}>"</Text>
-              </View>
-              <Text style={styles.qotdText}>{quoteOfDay.content}</Text>
-              <Text style={styles.qotdAuthor}>— {quoteOfDay.author}</Text>
-              <View style={styles.qotdActions}>
-                <Pressable style={styles.qotdButton} onPress={() => handleToggleFavorite(quoteOfDay)}>
-                  <Ionicons
-                    name={isFavorite(quoteOfDay.id) ? 'heart' : 'heart-outline'}
-                    size={20}
-                    color="#FFFFFF"
-                  />
-                </Pressable>
-                <Pressable
-                  style={styles.qotdButton}
-                  onPress={() => handleShareQuote(quoteOfDay)}
-                >
-                  <Ionicons name="share-outline" size={20} color="#FFFFFF" />
-                </Pressable>
-              </View>
-            </LinearGradient>
-          )}
-        </View>
-
-        {/* Categories */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Today's Categories</Text>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.categoriesContainer}
-          >
-            {CATEGORIES.map((category) => (
-              <Pressable
-                key={category}
-                style={styles.categoryChip}
-                onPress={() => handleCategoryPress(category)}
-              >
-                <Text style={styles.categoryChipText}>{category}</Text>
-              </Pressable>
-            ))}
-          </ScrollView>
-        </View>
-
-        {/* Discover More */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Discover More</Text>
-          <View style={styles.discoverGrid}>
-            {discoverQuotes.map((quote) => (
-              <View key={quote.id} style={styles.discoverCard}>
-                <View style={styles.discoverCardInner}>
-                  <Text style={styles.discoverQuote} numberOfLines={3}>
-                    "{quote.content}"
-                  </Text>
-                  <Text style={styles.discoverAuthor}>— {quote.author}</Text>
-                  <View style={styles.discoverFooter}>
-                    <View style={styles.discoverCategory}>
-                      <Text style={styles.discoverCategoryText}>{quote.category}</Text>
-                    </View>
-                    <View style={styles.discoverActions}>
-                      <Pressable
-                        style={styles.discoverActionBtn}
-                        onPress={() => handleToggleFavorite(quote)}
-                      >
-                        <Ionicons
-                          name={isFavorite(quote.id) ? 'heart' : 'heart-outline'}
-                          size={16}
-                          color={isFavorite(quote.id) ? COLORS.terracotta : COLORS.textMuted}
-                        />
-                      </Pressable>
-                      <Pressable
-                        style={styles.discoverActionBtn}
-                        onPress={() => handleShareQuote(quote)}
-                      >
-                        <Ionicons name="share-outline" size={16} color={COLORS.textMuted} />
-                      </Pressable>
-                    </View>
-                  </View>
-                </View>
-              </View>
-            ))}
-          </View>
-        </View>
-      </ScrollView>
+        onEndReached={loadMoreQuotes}
+        onEndReachedThreshold={0.5}
+      />
     </View>
   );
 };
@@ -258,10 +310,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: COLORS.offWhite,
   },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
+  listContent: {
     paddingHorizontal: SPACING.base,
   },
   header: {
@@ -368,9 +417,10 @@ const styles = StyleSheet.create({
     color: COLORS.textPrimary,
     fontWeight: '500',
   },
-  discoverGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+  discoverHeader: {
+    marginBottom: SPACING.sm,
+  },
+  row: {
     justifyContent: 'space-between',
   },
   discoverCard: {
@@ -384,6 +434,12 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.08,
     shadowRadius: 4,
     elevation: 2,
+  },
+  cardLeft: {
+    marginRight: SPACING.xs,
+  },
+  cardRight: {
+    marginLeft: SPACING.xs,
   },
   discoverCardInner: {
     padding: SPACING.md,
@@ -430,6 +486,10 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     backgroundColor: COLORS.offWhite,
     justifyContent: 'center',
+    alignItems: 'center',
+  },
+  footerLoader: {
+    paddingVertical: SPACING.lg,
     alignItems: 'center',
   },
 });
