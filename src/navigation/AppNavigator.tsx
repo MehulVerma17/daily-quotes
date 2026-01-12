@@ -22,8 +22,7 @@ const TabItem: React.FC<{
   onPress: () => void;
   iconName: keyof typeof Ionicons.glyphMap;
   label: string;
-  isHomeScreen: boolean;
-}> = ({ isFocused, onPress, iconName, label, isHomeScreen }) => {
+}> = ({ isFocused, onPress, iconName, label }) => {
   const scaleAnim = useRef(new Animated.Value(1)).current;
 
   const handlePressIn = () => {
@@ -40,8 +39,8 @@ const TabItem: React.FC<{
     }).start();
   };
 
-  const activeColor = isHomeScreen ? '#FFFFFF' : '#C4785A';
-  const inactiveColor = isHomeScreen ? 'rgba(255, 255, 255, 0.5)' : '#9E9E9E';
+  const activeColor = '#C4785A';
+  const inactiveColor = '#9E9E9E';
 
   return (
     <Pressable
@@ -60,7 +59,6 @@ const TabItem: React.FC<{
           style={[
             styles.tabLabel,
             { color: isFocused ? activeColor : inactiveColor },
-            isHomeScreen && styles.tabLabelHome,
           ]}
         >
           {label}
@@ -82,14 +80,12 @@ const CustomTabBar: React.FC<CustomTabBarProps> = ({
   navigation,
 }) => {
   const insets = useSafeAreaInsets();
-  const isHomeScreen = state.index === 0;
 
   return (
     <View
       style={[
         styles.tabBarContainer,
         { paddingBottom: insets.bottom },
-        isHomeScreen ? styles.tabBarHome : styles.tabBarSaved,
       ]}
     >
       {state.routes.map((route: any, index: number) => {
@@ -126,7 +122,6 @@ const CustomTabBar: React.FC<CustomTabBarProps> = ({
             onPress={onPress}
             iconName={iconName}
             label={label}
-            isHomeScreen={isHomeScreen}
           />
         );
       })}
@@ -155,12 +150,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     paddingTop: 14,
     paddingBottom: 10,
-  },
-  tabBarHome: {
-    backgroundColor: 'rgba(180, 140, 130, 0.35)',
-    borderTopWidth: 0,
-  },
-  tabBarSaved: {
     backgroundColor: '#FFFFFF',
     borderTopWidth: 1,
     borderTopColor: '#F0EBE3',
@@ -176,8 +165,5 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginTop: 4,
     letterSpacing: 1,
-  },
-  tabLabelHome: {
-    fontWeight: '500',
   },
 });

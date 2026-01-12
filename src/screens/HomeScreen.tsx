@@ -162,12 +162,8 @@ export const HomeScreen: React.FC = () => {
               },
             ]}
           >
-            {/* Opening Quote Mark */}
-            <Text style={styles.quoteMark}>"</Text>
-            <Text style={styles.quoteText}>{currentQuote.content}</Text>
-            {/* Closing Quote Mark */}
-            <Text style={[styles.quoteMark, styles.quoteMarkClose]}>"</Text>
-            <Text style={styles.authorText}>{currentQuote.author.toUpperCase()}</Text>
+            <Text style={styles.quoteText}>"{currentQuote.content}"</Text>
+            <Text style={styles.authorText}>— {currentQuote.author.toUpperCase()}</Text>
           </Animated.View>
         ) : (
           <Text style={styles.errorText}>Tap refresh to load a quote</Text>
@@ -241,17 +237,6 @@ const styles = StyleSheet.create({
   },
   quoteWrapper: {
     alignItems: 'center',
-  },
-  quoteMark: {
-    fontSize: Math.min(60, width * 0.15),
-    fontFamily: 'serif',
-    color: 'rgba(45, 45, 45, 0.15)',
-    lineHeight: Math.min(50, width * 0.12),
-    marginBottom: -10,
-  },
-  quoteMarkClose: {
-    marginTop: -10,
-    marginBottom: 0,
   },
   quoteText: {
     fontSize: Math.min(28, width * 0.07),
