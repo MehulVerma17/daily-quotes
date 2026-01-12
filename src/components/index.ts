@@ -1,2 +1,1 @@
-export { TagChip } from './TagChip';
-export { QuoteCard } from './QuoteCard';
+export { ShareQuoteModal } from './ShareQuoteModal';

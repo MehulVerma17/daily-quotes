@@ -1,28 +1,58 @@
+/**
+ * App Navigator
+ *
+ * Main bottom tab navigator for authenticated users.
+ * Contains 5 tabs: Home, Search, Favorites, Collections, Profile
+ *
+ * Note: NavigationContainer is provided by RootNavigator
+ */
+
 import React, { useRef } from 'react';
-import { View, StyleSheet, Text, Dimensions, Pressable, Animated } from 'react-native';
+import { View, StyleSheet, Text, Pressable, Animated, Platform } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { NavigationContainer } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { HomeScreen } from '../screens/HomeScreen';
-import { SavedScreen } from '../screens/SavedScreen';
-
-const { width } = Dimensions.get('window');
+import { HomeNavigator } from './HomeNavigator';
+import { CollectionsNavigator } from './CollectionsNavigator';
+import { ProfileNavigator } from './ProfileNavigator';
+import { FavoritesScreen } from '../screens/favorites';
+import { SearchScreen } from '../screens/search';
+import { COLORS, SPACING, RADIUS, FONT_SIZES, scale } from '../constants/theme';
 
 export type RootTabParamList = {
-  Home: undefined;
-  Saved: undefined;
+  HomeTab: undefined;
+  SearchTab: undefined;
+  FavoritesTab: undefined;
+  CollectionsTab: undefined;
+  ProfileTab: undefined;
 };
 
 const Tab = createBottomTabNavigator<RootTabParamList>();
 
-// Animated Tab Item
-const TabItem: React.FC<{
+// Tab bar icons mapping
+const TAB_ICONS: Record<keyof RootTabParamList, { active: string; inactive: string }> = {
+  HomeTab: { active: 'home', inactive: 'home-outline' },
+  SearchTab: { active: 'search', inactive: 'search-outline' },
+  FavoritesTab: { active: 'heart', inactive: 'heart-outline' },
+  CollectionsTab: { active: 'folder', inactive: 'folder-outline' },
+  ProfileTab: { active: 'person', inactive: 'person-outline' },
+};
+
+// Tab bar labels
+const TAB_LABELS: Record<keyof RootTabParamList, string> = {
+  HomeTab: 'Home',
+  SearchTab: 'Search',
+  FavoritesTab: 'Favorites',
+  CollectionsTab: 'Collections',
+  ProfileTab: 'Profile',
+};
+
+// Animated Tab Button Component
+const TabButton: React.FC<{
   isFocused: boolean;
   onPress: () => void;
-  iconName: keyof typeof Ionicons.glyphMap;
-  label: string;
-}> = ({ isFocused, onPress, iconName, label }) => {
+  routeName: keyof RootTabParamList;
+}> = ({ isFocused, onPress, routeName }) => {
   const scaleAnim = useRef(new Animated.Value(1)).current;
 
   const handlePressIn = () => {
@@ -39,26 +69,26 @@ const TabItem: React.FC<{
     }).start();
   };
 
-  const activeColor = '#C4785A';
-  const inactiveColor = '#9E9E9E';
+  const icons = TAB_ICONS[routeName];
+  const label = TAB_LABELS[routeName];
 
   return (
     <Pressable
       onPress={onPress}
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
-      style={styles.tabItem}
+      style={styles.tabButton}
     >
-      <Animated.View style={{ transform: [{ scale: scaleAnim }], alignItems: 'center' }}>
+      <Animated.View style={[styles.tabButtonInner, { transform: [{ scale: scaleAnim }] }]}>
         <Ionicons
-          name={iconName}
-          size={Math.min(24, width * 0.06)}
-          color={isFocused ? activeColor : inactiveColor}
+          name={(isFocused ? icons.active : icons.inactive) as any}
+          size={22}
+          color={isFocused ? COLORS.terracotta : COLORS.tabInactive}
         />
         <Text
           style={[
             styles.tabLabel,
-            { color: isFocused ? activeColor : inactiveColor },
+            { color: isFocused ? COLORS.terracotta : COLORS.tabInactive },
           ]}
         >
           {label}
@@ -68,6 +98,7 @@ const TabItem: React.FC<{
   );
 };
 
+// Custom Tab Bar Component
 interface CustomTabBarProps {
   state: any;
   descriptors: any;
@@ -85,11 +116,12 @@ const CustomTabBar: React.FC<CustomTabBarProps> = ({
     <View
       style={[
         styles.tabBarContainer,
-        { paddingBottom: insets.bottom },
+        {
+          paddingBottom: Platform.OS === 'ios' ? insets.bottom : SPACING.sm,
+        },
       ]}
     >
       {state.routes.map((route: any, index: number) => {
-        const { options } = descriptors[route.key];
         const isFocused = state.index === index;
 
         const onPress = () => {
@@ -104,24 +136,12 @@ const CustomTabBar: React.FC<CustomTabBarProps> = ({
           }
         };
 
-        const iconName =
-          route.name === 'Home'
-            ? isFocused
-              ? 'home'
-              : 'home-outline'
-            : isFocused
-            ? 'heart'
-            : 'heart-outline';
-
-        const label = route.name === 'Home' ? 'HOME' : 'SAVED';
-
         return (
-          <TabItem
+          <TabButton
             key={route.key}
             isFocused={isFocused}
             onPress={onPress}
-            iconName={iconName}
-            label={label}
+            routeName={route.name as keyof RootTabParamList}
           />
         );
       })}
@@ -131,39 +151,43 @@ const CustomTabBar: React.FC<CustomTabBarProps> = ({
 
 export const AppNavigator: React.FC = () => {
   return (
-    <NavigationContainer>
-      <Tab.Navigator
-        tabBar={(props) => <CustomTabBar {...props} />}
-        screenOptions={{
-          headerShown: false,
-        }}
-      >
-        <Tab.Screen name="Home" component={HomeScreen} />
-        <Tab.Screen name="Saved" component={SavedScreen} />
-      </Tab.Navigator>
-    </NavigationContainer>
+    <Tab.Navigator
+      tabBar={(props) => <CustomTabBar {...props} />}
+      screenOptions={{
+        headerShown: false,
+      }}
+    >
+      <Tab.Screen name="HomeTab" component={HomeNavigator} />
+      <Tab.Screen name="SearchTab" component={SearchScreen} />
+      <Tab.Screen name="FavoritesTab" component={FavoritesScreen} />
+      <Tab.Screen name="CollectionsTab" component={CollectionsNavigator} />
+      <Tab.Screen name="ProfileTab" component={ProfileNavigator} />
+    </Tab.Navigator>
   );
 };
 
 const styles = StyleSheet.create({
   tabBarContainer: {
     flexDirection: 'row',
-    paddingTop: 14,
-    paddingBottom: 10,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: COLORS.white,
     borderTopWidth: 1,
-    borderTopColor: '#F0EBE3',
+    borderTopColor: COLORS.border,
+    paddingTop: SPACING.sm,
   },
-  tabItem: {
+  tabButton: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 6,
+    paddingVertical: SPACING.xs,
+  },
+  tabButtonInner: {
+    alignItems: 'center',
   },
   tabLabel: {
-    fontSize: Math.min(11, width * 0.028),
-    fontWeight: '600',
+    fontSize: scale(10),
+    fontWeight: '500',
     marginTop: 4,
-    letterSpacing: 1,
   },
 });
+
+export default AppNavigator;

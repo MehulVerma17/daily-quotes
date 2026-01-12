@@ -1,19 +1,50 @@
+/**
+ * QuoteVault App
+ *
+ * Main entry point for the QuoteVault mobile application.
+ * A full-featured quote discovery and collection app with:
+ * - User authentication (Supabase)
+ * - Quote browsing by category
+ * - Favorites with cloud sync
+ * - Custom collections
+ * - Daily quote notifications
+ * - Share cards
+ * - Theme customization
+ *
+ * @author QuoteVault Team
+ * @version 2.0.0
+ */
+
 import React from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import Toast, { BaseToast, ErrorToast, ToastConfig } from 'react-native-toast-message';
-import { AppNavigator } from './src/navigation';
-import { FavoritesProvider } from './src/context';
 
+import { RootNavigator } from './src/navigation/RootNavigator';
+import { AuthProvider } from './src/context';
+
+// ============================================
+// TOAST CONFIGURATION
+// ============================================
+
+/**
+ * Custom toast styling to match app theme
+ */
 const toastConfig: ToastConfig = {
+  // Success toast (green accent)
   success: (props) => (
     <BaseToast
       {...props}
       style={{
-        borderLeftColor: '#8B9D83',
+        borderLeftColor: '#7BAE7F',
         backgroundColor: '#FFFFFF',
         borderRadius: 12,
         marginHorizontal: 20,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 8,
+        elevation: 4,
       }}
       contentContainerStyle={{ paddingHorizontal: 16 }}
       text1Style={{
@@ -27,6 +58,8 @@ const toastConfig: ToastConfig = {
       }}
     />
   ),
+
+  // Error toast (terracotta accent)
   error: (props) => (
     <ErrorToast
       {...props}
@@ -35,6 +68,39 @@ const toastConfig: ToastConfig = {
         backgroundColor: '#FFFFFF',
         borderRadius: 12,
         marginHorizontal: 20,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 8,
+        elevation: 4,
+      }}
+      contentContainerStyle={{ paddingHorizontal: 16 }}
+      text1Style={{
+        fontSize: 15,
+        fontWeight: '600',
+        color: '#2D2D2D',
+      }}
+      text2Style={{
+        fontSize: 13,
+        color: '#6B6B6B',
+      }}
+    />
+  ),
+
+  // Info toast (neutral)
+  info: (props) => (
+    <BaseToast
+      {...props}
+      style={{
+        borderLeftColor: '#5A8EC4',
+        backgroundColor: '#FFFFFF',
+        borderRadius: 12,
+        marginHorizontal: 20,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 8,
+        elevation: 4,
       }}
       contentContainerStyle={{ paddingHorizontal: 16 }}
       text1Style={{
@@ -50,14 +116,24 @@ const toastConfig: ToastConfig = {
   ),
 };
 
+// ============================================
+// APP COMPONENT
+// ============================================
+
 export default function App() {
   return (
     <SafeAreaProvider>
-      <FavoritesProvider>
+      {/* Authentication provider - handles user auth state */}
+      <AuthProvider>
+        {/* Status bar styling */}
         <StatusBar style="dark" />
-        <AppNavigator />
+
+        {/* Root navigation - switches between Auth and Main based on auth state */}
+        <RootNavigator />
+
+        {/* Toast notifications */}
         <Toast config={toastConfig} position="top" topOffset={60} />
-      </FavoritesProvider>
+      </AuthProvider>
     </SafeAreaProvider>
   );
 }
