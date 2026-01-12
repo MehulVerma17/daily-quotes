@@ -20,7 +20,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import Slider from '@react-native-community/slider';
-import { useAuth } from '../../context/AuthContext';
+import { useAuthStore } from '../../stores';
 import { COLORS, SPACING, RADIUS, FONTS, FONT_SIZES, ACCENT_COLORS, scale } from '../../constants/theme';
 import { UserSettings, ThemeMode, AccentColor, FontSize } from '../../types';
 import { getUserSettings, updateUserSettings } from '../../services/settingsService';
@@ -56,7 +56,9 @@ const CATEGORY_OPTIONS = [
 export const SettingsScreen: React.FC = () => {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
-  const { user } = useAuth();
+
+  // Zustand store
+  const user = useAuthStore((state) => state.user);
 
   const [settings, setSettings] = useState<UserSettings | null>(null);
   const [loading, setLoading] = useState(true);

@@ -15,20 +15,17 @@ import {
   Pressable,
   ActivityIndicator,
   Share,
-  Dimensions,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { useAuth } from '../../context/AuthContext';
-import { COLORS, SPACING, RADIUS, FONTS, FONT_SIZES, GRADIENTS, scale } from '../../constants/theme';
+import { useAuthStore, useFavoritesStore } from '../../stores';
+import { COLORS, SPACING, RADIUS, FONTS, FONT_SIZES } from '../../constants/theme';
 import { Quote } from '../../types';
-import { getQuoteOfDay, getQuotes, getRandomQuote } from '../../services/quoteService';
+import { getQuoteOfDay, getQuotes } from '../../services/quoteService';
 import { CATEGORIES } from '../../config';
-
-const { width } = Dimensions.get('window');
 
 type HomeStackParamList = {
   Home: undefined;
@@ -39,7 +36,11 @@ type HomeStackParamList = {
 export const HomeScreen: React.FC = () => {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<NativeStackNavigationProp<HomeStackParamList>>();
-  const { profile } = useAuth();
+
+  // Zustand stores
+  const profile = useAuthStore((state) => state.profile);
+  const user = useAuthStore((state) => state.user);
+  const { toggleFavorite, isFavorite, loadFavorites } = useFavoritesStore();
 
   const [quoteOfDay, setQuoteOfDay] = useState<Quote | null>(null);
   const [discoverQuotes, setDiscoverQuotes] = useState<Quote[]>([]);
@@ -75,6 +76,13 @@ export const HomeScreen: React.FC = () => {
     loadData();
   }, [loadData]);
 
+  // Load favorites when user changes
+  useEffect(() => {
+    if (user?.id) {
+      loadFavorites(user.id);
+    }
+  }, [user?.id, loadFavorites]);
+
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     await loadData();
@@ -87,6 +95,12 @@ export const HomeScreen: React.FC = () => {
 
   const handleSearchPress = () => {
     navigation.navigate('Search');
+  };
+
+  const handleToggleFavorite = (quote: Quote) => {
+    if (user?.id) {
+      toggleFavorite(user.id, quote);
+    }
   };
 
   const handleShareQuote = async (quote: Quote) => {
@@ -151,8 +165,12 @@ export const HomeScreen: React.FC = () => {
               <Text style={styles.qotdText}>{quoteOfDay.content}</Text>
               <Text style={styles.qotdAuthor}>— {quoteOfDay.author}</Text>
               <View style={styles.qotdActions}>
-                <Pressable style={styles.qotdButton}>
-                  <Ionicons name="heart-outline" size={20} color="#FFFFFF" />
+                <Pressable style={styles.qotdButton} onPress={() => handleToggleFavorite(quoteOfDay)}>
+                  <Ionicons
+                    name={isFavorite(quoteOfDay.id) ? 'heart' : 'heart-outline'}
+                    size={20}
+                    color="#FFFFFF"
+                  />
                 </Pressable>
                 <Pressable
                   style={styles.qotdButton}
@@ -189,18 +207,38 @@ export const HomeScreen: React.FC = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Discover More</Text>
           <View style={styles.discoverGrid}>
-            {discoverQuotes.map((quote, index) => (
-              <Pressable key={quote.id} style={styles.discoverCard}>
+            {discoverQuotes.map((quote) => (
+              <View key={quote.id} style={styles.discoverCard}>
                 <View style={styles.discoverCardInner}>
-                  <Text style={styles.discoverQuote} numberOfLines={4}>
+                  <Text style={styles.discoverQuote} numberOfLines={3}>
                     "{quote.content}"
                   </Text>
                   <Text style={styles.discoverAuthor}>— {quote.author}</Text>
-                  <View style={styles.discoverCategory}>
-                    <Text style={styles.discoverCategoryText}>{quote.category}</Text>
+                  <View style={styles.discoverFooter}>
+                    <View style={styles.discoverCategory}>
+                      <Text style={styles.discoverCategoryText}>{quote.category}</Text>
+                    </View>
+                    <View style={styles.discoverActions}>
+                      <Pressable
+                        style={styles.discoverActionBtn}
+                        onPress={() => handleToggleFavorite(quote)}
+                      >
+                        <Ionicons
+                          name={isFavorite(quote.id) ? 'heart' : 'heart-outline'}
+                          size={16}
+                          color={isFavorite(quote.id) ? COLORS.terracotta : COLORS.textMuted}
+                        />
+                      </Pressable>
+                      <Pressable
+                        style={styles.discoverActionBtn}
+                        onPress={() => handleShareQuote(quote)}
+                      >
+                        <Ionicons name="share-outline" size={16} color={COLORS.textMuted} />
+                      </Pressable>
+                    </View>
                   </View>
                 </View>
-              </Pressable>
+              </View>
             ))}
           </View>
         </View>
@@ -334,13 +372,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
-    gap: SPACING.md,
   },
   discoverCard: {
-    width: (width - SPACING.base * 2 - SPACING.md) / 2,
+    width: '48.5%',
     backgroundColor: COLORS.white,
     borderRadius: RADIUS.lg,
     overflow: 'hidden',
+    marginBottom: SPACING.md,
     shadowColor: COLORS.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
@@ -348,8 +386,9 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   discoverCardInner: {
-    padding: SPACING.base,
-    minHeight: 160,
+    padding: SPACING.md,
+    minHeight: 170,
+    justifyContent: 'space-between',
   },
   discoverQuote: {
     fontSize: FONT_SIZES.sm,
@@ -358,7 +397,6 @@ const styles = StyleSheet.create({
     fontFamily: FONTS.serifItalic,
     lineHeight: 20,
     marginBottom: SPACING.sm,
-    flex: 1,
   },
   discoverAuthor: {
     fontSize: FONT_SIZES.xs,
@@ -366,17 +404,33 @@ const styles = StyleSheet.create({
     fontFamily: FONTS.sansRegular,
     marginBottom: SPACING.sm,
   },
+  discoverFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
   discoverCategory: {
     backgroundColor: COLORS.gradientStart,
     paddingHorizontal: SPACING.sm,
     paddingVertical: SPACING.xs,
     borderRadius: RADIUS.sm,
-    alignSelf: 'flex-start',
   },
   discoverCategoryText: {
     fontSize: FONT_SIZES.xs,
     color: COLORS.terracotta,
     fontWeight: '500',
+  },
+  discoverActions: {
+    flexDirection: 'row',
+    gap: SPACING.xs,
+  },
+  discoverActionBtn: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: COLORS.offWhite,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
 

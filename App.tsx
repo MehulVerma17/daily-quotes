@@ -15,13 +15,13 @@
  * @version 2.0.0
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import Toast, { BaseToast, ErrorToast, ToastConfig } from 'react-native-toast-message';
 
 import { RootNavigator } from './src/navigation/RootNavigator';
-import { AuthProvider } from './src/context';
+import { useAuthStore } from './src/stores';
 
 // ============================================
 // TOAST CONFIGURATION
@@ -121,19 +121,23 @@ const toastConfig: ToastConfig = {
 // ============================================
 
 export default function App() {
+  const initialize = useAuthStore((state) => state.initialize);
+
+  // Initialize auth on app start
+  useEffect(() => {
+    initialize();
+  }, [initialize]);
+
   return (
     <SafeAreaProvider>
-      {/* Authentication provider - handles user auth state */}
-      <AuthProvider>
-        {/* Status bar styling */}
-        <StatusBar style="dark" />
+      {/* Status bar styling */}
+      <StatusBar style="dark" />
 
-        {/* Root navigation - switches between Auth and Main based on auth state */}
-        <RootNavigator />
+      {/* Root navigation - switches between Auth and Main based on auth state */}
+      <RootNavigator />
 
-        {/* Toast notifications */}
-        <Toast config={toastConfig} position="top" topOffset={60} />
-      </AuthProvider>
+      {/* Toast notifications */}
+      <Toast config={toastConfig} position="top" topOffset={60} />
     </SafeAreaProvider>
   );
 }

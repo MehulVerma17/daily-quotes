@@ -35,7 +35,7 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Toast from 'react-native-toast-message';
 
-import { useAuth } from '../../context/AuthContext';
+import { useAuthStore } from '../../stores';
 import { AuthStackParamList } from '../../types';
 import { COLORS, SPACING, RADIUS, FONT_SIZES, SHADOWS, moderateScale } from '../../constants/theme';
 
@@ -68,7 +68,11 @@ const STRENGTH_COLORS = {
 export const SignUpScreen: React.FC = () => {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<SignUpScreenNavigationProp>();
-  const { signUp, signInWithGoogle, isLoading } = useAuth();
+
+  // Zustand store
+  const signUp = useAuthStore((state) => state.signUp);
+  const signInWithGoogle = useAuthStore((state) => state.signInWithGoogle);
+  const isLoading = useAuthStore((state) => state.isLoading);
 
   // Form state
   const [fullName, setFullName] = useState('');

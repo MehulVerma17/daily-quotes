@@ -25,6 +25,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { COLORS, SPACING, RADIUS, FONTS, FONT_SIZES, GRADIENTS, scale } from '../../constants/theme';
 import { Quote } from '../../types';
 import { getQuotesByCategory } from '../../services/quoteService';
+import { useAuthStore, useFavoritesStore } from '../../stores';
 
 const { width } = Dimensions.get('window');
 
@@ -45,6 +46,11 @@ export const CategoryScreen: React.FC = () => {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<NativeStackNavigationProp<CategoryStackParamList>>();
   const route = useRoute<RouteProp<CategoryStackParamList, 'Category'>>();
+
+  // Zustand stores
+  const user = useAuthStore((state) => state.user);
+  const { toggleFavorite, isFavorite } = useFavoritesStore();
+
   const { category } = route.params;
 
   const [quotes, setQuotes] = useState<Quote[]>([]);
@@ -88,6 +94,12 @@ export const CategoryScreen: React.FC = () => {
     }
   }, [loading, hasMore, page, loadQuotes]);
 
+  const handleToggleFavorite = (quote: Quote) => {
+    if (user?.id) {
+      toggleFavorite(user.id, quote);
+    }
+  };
+
   const handleShareQuote = async (quote: Quote) => {
     try {
       await Share.share({
@@ -109,8 +121,12 @@ export const CategoryScreen: React.FC = () => {
         <View style={styles.quoteFooter}>
           <Text style={styles.quoteAuthor}>— {item.author}</Text>
           <View style={styles.quoteActions}>
-            <Pressable style={styles.actionButton}>
-              <Ionicons name="heart-outline" size={16} color={COLORS.textMuted} />
+            <Pressable style={styles.actionButton} onPress={() => handleToggleFavorite(item)}>
+              <Ionicons
+                name={isFavorite(item.id) ? 'heart' : 'heart-outline'}
+                size={16}
+                color={isFavorite(item.id) ? COLORS.terracotta : COLORS.textMuted}
+              />
             </Pressable>
             <Pressable style={styles.actionButton} onPress={() => handleShareQuote(item)}>
               <Ionicons name="share-outline" size={16} color={COLORS.textMuted} />

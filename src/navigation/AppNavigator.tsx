@@ -112,12 +112,25 @@ const CustomTabBar: React.FC<CustomTabBarProps> = ({
 }) => {
   const insets = useSafeAreaInsets();
 
+  // Cache the initial bottom inset to prevent jumping when share sheet opens
+  // This is critical for Android where share sheet can cause inset changes
+  const cachedBottomInset = useRef<number | null>(null);
+
+  // Cache the first valid bottom inset value and never change it
+  if (cachedBottomInset.current === null) {
+    // Use current inset if available, otherwise use typical Android nav bar height
+    cachedBottomInset.current = insets.bottom > 0 ? insets.bottom : 48;
+  }
+
+  // Always use the cached value for consistent positioning
+  const bottomPadding = cachedBottomInset.current;
+
   return (
     <View
       style={[
         styles.tabBarContainer,
         {
-          paddingBottom: Platform.OS === 'ios' ? insets.bottom : SPACING.sm,
+          paddingBottom: bottomPadding,
         },
       ]}
     >

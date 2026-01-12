@@ -20,7 +20,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { useAuth } from '../../context/AuthContext';
+import { useAuthStore } from '../../stores';
 import { COLORS, SPACING, RADIUS, FONTS, FONT_SIZES, scale } from '../../constants/theme';
 import { getFavoriteCount } from '../../services/favoritesService';
 import { getCollectionCount } from '../../services/collectionsService';
@@ -43,7 +43,11 @@ const ACHIEVEMENTS = [
 export const ProfileScreen: React.FC = () => {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<NativeStackNavigationProp<ProfileStackParamList>>();
-  const { user, profile, signOut } = useAuth();
+
+  // Zustand store
+  const user = useAuthStore((state) => state.user);
+  const profile = useAuthStore((state) => state.profile);
+  const signOut = useAuthStore((state) => state.signOut);
 
   const [favoriteCount, setFavoriteCount] = useState(0);
   const [collectionCount, setCollectionCount] = useState(0);

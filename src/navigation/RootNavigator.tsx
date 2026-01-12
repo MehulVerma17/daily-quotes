@@ -14,7 +14,7 @@ import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 
-import { useAuth } from '../context/AuthContext';
+import { useAuthStore } from '../stores';
 import { AuthNavigator } from './AuthNavigator';
 import { AppNavigator } from './AppNavigator';
 import { COLORS } from '../constants/theme';
@@ -40,7 +40,8 @@ const LoadingScreen: React.FC = () => (
 // ============================================
 
 export const RootNavigator: React.FC = () => {
-  const { isAuthenticated, isLoading } = useAuth();
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const isLoading = useAuthStore((state) => state.isLoading);
 
   // Show loading screen while checking auth state
   if (isLoading) {

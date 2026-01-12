@@ -22,7 +22,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { useAuth } from '../../context/AuthContext';
+import { useAuthStore } from '../../stores';
 import { COLORS, SPACING, RADIUS, FONTS, FONT_SIZES, scale } from '../../constants/theme';
 import { Collection } from '../../types';
 import { getUserCollections, createCollection, deleteCollection } from '../../services/collectionsService';
@@ -59,7 +59,9 @@ const COLLECTION_ICONS = [
 export const CollectionsScreen: React.FC = () => {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<NativeStackNavigationProp<CollectionsStackParamList>>();
-  const { user } = useAuth();
+
+  // Zustand store
+  const user = useAuthStore((state) => state.user);
 
   const [collections, setCollections] = useState<Collection[]>([]);
   const [loading, setLoading] = useState(true);

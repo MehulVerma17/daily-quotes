@@ -20,12 +20,10 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { useAuth } from '../../context/AuthContext';
+import { useAuthStore, useFavoritesStore } from '../../stores';
 import { COLORS, SPACING, RADIUS, FONTS, FONT_SIZES, scale } from '../../constants/theme';
 import { Quote, UserFavorite } from '../../types';
 import {
-  getUserFavorites,
-  removeFromFavorites,
   getFavoriteCategories,
   getFavoriteAuthors,
 } from '../../services/favoritesService';
@@ -34,50 +32,49 @@ const { width } = Dimensions.get('window');
 
 export const FavoritesScreen: React.FC = () => {
   const insets = useSafeAreaInsets();
-  const { user } = useAuth();
 
-  const [favorites, setFavorites] = useState<UserFavorite[]>([]);
+  // Zustand stores
+  const user = useAuthStore((state) => state.user);
+  const { favorites, loading: favoritesLoading, toggleFavorite, loadFavorites } = useFavoritesStore();
+
   const [categories, setCategories] = useState<string[]>([]);
   const [authors, setAuthors] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [activeFilter, setActiveFilter] = useState<string>('All');
 
-  const loadFavorites = useCallback(async () => {
+  const loadMetadata = useCallback(async () => {
     if (!user?.id) return;
     try {
-      const [favs, cats, auths] = await Promise.all([
-        getUserFavorites(user.id),
+      const [cats, auths] = await Promise.all([
         getFavoriteCategories(user.id),
         getFavoriteAuthors(user.id),
       ]);
-      setFavorites(favs);
       setCategories(cats);
       setAuthors(auths);
     } catch (error) {
-      console.error('Error loading favorites:', error);
+      console.error('Error loading favorites metadata:', error);
     } finally {
       setLoading(false);
     }
   }, [user?.id]);
 
   useEffect(() => {
-    loadFavorites();
-  }, [loadFavorites]);
+    loadMetadata();
+  }, [loadMetadata, favorites]);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    await loadFavorites();
+    if (user?.id) {
+      await loadFavorites(user.id);
+    }
+    await loadMetadata();
     setRefreshing(false);
-  }, [loadFavorites]);
+  }, [user?.id, loadFavorites, loadMetadata]);
 
-  const handleRemoveFavorite = async (quoteId: string) => {
-    if (!user?.id) return;
-    try {
-      await removeFromFavorites(user.id, quoteId);
-      setFavorites((prev) => prev.filter((f) => f.quote_id !== quoteId));
-    } catch (error) {
-      console.error('Error removing favorite:', error);
+  const handleRemoveFavorite = async (quote: Quote) => {
+    if (user?.id) {
+      await toggleFavorite(user.id, quote);
     }
   };
 
@@ -167,7 +164,7 @@ export const FavoritesScreen: React.FC = () => {
           </View>
           <Pressable
             style={styles.favoriteButton}
-            onPress={() => handleRemoveFavorite(item.quote_id)}
+            onPress={() => handleRemoveFavorite(quote)}
           >
             <Ionicons name="heart" size={20} color={COLORS.terracotta} />
           </Pressable>
@@ -200,7 +197,7 @@ export const FavoritesScreen: React.FC = () => {
     </View>
   );
 
-  if (loading) {
+  if (loading || favoritesLoading) {
     return (
       <View style={[styles.container, { paddingTop: insets.top }]}>
         <View style={styles.loadingContainer}>

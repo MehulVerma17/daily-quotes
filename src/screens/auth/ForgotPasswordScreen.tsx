@@ -31,7 +31,7 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Toast from 'react-native-toast-message';
 
-import { useAuth } from '../../context/AuthContext';
+import { useAuthStore } from '../../stores';
 import { AuthStackParamList } from '../../types';
 import { COLORS, SPACING, RADIUS, FONT_SIZES, SHADOWS, moderateScale } from '../../constants/theme';
 
@@ -54,7 +54,10 @@ const { width, height } = Dimensions.get('window');
 export const ForgotPasswordScreen: React.FC = () => {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<ForgotPasswordNavigationProp>();
-  const { resetPassword, isLoading } = useAuth();
+
+  // Zustand store
+  const resetPassword = useAuthStore((state) => state.resetPassword);
+  const isLoading = useAuthStore((state) => state.isLoading);
 
   // Form state
   const [email, setEmail] = useState('');

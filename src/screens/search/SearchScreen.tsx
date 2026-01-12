@@ -25,6 +25,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { COLORS, SPACING, RADIUS, FONTS, FONT_SIZES, scale } from '../../constants/theme';
 import { Quote } from '../../types';
 import { searchQuotes, getQuotesByAuthor } from '../../services/quoteService';
+import { useAuthStore, useFavoritesStore } from '../../stores';
 import { CATEGORIES } from '../../config';
 
 const { width } = Dimensions.get('window');
@@ -39,6 +40,11 @@ type SearchStackParamList = {
 export const SearchScreen: React.FC = () => {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<NativeStackNavigationProp<SearchStackParamList>>();
+
+  // Zustand stores
+  const user = useAuthStore((state) => state.user);
+  const { toggleFavorite, isFavorite } = useFavoritesStore();
+
   const searchInputRef = useRef<TextInput>(null);
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -85,6 +91,12 @@ export const SearchScreen: React.FC = () => {
     navigation.navigate('Category', { category });
   };
 
+  const handleToggleFavorite = (quote: Quote) => {
+    if (user?.id) {
+      toggleFavorite(user.id, quote);
+    }
+  };
+
   const handleShareQuote = async (quote: Quote) => {
     try {
       await Share.share({
@@ -115,8 +127,12 @@ export const SearchScreen: React.FC = () => {
           </View>
         </View>
         <View style={styles.quoteActions}>
-          <Pressable style={styles.actionButton}>
-            <Ionicons name="heart-outline" size={18} color={COLORS.textMuted} />
+          <Pressable style={styles.actionButton} onPress={() => handleToggleFavorite(item)}>
+            <Ionicons
+              name={isFavorite(item.id) ? 'heart' : 'heart-outline'}
+              size={18}
+              color={isFavorite(item.id) ? COLORS.terracotta : COLORS.textMuted}
+            />
           </Pressable>
           <Pressable style={styles.actionButton} onPress={() => handleShareQuote(item)}>
             <Ionicons name="share-outline" size={18} color={COLORS.textMuted} />

@@ -34,7 +34,7 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Toast from 'react-native-toast-message';
 
-import { useAuth } from '../../context/AuthContext';
+import { useAuthStore } from '../../stores';
 import { AuthStackParamList } from '../../types';
 import { COLORS, SPACING, RADIUS, FONT_SIZES, SHADOWS, scale, moderateScale } from '../../constants/theme';
 
@@ -57,7 +57,11 @@ const { width, height } = Dimensions.get('window');
 export const LoginScreen: React.FC = () => {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<LoginScreenNavigationProp>();
-  const { signIn, signInWithGoogle, isLoading } = useAuth();
+
+  // Zustand store
+  const signIn = useAuthStore((state) => state.signIn);
+  const signInWithGoogle = useAuthStore((state) => state.signInWithGoogle);
+  const isLoading = useAuthStore((state) => state.isLoading);
 
   // Form state
   const [email, setEmail] = useState('');
