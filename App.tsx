@@ -1,20 +1,63 @@
+import React from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import Toast, { BaseToast, ErrorToast, ToastConfig } from 'react-native-toast-message';
+import { AppNavigator } from './src/navigation';
+import { FavoritesProvider } from './src/context';
+
+const toastConfig: ToastConfig = {
+  success: (props) => (
+    <BaseToast
+      {...props}
+      style={{
+        borderLeftColor: '#8B9D83',
+        backgroundColor: '#FFFFFF',
+        borderRadius: 12,
+        marginHorizontal: 20,
+      }}
+      contentContainerStyle={{ paddingHorizontal: 16 }}
+      text1Style={{
+        fontSize: 15,
+        fontWeight: '600',
+        color: '#2D2D2D',
+      }}
+      text2Style={{
+        fontSize: 13,
+        color: '#6B6B6B',
+      }}
+    />
+  ),
+  error: (props) => (
+    <ErrorToast
+      {...props}
+      style={{
+        borderLeftColor: '#C4785A',
+        backgroundColor: '#FFFFFF',
+        borderRadius: 12,
+        marginHorizontal: 20,
+      }}
+      contentContainerStyle={{ paddingHorizontal: 16 }}
+      text1Style={{
+        fontSize: 15,
+        fontWeight: '600',
+        color: '#2D2D2D',
+      }}
+      text2Style={{
+        fontSize: 13,
+        color: '#6B6B6B',
+      }}
+    />
+  ),
+};
 
 export default function App() {
   return (
-    <View style={styles.container}>
-      <Text>Open up App.tsx to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <SafeAreaProvider>
+      <FavoritesProvider>
+        <StatusBar style="dark" />
+        <AppNavigator />
+        <Toast config={toastConfig} position="top" topOffset={60} />
+      </FavoritesProvider>
+    </SafeAreaProvider>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
