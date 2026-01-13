@@ -94,10 +94,12 @@ export const AddToCollectionModal: React.FC<AddToCollectionModalProps> = ({
     try {
       await addQuoteToCollection(collection.id, quote.id);
 
-      // Update local state
+      // Update local state (hasQuote and quote_count)
       setCollections((prev) =>
         prev.map((c) =>
-          c.id === collection.id ? { ...c, hasQuote: true } : c
+          c.id === collection.id
+            ? { ...c, hasQuote: true, quote_count: (c.quote_count || 0) + 1 }
+            : c
         )
       );
 
