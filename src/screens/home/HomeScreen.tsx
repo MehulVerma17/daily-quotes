@@ -99,7 +99,12 @@ export const HomeScreen: React.FC = () => {
     try {
       const nextPage = page + 1;
       const quotes = await getQuotes(nextPage, PAGE_SIZE);
-      setDiscoverQuotes((prev) => [...prev, ...quotes.data]);
+      // Deduplicate to prevent duplicate key errors
+      setDiscoverQuotes((prev) => {
+        const existingIds = new Set(prev.map(q => q.id));
+        const newQuotes = quotes.data.filter(q => !existingIds.has(q.id));
+        return [...prev, ...newQuotes];
+      });
       setHasMore(quotes.hasMore);
       setPage(nextPage);
     } catch (error) {
