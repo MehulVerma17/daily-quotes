@@ -11,8 +11,11 @@
 
 import React from 'react';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, createNavigationContainerRef } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
+
+// Navigation ref for use outside of React components (e.g., notification handlers)
+export const navigationRef = createNavigationContainerRef();
 
 import { useAuthStore } from '../stores';
 import { AuthNavigator } from './AuthNavigator';
@@ -49,7 +52,7 @@ export const RootNavigator: React.FC = () => {
   }
 
   return (
-    <NavigationContainer>
+    <NavigationContainer ref={navigationRef}>
       {isAuthenticated ? (
         // User is authenticated - show main app
         <AppNavigator />

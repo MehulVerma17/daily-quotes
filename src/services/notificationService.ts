@@ -54,14 +54,25 @@ export const checkNotificationPermissions = async (): Promise<boolean> => {
 /**
  * Schedule a daily notification at the specified time
  * @param time Time in HH:mm format (24-hour)
+ * @returns The next scheduled time as a readable string
  */
-export const scheduleDailyQuoteNotification = async (time: string): Promise<void> => {
+export const scheduleDailyQuoteNotification = async (time: string): Promise<string> => {
   try {
     // Cancel any existing scheduled notifications first
     await Notifications.cancelAllScheduledNotificationsAsync();
 
     // Parse time (HH:mm format)
     const [hours, minutes] = time.split(':').map(Number);
+
+    // Calculate when the next notification will fire
+    const now = new Date();
+    const scheduledTime = new Date();
+    scheduledTime.setHours(hours, minutes, 0, 0);
+
+    // If the time has already passed today, it will fire tomorrow
+    if (scheduledTime <= now) {
+      scheduledTime.setDate(scheduledTime.getDate() + 1);
+    }
 
     // Schedule daily repeating notification
     await Notifications.scheduleNotificationAsync({
@@ -78,7 +89,16 @@ export const scheduleDailyQuoteNotification = async (time: string): Promise<void
       },
     });
 
-    console.log(`Daily notification scheduled for ${hours}:${minutes.toString().padStart(2, '0')}`);
+    // Log scheduled notifications for debugging
+    const scheduled = await Notifications.getAllScheduledNotificationsAsync();
+    console.log('Scheduled notifications:', JSON.stringify(scheduled, null, 2));
+
+    const timeStr = scheduledTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const isToday = scheduledTime.toDateString() === now.toDateString();
+    const dayStr = isToday ? 'today' : 'tomorrow';
+
+    console.log(`Daily notification scheduled for ${timeStr} ${dayStr}`);
+    return `${timeStr} ${dayStr}`;
   } catch (error) {
     console.error('Error scheduling notification:', error);
     throw error;
@@ -94,6 +114,26 @@ export const cancelDailyQuoteNotification = async (): Promise<void> => {
     console.log('All notifications cancelled');
   } catch (error) {
     console.error('Error cancelling notifications:', error);
+    throw error;
+  }
+};
+
+/**
+ * Send an immediate test notification to verify notifications work
+ */
+export const sendTestNotification = async (): Promise<void> => {
+  try {
+    await Notifications.scheduleNotificationAsync({
+      content: {
+        title: 'Your Daily Quote',
+        body: 'Test notification - Notifications are working!',
+        sound: true,
+      },
+      trigger: null, // null = send immediately
+    });
+    console.log('Test notification sent');
+  } catch (error) {
+    console.error('Error sending test notification:', error);
     throw error;
   }
 };

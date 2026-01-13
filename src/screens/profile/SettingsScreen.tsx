@@ -31,10 +31,12 @@ import {
   requestNotificationPermissions,
   scheduleDailyQuoteNotification,
   cancelDailyQuoteNotification,
+  sendTestNotification,
   formatNotificationTime,
   timeStringToDate,
   dateToTimeString,
 } from '../../services/notificationService';
+import Toast from 'react-native-toast-message';
 import { APP_CONFIG } from '../../config';
 
 const { width } = Dimensions.get('window');
@@ -147,10 +149,20 @@ export const SettingsScreen: React.FC = () => {
       }
       // Schedule the notification
       const time = settings?.notification_time || '09:00';
-      await scheduleDailyQuoteNotification(time);
+      const scheduledFor = await scheduleDailyQuoteNotification(time);
+      Toast.show({
+        type: 'success',
+        text1: 'Daily Quote Enabled',
+        text2: `Next notification: ${scheduledFor}`,
+      });
     } else {
       // Cancel notifications
       await cancelDailyQuoteNotification();
+      Toast.show({
+        type: 'info',
+        text1: 'Notifications Disabled',
+        text2: 'You won\'t receive daily quote reminders',
+      });
     }
     handleUpdateSetting('notification_enabled', enabled);
   };
@@ -164,8 +176,39 @@ export const SettingsScreen: React.FC = () => {
       await handleUpdateSetting('notification_time', newTime);
       // Reschedule notification if enabled
       if (settings?.notification_enabled) {
-        await scheduleDailyQuoteNotification(newTime);
+        const scheduledFor = await scheduleDailyQuoteNotification(newTime);
+        Toast.show({
+          type: 'success',
+          text1: 'Reminder Set',
+          text2: `Next notification: ${scheduledFor}`,
+        });
       }
+    }
+  };
+
+  const handleTestNotification = async () => {
+    try {
+      const granted = await requestNotificationPermissions();
+      if (!granted) {
+        Alert.alert(
+          'Permission Required',
+          'Please enable notifications in your device settings.',
+          [{ text: 'OK' }]
+        );
+        return;
+      }
+      await sendTestNotification();
+      Toast.show({
+        type: 'success',
+        text1: 'Test Sent',
+        text2: 'You should receive a notification now!',
+      });
+    } catch (error) {
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: 'Failed to send test notification',
+      });
     }
   };
 
@@ -327,6 +370,15 @@ export const SettingsScreen: React.FC = () => {
                 onChange={handleTimeChange}
               />
             )}
+
+            {/* Test Notification Button */}
+            <Pressable
+              style={styles.testButton}
+              onPress={handleTestNotification}
+            >
+              <Ionicons name="notifications-outline" size={18} color={COLORS.terracotta} />
+              <Text style={styles.testButtonText}>Test Notification</Text>
+            </Pressable>
 
             {/* Favorite Categories */}
             <View style={styles.categoriesSection}>
@@ -582,6 +634,23 @@ const styles = StyleSheet.create({
   toggleSubtitle: {
     fontSize: FONT_SIZES.sm,
     color: COLORS.textMuted,
+  },
+  testButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: SPACING.sm,
+    paddingVertical: SPACING.md,
+    marginVertical: SPACING.sm,
+    borderRadius: RADIUS.md,
+    borderWidth: 1,
+    borderColor: COLORS.terracotta,
+    backgroundColor: COLORS.terracotta + '10',
+  },
+  testButtonText: {
+    fontSize: FONT_SIZES.sm,
+    color: COLORS.terracotta,
+    fontWeight: '600',
   },
   categoriesSection: {
     borderTopWidth: 1,

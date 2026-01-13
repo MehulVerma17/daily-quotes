@@ -21,7 +21,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import Toast, { BaseToast, ErrorToast, ToastConfig } from 'react-native-toast-message';
 import * as Notifications from 'expo-notifications';
 
-import { RootNavigator } from './src/navigation/RootNavigator';
+import { RootNavigator, navigationRef } from './src/navigation/RootNavigator';
 import { useAuthStore } from './src/stores';
 
 // ============================================
@@ -158,7 +158,11 @@ export default function App() {
     // Listener for when user taps on notification
     responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
       console.log('Notification tapped:', response);
-      // The app will automatically navigate to home when opened
+      // Navigate to Home screen when notification is tapped
+      const screen = response.notification.request.content.data?.screen;
+      if (screen === 'Home' && navigationRef.isReady()) {
+        navigationRef.navigate('HomeTab' as never);
+      }
     });
 
     // Cleanup listeners on unmount
