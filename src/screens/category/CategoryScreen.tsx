@@ -26,6 +26,7 @@ import { COLORS, SPACING, RADIUS, FONTS, FONT_SIZES, GRADIENTS, scale } from '..
 import { Quote } from '../../types';
 import { getQuotesByCategory } from '../../services/quoteService';
 import { useAuthStore, useFavoritesStore } from '../../stores';
+import { AddToCollectionModal } from '../../components';
 
 const { width } = Dimensions.get('window');
 
@@ -58,6 +59,10 @@ export const CategoryScreen: React.FC = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
+
+  // Collection modal state
+  const [collectionModalVisible, setCollectionModalVisible] = useState(false);
+  const [selectedQuoteForCollection, setSelectedQuoteForCollection] = useState<Quote | null>(null);
 
   const gradientColors: readonly [string, string] = CATEGORY_GRADIENTS[category] || ['#E8A87C', '#D4927A'];
 
@@ -110,6 +115,11 @@ export const CategoryScreen: React.FC = () => {
     }
   };
 
+  const handleAddToCollection = (quote: Quote) => {
+    setSelectedQuoteForCollection(quote);
+    setCollectionModalVisible(true);
+  };
+
   const renderQuoteCard = ({ item, index }: { item: Quote; index: number }) => {
     // Alternating card sizes for masonry effect
     const isLarge = index % 3 === 0;
@@ -127,6 +137,9 @@ export const CategoryScreen: React.FC = () => {
                 size={16}
                 color={isFavorite(item.id) ? COLORS.terracotta : COLORS.textMuted}
               />
+            </Pressable>
+            <Pressable style={styles.actionButton} onPress={() => handleAddToCollection(item)}>
+              <Ionicons name="folder-outline" size={16} color={COLORS.textMuted} />
             </Pressable>
             <Pressable style={styles.actionButton} onPress={() => handleShareQuote(item)}>
               <Ionicons name="share-outline" size={16} color={COLORS.textMuted} />
@@ -205,6 +218,13 @@ export const CategoryScreen: React.FC = () => {
             </Text>
           </View>
         }
+      />
+
+      {/* Add to Collection Modal */}
+      <AddToCollectionModal
+        visible={collectionModalVisible}
+        quote={selectedQuoteForCollection}
+        onClose={() => setCollectionModalVisible(false)}
       />
     </View>
   );

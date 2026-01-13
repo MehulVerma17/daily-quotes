@@ -26,6 +26,7 @@ import { Quote } from '../../types';
 import { searchQuotes, getQuotesByAuthor } from '../../services/quoteService';
 import { useAuthStore, useFavoritesStore } from '../../stores';
 import { CATEGORIES } from '../../config';
+import { AddToCollectionModal } from '../../components';
 
 const { width } = Dimensions.get('window');
 
@@ -51,6 +52,10 @@ export const SearchScreen: React.FC = () => {
   const [results, setResults] = useState<Quote[]>([]);
   const [loading, setLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
+
+  // Collection modal state
+  const [collectionModalVisible, setCollectionModalVisible] = useState(false);
+  const [selectedQuoteForCollection, setSelectedQuoteForCollection] = useState<Quote | null>(null);
 
   // Debounced search effect
   useEffect(() => {
@@ -122,6 +127,11 @@ export const SearchScreen: React.FC = () => {
     searchInputRef.current?.focus();
   };
 
+  const handleAddToCollection = (quote: Quote) => {
+    setSelectedQuoteForCollection(quote);
+    setCollectionModalVisible(true);
+  };
+
   const renderQuoteItem = ({ item }: { item: Quote }) => (
     <View style={styles.quoteCard}>
       <Text style={styles.quoteText} numberOfLines={4}>
@@ -141,6 +151,9 @@ export const SearchScreen: React.FC = () => {
               size={18}
               color={isFavorite(item.id) ? COLORS.terracotta : COLORS.textMuted}
             />
+          </Pressable>
+          <Pressable style={styles.actionButton} onPress={() => handleAddToCollection(item)}>
+            <Ionicons name="folder-outline" size={18} color={COLORS.textMuted} />
           </Pressable>
           <Pressable style={styles.actionButton} onPress={() => handleShareQuote(item)}>
             <Ionicons name="share-outline" size={18} color={COLORS.textMuted} />
@@ -271,6 +284,13 @@ export const SearchScreen: React.FC = () => {
       ) : (
         renderEmptyState()
       )}
+
+      {/* Add to Collection Modal */}
+      <AddToCollectionModal
+        visible={collectionModalVisible}
+        quote={selectedQuoteForCollection}
+        onClose={() => setCollectionModalVisible(false)}
+      />
     </View>
   );
 };

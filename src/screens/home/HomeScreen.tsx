@@ -28,6 +28,7 @@ import { COLORS, SPACING, RADIUS, FONTS, FONT_SIZES } from '../../constants/them
 import { Quote } from '../../types';
 import { getQuoteOfDay, getQuotes } from '../../services/quoteService';
 import { CATEGORIES } from '../../config';
+import { AddToCollectionModal } from '../../components';
 
 type HomeStackParamList = {
   Home: undefined;
@@ -54,6 +55,10 @@ export const HomeScreen: React.FC = () => {
   const [loadingMore, setLoadingMore] = useState(false);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
+
+  // Collection modal state
+  const [collectionModalVisible, setCollectionModalVisible] = useState(false);
+  const [selectedQuoteForCollection, setSelectedQuoteForCollection] = useState<Quote | null>(null);
 
   // Get greeting based on time of day
   const getGreeting = () => {
@@ -142,6 +147,11 @@ export const HomeScreen: React.FC = () => {
     }
   };
 
+  const handleAddToCollection = (quote: Quote) => {
+    setSelectedQuoteForCollection(quote);
+    setCollectionModalVisible(true);
+  };
+
   // Render header with greeting, QOTD, and categories
   const renderHeader = () => (
     <View>
@@ -178,6 +188,12 @@ export const HomeScreen: React.FC = () => {
                   size={20}
                   color="#FFFFFF"
                 />
+              </Pressable>
+              <Pressable
+                style={styles.qotdButton}
+                onPress={() => handleAddToCollection(quoteOfDay)}
+              >
+                <Ionicons name="folder-outline" size={20} color="#FFFFFF" />
               </Pressable>
               <Pressable
                 style={styles.qotdButton}
@@ -242,6 +258,12 @@ export const HomeScreen: React.FC = () => {
             </Pressable>
             <Pressable
               style={styles.discoverActionBtn}
+              onPress={() => handleAddToCollection(item)}
+            >
+              <Ionicons name="folder-outline" size={16} color={COLORS.textMuted} />
+            </Pressable>
+            <Pressable
+              style={styles.discoverActionBtn}
               onPress={() => handleShareQuote(item)}
             >
               <Ionicons name="share-outline" size={16} color={COLORS.textMuted} />
@@ -294,6 +316,13 @@ export const HomeScreen: React.FC = () => {
         }
         onEndReached={loadMoreQuotes}
         onEndReachedThreshold={0.5}
+      />
+
+      {/* Add to Collection Modal */}
+      <AddToCollectionModal
+        visible={collectionModalVisible}
+        quote={selectedQuoteForCollection}
+        onClose={() => setCollectionModalVisible(false)}
       />
     </View>
   );

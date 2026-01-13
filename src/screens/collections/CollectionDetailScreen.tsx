@@ -25,6 +25,7 @@ import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { COLORS, SPACING, RADIUS, FONTS, FONT_SIZES, scale } from '../../constants/theme';
 import { Quote, CollectionWithQuotes } from '../../types';
 import { getCollectionWithQuotes, removeQuoteFromCollection, deleteCollection } from '../../services/collectionsService';
+import { useCollectionsStore } from '../../stores';
 
 const { width } = Dimensions.get('window');
 
@@ -37,6 +38,12 @@ export const CollectionDetailScreen: React.FC = () => {
   const navigation = useNavigation();
   const route = useRoute<RouteProp<CollectionDetailParamList, 'CollectionDetail'>>();
   const { collectionId, collectionName } = route.params;
+
+  // Zustand store
+  const {
+    decrementQuoteCount,
+    deleteCollection: deleteCollectionFromStore,
+  } = useCollectionsStore();
 
   const [collection, setCollection] = useState<CollectionWithQuotes | null>(null);
   const [loading, setLoading] = useState(true);
@@ -80,6 +87,8 @@ export const CollectionDetailScreen: React.FC = () => {
                   ? { ...prev, quotes: prev.quotes.filter((q) => q.id !== quoteId) }
                   : null
               );
+              // Update the global collections store count
+              decrementQuoteCount(collectionId);
             } catch (error) {
               console.error('Error removing quote:', error);
             }
@@ -101,6 +110,8 @@ export const CollectionDetailScreen: React.FC = () => {
           onPress: async () => {
             try {
               await deleteCollection(collectionId);
+              // Update the global collections store
+              deleteCollectionFromStore(collectionId);
               navigation.goBack();
             } catch (error) {
               console.error('Error deleting collection:', error);

@@ -27,6 +27,7 @@ import {
   getFavoriteCategories,
   getFavoriteAuthors,
 } from '../../services/favoritesService';
+import { AddToCollectionModal } from '../../components';
 
 const { width } = Dimensions.get('window');
 
@@ -42,6 +43,10 @@ export const FavoritesScreen: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [activeFilter, setActiveFilter] = useState<string>('All');
+
+  // Collection modal state
+  const [collectionModalVisible, setCollectionModalVisible] = useState(false);
+  const [selectedQuoteForCollection, setSelectedQuoteForCollection] = useState<Quote | null>(null);
 
   const loadMetadata = useCallback(async () => {
     if (!user?.id) return;
@@ -86,6 +91,11 @@ export const FavoritesScreen: React.FC = () => {
     } catch (error) {
       console.error('Error sharing:', error);
     }
+  };
+
+  const handleAddToCollection = (quote: Quote) => {
+    setSelectedQuoteForCollection(quote);
+    setCollectionModalVisible(true);
   };
 
   // Filter favorites by category
@@ -174,12 +184,20 @@ export const FavoritesScreen: React.FC = () => {
         </Text>
         <View style={styles.quoteFooter}>
           <Text style={styles.quoteAuthor}>— {quote.author}</Text>
-          <Pressable
-            style={styles.shareButton}
-            onPress={() => handleShareQuote(quote)}
-          >
-            <Ionicons name="share-outline" size={18} color={COLORS.textMuted} />
-          </Pressable>
+          <View style={styles.quoteActions}>
+            <Pressable
+              style={styles.shareButton}
+              onPress={() => handleAddToCollection(quote)}
+            >
+              <Ionicons name="folder-outline" size={18} color={COLORS.textMuted} />
+            </Pressable>
+            <Pressable
+              style={styles.shareButton}
+              onPress={() => handleShareQuote(quote)}
+            >
+              <Ionicons name="share-outline" size={18} color={COLORS.textMuted} />
+            </Pressable>
+          </View>
         </View>
       </View>
     );
@@ -224,6 +242,13 @@ export const FavoritesScreen: React.FC = () => {
           />
         }
         ListEmptyComponent={renderEmptyState}
+      />
+
+      {/* Add to Collection Modal */}
+      <AddToCollectionModal
+        visible={collectionModalVisible}
+        quote={selectedQuoteForCollection}
+        onClose={() => setCollectionModalVisible(false)}
       />
     </View>
   );
@@ -375,6 +400,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+  },
+  quoteActions: {
+    flexDirection: 'row',
+    gap: SPACING.sm,
   },
   quoteAuthor: {
     fontSize: FONT_SIZES.sm,

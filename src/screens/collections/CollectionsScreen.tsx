@@ -22,10 +22,10 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { useAuthStore } from '../../stores';
+import { useAuthStore, useCollectionsStore } from '../../stores';
 import { COLORS, SPACING, RADIUS, FONTS, FONT_SIZES, scale } from '../../constants/theme';
 import { Collection } from '../../types';
-import { getUserCollections, createCollection, deleteCollection } from '../../services/collectionsService';
+import { createCollection, deleteCollection } from '../../services/collectionsService';
 
 const { width } = Dimensions.get('window');
 
@@ -60,11 +60,16 @@ export const CollectionsScreen: React.FC = () => {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<NativeStackNavigationProp<CollectionsStackParamList>>();
 
-  // Zustand store
+  // Zustand stores
   const user = useAuthStore((state) => state.user);
+  const {
+    collections,
+    loading,
+    loadCollections,
+    addCollection: addCollectionToStore,
+    deleteCollection: deleteCollectionFromStore,
+  } = useCollectionsStore();
 
-  const [collections, setCollections] = useState<Collection[]>([]);
-  const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newCollectionName, setNewCollectionName] = useState('');
@@ -72,27 +77,18 @@ export const CollectionsScreen: React.FC = () => {
   const [selectedIcon, setSelectedIcon] = useState(COLLECTION_ICONS[0]);
   const [creating, setCreating] = useState(false);
 
-  const loadCollections = useCallback(async () => {
-    if (!user?.id) return;
-    try {
-      const data = await getUserCollections(user.id);
-      setCollections(data);
-    } catch (error) {
-      console.error('Error loading collections:', error);
-    } finally {
-      setLoading(false);
-    }
-  }, [user?.id]);
-
   useEffect(() => {
-    loadCollections();
-  }, [loadCollections]);
+    if (user?.id) {
+      loadCollections(user.id);
+    }
+  }, [user?.id, loadCollections]);
 
   const onRefresh = useCallback(async () => {
+    if (!user?.id) return;
     setRefreshing(true);
-    await loadCollections();
+    await loadCollections(user.id);
     setRefreshing(false);
-  }, [loadCollections]);
+  }, [user?.id, loadCollections]);
 
   const handleCreateCollection = async () => {
     if (!user?.id || !newCollectionName.trim()) return;
@@ -107,7 +103,7 @@ export const CollectionsScreen: React.FC = () => {
         selectedColor
       );
       if (newCollection) {
-        setCollections((prev) => [{ ...newCollection, quote_count: 0 }, ...prev]);
+        addCollectionToStore({ ...newCollection, quote_count: 0 });
       }
       setShowCreateModal(false);
       setNewCollectionName('');
@@ -120,10 +116,10 @@ export const CollectionsScreen: React.FC = () => {
     }
   };
 
-  const handleDeleteCollection = async (collectionId: string) => {
+  const handleDeleteCollectionPress = async (collectionId: string) => {
     try {
       await deleteCollection(collectionId);
-      setCollections((prev) => prev.filter((c) => c.id !== collectionId));
+      deleteCollectionFromStore(collectionId);
     } catch (error) {
       console.error('Error deleting collection:', error);
     }
