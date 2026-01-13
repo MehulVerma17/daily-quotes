@@ -20,6 +20,8 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import * as ImagePicker from "expo-image-picker";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useAuthStore } from "../../stores";
 import {
   SPACING,
@@ -31,6 +33,8 @@ import {
 import { useTheme } from "../../contexts";
 import { getFavoriteCount } from "../../services/favoritesService";
 import { getCollectionCount } from "../../services/collectionsService";
+
+const AVATAR_STORAGE_KEY = "@profile_avatar";
 
 const { width } = Dimensions.get("window");
 
@@ -80,8 +84,7 @@ export const ProfileScreen: React.FC = () => {
 
   const [favoriteCount, setFavoriteCount] = useState(0);
   const [collectionCount, setCollectionCount] = useState(0);
-  const [sharedCount, setSharedCount] = useState(23); // Placeholder
-  const [dayStreak, setDayStreak] = useState(89); // Placeholder
+  const [localAvatarUri, setLocalAvatarUri] = useState<string | null>(null);
 
   const loadStats = useCallback(async () => {
     if (!user?.id) return;
@@ -97,9 +100,71 @@ export const ProfileScreen: React.FC = () => {
     }
   }, [user?.id]);
 
+  // Load saved avatar from local storage
+  const loadLocalAvatar = useCallback(async () => {
+    try {
+      const savedUri = await AsyncStorage.getItem(AVATAR_STORAGE_KEY);
+      if (savedUri) {
+        setLocalAvatarUri(savedUri);
+      }
+    } catch (error) {
+      console.error("Error loading local avatar:", error);
+    }
+  }, []);
+
   useEffect(() => {
     loadStats();
-  }, [loadStats]);
+    loadLocalAvatar();
+  }, [loadStats, loadLocalAvatar]);
+
+  const handlePickImage = async () => {
+    // Show options for camera or gallery
+    Alert.alert("Change Profile Photo", "Choose an option", [
+      {
+        text: "Take Photo",
+        onPress: async () => {
+          const { status } = await ImagePicker.requestCameraPermissionsAsync();
+          if (status !== "granted") {
+            Alert.alert("Permission needed", "Camera permission is required to take photos.");
+            return;
+          }
+          const result = await ImagePicker.launchCameraAsync({
+            mediaTypes: ["images"],
+            allowsEditing: true,
+            aspect: [1, 1],
+            quality: 0.8,
+          });
+          if (!result.canceled && result.assets[0]) {
+            const uri = result.assets[0].uri;
+            setLocalAvatarUri(uri);
+            await AsyncStorage.setItem(AVATAR_STORAGE_KEY, uri);
+          }
+        },
+      },
+      {
+        text: "Choose from Gallery",
+        onPress: async () => {
+          const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+          if (status !== "granted") {
+            Alert.alert("Permission needed", "Gallery permission is required to select photos.");
+            return;
+          }
+          const result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ["images"],
+            allowsEditing: true,
+            aspect: [1, 1],
+            quality: 0.8,
+          });
+          if (!result.canceled && result.assets[0]) {
+            const uri = result.assets[0].uri;
+            setLocalAvatarUri(uri);
+            await AsyncStorage.setItem(AVATAR_STORAGE_KEY, uri);
+          }
+        },
+      },
+      { text: "Cancel", style: "cancel" },
+    ]);
+  };
 
   const handleLogout = () => {
     Alert.alert("Log Out", "Are you sure you want to log out?", [
@@ -170,7 +235,8 @@ export const ProfileScreen: React.FC = () => {
         {/* Profile Info */}
         <View style={styles.profileSection}>
           <View style={styles.avatarContainer}>
-            <View
+            <Pressable
+              onPress={handlePickImage}
               style={[
                 styles.avatar,
                 {
@@ -179,7 +245,12 @@ export const ProfileScreen: React.FC = () => {
                 },
               ]}
             >
-              {profile?.avatar_url ? (
+              {localAvatarUri ? (
+                <Image
+                  source={{ uri: localAvatarUri }}
+                  style={styles.avatarImage}
+                />
+              ) : profile?.avatar_url ? (
                 <Image
                   source={{ uri: profile.avatar_url }}
                   style={styles.avatarImage}
@@ -187,8 +258,9 @@ export const ProfileScreen: React.FC = () => {
               ) : (
                 <Ionicons name="person" size={40} color={colors.textMuted} />
               )}
-            </View>
+            </Pressable>
             <Pressable
+              onPress={handlePickImage}
               style={[
                 styles.cameraButton,
                 { backgroundColor: accent.primary, borderColor: colors.white },
@@ -247,45 +319,6 @@ export const ProfileScreen: React.FC = () => {
             </Text>
             <Text style={[styles.statLabel, { color: colors.textMuted }]}>
               Collections
-            </Text>
-          </View>
-          <View
-            style={[
-              styles.statCard,
-              { backgroundColor: colors.white, shadowColor: colors.shadow },
-            ]}
-          >
-            <View
-              style={[styles.statIcon, { backgroundColor: colors.info + "20" }]}
-            >
-              <Ionicons name="share-social" size={18} color={colors.info} />
-            </View>
-            <Text style={[styles.statNumber, { color: colors.textPrimary }]}>
-              {sharedCount}
-            </Text>
-            <Text style={[styles.statLabel, { color: colors.textMuted }]}>
-              Shared
-            </Text>
-          </View>
-          <View
-            style={[
-              styles.statCard,
-              { backgroundColor: colors.white, shadowColor: colors.shadow },
-            ]}
-          >
-            <View
-              style={[
-                styles.statIcon,
-                { backgroundColor: colors.warning + "20" },
-              ]}
-            >
-              <Ionicons name="flame" size={18} color={colors.warning} />
-            </View>
-            <Text style={[styles.statNumber, { color: colors.textPrimary }]}>
-              {dayStreak}
-            </Text>
-            <Text style={[styles.statLabel, { color: colors.textMuted }]}>
-              Day Streak
             </Text>
           </View>
         </View>
