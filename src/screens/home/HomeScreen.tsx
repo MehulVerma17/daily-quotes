@@ -23,7 +23,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useAuthStore, useFavoritesStore } from '../../stores';
-import { COLORS, SPACING, RADIUS, FONTS, FONT_SIZES } from '../../constants/theme';
+import { SPACING, RADIUS, FONTS, FONT_SIZES } from '../../constants/theme';
+import { useTheme } from '../../contexts';
 import { Quote } from '../../types';
 import { getQuoteOfDay, getQuotes } from '../../services/quoteService';
 import { CATEGORIES } from '../../config';
@@ -40,6 +41,9 @@ const PAGE_SIZE = 10;
 export const HomeScreen: React.FC = () => {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<NativeStackNavigationProp<HomeStackParamList>>();
+
+  // Theme
+  const { colors, accent, isDark, quoteFontSize } = useTheme();
 
   // Zustand stores
   const profile = useAuthStore((state) => state.profile);
@@ -161,20 +165,20 @@ export const HomeScreen: React.FC = () => {
       {/* Header */}
       <View style={styles.header}>
         <View>
-          <Text style={styles.greeting}>{getGreeting()},</Text>
-          <Text style={styles.userName}>{firstName}</Text>
+          <Text style={[styles.greeting, { color: colors.textSecondary }]}>{getGreeting()},</Text>
+          <Text style={[styles.userName, { color: colors.textPrimary }]}>{firstName}</Text>
         </View>
-        <Pressable onPress={handleSearchPress} style={styles.searchButton}>
-          <Ionicons name="search" size={24} color={COLORS.textPrimary} />
+        <Pressable onPress={handleSearchPress} style={[styles.searchButton, { backgroundColor: colors.white }]}>
+          <Ionicons name="search" size={24} color={colors.textPrimary} />
         </Pressable>
       </View>
 
       {/* Quote of the Day */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Quote of the Day</Text>
+        <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Quote of the Day</Text>
         {quoteOfDay && (
           <LinearGradient
-            colors={['#E8A87C', '#D4A5A5']}
+            colors={isDark ? [accent.dark, accent.primary] : [colors.warmPeach, colors.dustyRose]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={styles.qotdCard}
@@ -182,7 +186,7 @@ export const HomeScreen: React.FC = () => {
             <View style={styles.quoteIcon}>
               <Text style={styles.quoteIconText}>"</Text>
             </View>
-            <Text style={styles.qotdText}>{quoteOfDay.content}</Text>
+            <Text style={[styles.qotdText, { fontSize: quoteFontSize }]}>{quoteOfDay.content}</Text>
             <Text style={styles.qotdAuthor}>— {quoteOfDay.author}</Text>
             <View style={styles.qotdActions}>
               <Pressable style={styles.qotdButton} onPress={() => handleToggleFavorite(quoteOfDay)}>
@@ -211,7 +215,7 @@ export const HomeScreen: React.FC = () => {
 
       {/* Categories */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Today's Categories</Text>
+        <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Today's Categories</Text>
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -220,10 +224,10 @@ export const HomeScreen: React.FC = () => {
           {CATEGORIES.map((category) => (
             <Pressable
               key={category}
-              style={styles.categoryChip}
+              style={[styles.categoryChip, { backgroundColor: colors.white }]}
               onPress={() => handleCategoryPress(category)}
             >
-              <Text style={styles.categoryChipText}>{category}</Text>
+              <Text style={[styles.categoryChipText, { color: colors.textPrimary }]}>{category}</Text>
             </Pressable>
           ))}
         </ScrollView>
@@ -231,45 +235,45 @@ export const HomeScreen: React.FC = () => {
 
       {/* Discover More Title */}
       <View style={styles.discoverHeader}>
-        <Text style={styles.sectionTitle}>Discover More</Text>
+        <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Discover More</Text>
       </View>
     </View>
   );
 
   // Render each quote card
   const renderQuoteCard = ({ item, index }: { item: Quote; index: number }) => (
-    <View style={[styles.discoverCard, index % 2 === 0 ? styles.cardLeft : styles.cardRight]}>
+    <View style={[styles.discoverCard, { backgroundColor: colors.white }, index % 2 === 0 ? styles.cardLeft : styles.cardRight]}>
       <View style={styles.discoverCardInner}>
-        <Text style={styles.discoverQuote} numberOfLines={3}>
+        <Text style={[styles.discoverQuote, { color: colors.textPrimary }]} numberOfLines={3}>
           "{item.content}"
         </Text>
-        <Text style={styles.discoverAuthor}>— {item.author}</Text>
+        <Text style={[styles.discoverAuthor, { color: colors.textMuted }]}>— {item.author}</Text>
         <View style={styles.discoverFooter}>
-          <View style={styles.discoverCategory}>
-            <Text style={styles.discoverCategoryText}>{item.category}</Text>
+          <View style={[styles.discoverCategory, { backgroundColor: colors.gradientStart }]}>
+            <Text style={[styles.discoverCategoryText, { color: accent.primary }]}>{item.category}</Text>
           </View>
           <View style={styles.discoverActions}>
             <Pressable
-              style={styles.discoverActionBtn}
+              style={[styles.discoverActionBtn, { backgroundColor: colors.offWhite }]}
               onPress={() => handleToggleFavorite(item)}
             >
               <Ionicons
                 name={isFavorite(item.id) ? 'heart' : 'heart-outline'}
                 size={16}
-                color={isFavorite(item.id) ? COLORS.terracotta : COLORS.textMuted}
+                color={isFavorite(item.id) ? accent.primary : colors.textMuted}
               />
             </Pressable>
             <Pressable
-              style={styles.discoverActionBtn}
+              style={[styles.discoverActionBtn, { backgroundColor: colors.offWhite }]}
               onPress={() => handleAddToCollection(item)}
             >
-              <Ionicons name="folder-outline" size={16} color={COLORS.textMuted} />
+              <Ionicons name="folder-outline" size={16} color={colors.textMuted} />
             </Pressable>
             <Pressable
-              style={styles.discoverActionBtn}
+              style={[styles.discoverActionBtn, { backgroundColor: colors.offWhite }]}
               onPress={() => handleShareQuote(item)}
             >
-              <Ionicons name="share-outline" size={16} color={COLORS.textMuted} />
+              <Ionicons name="share-outline" size={16} color={colors.textMuted} />
             </Pressable>
           </View>
         </View>
@@ -282,21 +286,21 @@ export const HomeScreen: React.FC = () => {
     if (!loadingMore) return null;
     return (
       <View style={styles.footerLoader}>
-        <ActivityIndicator size="small" color={COLORS.terracotta} />
+        <ActivityIndicator size="small" color={accent.primary} />
       </View>
     );
   };
 
   if (loading) {
     return (
-      <View style={[styles.loadingContainer, { paddingTop: insets.top }]}>
-        <ActivityIndicator size="large" color={COLORS.terracotta} />
+      <View style={[styles.loadingContainer, { paddingTop: insets.top, backgroundColor: colors.offWhite }]}>
+        <ActivityIndicator size="large" color={accent.primary} />
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.offWhite }]}>
       <FlatList
         data={discoverQuotes}
         keyExtractor={(item) => item.id}
@@ -314,7 +318,7 @@ export const HomeScreen: React.FC = () => {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            tintColor={COLORS.terracotta}
+            tintColor={accent.primary}
           />
         }
         onEndReached={loadMoreQuotes}
@@ -341,13 +345,11 @@ export const HomeScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.offWhite,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: COLORS.offWhite,
   },
   listContent: {
     paddingHorizontal: SPACING.base,
@@ -360,23 +362,20 @@ const styles = StyleSheet.create({
   },
   greeting: {
     fontSize: FONT_SIZES.md,
-    color: COLORS.textSecondary,
     fontFamily: FONTS.sansRegular,
   },
   userName: {
     fontSize: FONT_SIZES.xxl,
     fontWeight: '700',
-    color: COLORS.textPrimary,
     fontFamily: FONTS.sansBold,
   },
   searchButton: {
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: COLORS.white,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: COLORS.shadow,
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
     shadowRadius: 4,
@@ -388,7 +387,6 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: FONT_SIZES.lg,
     fontWeight: '600',
-    color: COLORS.textPrimary,
     marginBottom: SPACING.md,
     fontFamily: FONTS.sansBold,
   },
@@ -407,7 +405,6 @@ const styles = StyleSheet.create({
     lineHeight: 48,
   },
   qotdText: {
-    fontSize: FONT_SIZES.xl,
     fontStyle: 'italic',
     color: '#FFFFFF',
     fontFamily: FONTS.serifItalic,
@@ -442,10 +439,9 @@ const styles = StyleSheet.create({
   categoryChip: {
     paddingHorizontal: SPACING.base,
     paddingVertical: SPACING.sm,
-    backgroundColor: COLORS.white,
     borderRadius: RADIUS.full,
     marginRight: SPACING.sm,
-    shadowColor: COLORS.shadow,
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
     shadowRadius: 2,
@@ -453,7 +449,6 @@ const styles = StyleSheet.create({
   },
   categoryChipText: {
     fontSize: FONT_SIZES.sm,
-    color: COLORS.textPrimary,
     fontWeight: '500',
   },
   discoverHeader: {
@@ -464,11 +459,10 @@ const styles = StyleSheet.create({
   },
   discoverCard: {
     width: '48.5%',
-    backgroundColor: COLORS.white,
     borderRadius: RADIUS.lg,
     overflow: 'hidden',
     marginBottom: SPACING.md,
-    shadowColor: COLORS.shadow,
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
     shadowRadius: 4,
@@ -488,14 +482,12 @@ const styles = StyleSheet.create({
   discoverQuote: {
     fontSize: FONT_SIZES.sm,
     fontStyle: 'italic',
-    color: COLORS.textPrimary,
     fontFamily: FONTS.serifItalic,
     lineHeight: 20,
     marginBottom: SPACING.sm,
   },
   discoverAuthor: {
     fontSize: FONT_SIZES.xs,
-    color: COLORS.textMuted,
     fontFamily: FONTS.sansRegular,
     marginBottom: SPACING.sm,
   },
@@ -505,14 +497,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   discoverCategory: {
-    backgroundColor: COLORS.gradientStart,
     paddingHorizontal: SPACING.sm,
     paddingVertical: SPACING.xs,
     borderRadius: RADIUS.sm,
   },
   discoverCategoryText: {
     fontSize: FONT_SIZES.xs,
-    color: COLORS.terracotta,
     fontWeight: '500',
   },
   discoverActions: {
@@ -523,7 +513,6 @@ const styles = StyleSheet.create({
     width: 28,
     height: 28,
     borderRadius: 14,
-    backgroundColor: COLORS.offWhite,
     justifyContent: 'center',
     alignItems: 'center',
   },

@@ -21,7 +21,8 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuthStore, useFavoritesStore } from '../../stores';
-import { COLORS, SPACING, RADIUS, FONTS, FONT_SIZES, scale } from '../../constants/theme';
+import { SPACING, RADIUS, FONTS, FONT_SIZES, scale } from '../../constants/theme';
+import { useTheme } from '../../contexts';
 import { Quote, UserFavorite } from '../../types';
 import {
   getFavoriteCategories,
@@ -33,6 +34,7 @@ const { width } = Dimensions.get('window');
 
 export const FavoritesScreen: React.FC = () => {
   const insets = useSafeAreaInsets();
+  const { colors, accent } = useTheme();
 
   // Zustand stores
   const user = useAuthStore((state) => state.user);
@@ -110,26 +112,26 @@ export const FavoritesScreen: React.FC = () => {
     <View style={styles.headerContainer}>
       {/* Title */}
       <View style={styles.titleRow}>
-        <Text style={styles.headerTitle}>Saved Favorites</Text>
+        <Text style={[styles.headerTitle, { color: colors.textPrimary }]}>Saved Favorites</Text>
         <View style={styles.syncBadge}>
-          <Ionicons name="cloud-done" size={14} color={COLORS.success} />
-          <Text style={styles.syncText}>SYNCED</Text>
+          <Ionicons name="cloud-done" size={14} color={colors.success} />
+          <Text style={[styles.syncText, { color: colors.success }]}>SYNCED</Text>
         </View>
       </View>
 
       {/* Stats Cards */}
       <View style={styles.statsContainer}>
-        <View style={styles.statCard}>
-          <Text style={styles.statNumber}>{favorites.length}</Text>
-          <Text style={styles.statLabel}>Favorites</Text>
+        <View style={[styles.statCard, { backgroundColor: colors.white }]}>
+          <Text style={[styles.statNumber, { color: accent.primary }]}>{favorites.length}</Text>
+          <Text style={[styles.statLabel, { color: colors.textMuted }]}>Favorites</Text>
         </View>
-        <View style={styles.statCard}>
-          <Text style={styles.statNumber}>{categories.length}</Text>
-          <Text style={styles.statLabel}>Categories</Text>
+        <View style={[styles.statCard, { backgroundColor: colors.white }]}>
+          <Text style={[styles.statNumber, { color: accent.primary }]}>{categories.length}</Text>
+          <Text style={[styles.statLabel, { color: colors.textMuted }]}>Categories</Text>
         </View>
-        <View style={styles.statCard}>
-          <Text style={styles.statNumber}>{authors.length}</Text>
-          <Text style={styles.statLabel}>Authors</Text>
+        <View style={[styles.statCard, { backgroundColor: colors.white }]}>
+          <Text style={[styles.statNumber, { color: accent.primary }]}>{authors.length}</Text>
+          <Text style={[styles.statLabel, { color: colors.textMuted }]}>Authors</Text>
         </View>
       </View>
 
@@ -144,14 +146,16 @@ export const FavoritesScreen: React.FC = () => {
             key={filter}
             style={[
               styles.filterChip,
-              activeFilter === filter && styles.filterChipActive,
+              { backgroundColor: colors.white, borderColor: colors.border },
+              activeFilter === filter && { backgroundColor: accent.primary, borderColor: accent.primary },
             ]}
             onPress={() => setActiveFilter(filter)}
           >
             <Text
               style={[
                 styles.filterChipText,
-                activeFilter === filter && styles.filterChipTextActive,
+                { color: colors.textPrimary },
+                activeFilter === filter && { color: '#FFFFFF' },
               ]}
             >
               {filter}
@@ -167,35 +171,35 @@ export const FavoritesScreen: React.FC = () => {
     if (!quote) return null;
 
     return (
-      <View style={styles.quoteCard}>
+      <View style={[styles.quoteCard, { backgroundColor: colors.white }]}>
         <View style={styles.quoteCardHeader}>
-          <View style={styles.categoryBadge}>
-            <Text style={styles.categoryBadgeText}>{quote.category}</Text>
+          <View style={[styles.categoryBadge, { backgroundColor: colors.gradientStart }]}>
+            <Text style={[styles.categoryBadgeText, { color: accent.primary }]}>{quote.category}</Text>
           </View>
           <Pressable
-            style={styles.favoriteButton}
+            style={[styles.favoriteButton, { backgroundColor: colors.offWhite }]}
             onPress={() => handleRemoveFavorite(quote)}
           >
-            <Ionicons name="heart" size={20} color={COLORS.terracotta} />
+            <Ionicons name="heart" size={20} color={accent.primary} />
           </Pressable>
         </View>
-        <Text style={styles.quoteText} numberOfLines={4}>
+        <Text style={[styles.quoteText, { color: colors.textPrimary }]} numberOfLines={4}>
           "{quote.content}"
         </Text>
         <View style={styles.quoteFooter}>
-          <Text style={styles.quoteAuthor}>— {quote.author}</Text>
+          <Text style={[styles.quoteAuthor, { color: colors.textSecondary }]}>— {quote.author}</Text>
           <View style={styles.quoteActions}>
             <Pressable
-              style={styles.shareButton}
+              style={[styles.shareButton, { backgroundColor: colors.offWhite }]}
               onPress={() => handleAddToCollection(quote)}
             >
-              <Ionicons name="folder-outline" size={18} color={COLORS.textMuted} />
+              <Ionicons name="folder-outline" size={18} color={colors.textMuted} />
             </Pressable>
             <Pressable
-              style={styles.shareButton}
+              style={[styles.shareButton, { backgroundColor: colors.offWhite }]}
               onPress={() => handleShareQuote(quote)}
             >
-              <Ionicons name="share-outline" size={18} color={COLORS.textMuted} />
+              <Ionicons name="share-outline" size={18} color={colors.textMuted} />
             </Pressable>
           </View>
         </View>
@@ -205,11 +209,11 @@ export const FavoritesScreen: React.FC = () => {
 
   const renderEmptyState = () => (
     <View style={styles.emptyContainer}>
-      <View style={styles.emptyIconContainer}>
-        <Ionicons name="heart-outline" size={48} color={COLORS.terracotta} />
+      <View style={[styles.emptyIconContainer, { backgroundColor: colors.gradientStart }]}>
+        <Ionicons name="heart-outline" size={48} color={accent.primary} />
       </View>
-      <Text style={styles.emptyTitle}>No favorites yet</Text>
-      <Text style={styles.emptySubtitle}>
+      <Text style={[styles.emptyTitle, { color: colors.textPrimary }]}>No favorites yet</Text>
+      <Text style={[styles.emptySubtitle, { color: colors.textMuted }]}>
         Tap the heart icon on quotes you love to save them here
       </Text>
     </View>
@@ -217,16 +221,16 @@ export const FavoritesScreen: React.FC = () => {
 
   if (loading || favoritesLoading) {
     return (
-      <View style={[styles.container, { paddingTop: insets.top }]}>
+      <View style={[styles.container, { paddingTop: insets.top, backgroundColor: colors.offWhite }]}>
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={COLORS.terracotta} />
+          <ActivityIndicator size="large" color={accent.primary} />
         </View>
       </View>
     );
   }
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top }]}>
+    <View style={[styles.container, { paddingTop: insets.top, backgroundColor: colors.offWhite }]}>
       <FlatList
         data={filteredFavorites}
         keyExtractor={(item) => item.id}
@@ -238,7 +242,7 @@ export const FavoritesScreen: React.FC = () => {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            tintColor={COLORS.terracotta}
+            tintColor={accent.primary}
           />
         }
         ListEmptyComponent={renderEmptyState}
@@ -257,7 +261,6 @@ export const FavoritesScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.offWhite,
   },
   loadingContainer: {
     flex: 1,
@@ -278,7 +281,6 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: FONT_SIZES.xxl,
     fontWeight: '700',
-    color: COLORS.textPrimary,
     fontFamily: FONTS.sansBold,
   },
   syncBadge: {
@@ -293,7 +295,6 @@ const styles = StyleSheet.create({
   syncText: {
     fontSize: FONT_SIZES.xs,
     fontWeight: '600',
-    color: COLORS.success,
   },
   statsContainer: {
     flexDirection: 'row',
@@ -302,11 +303,10 @@ const styles = StyleSheet.create({
   },
   statCard: {
     flex: 1,
-    backgroundColor: COLORS.white,
     borderRadius: RADIUS.lg,
     padding: SPACING.md,
     alignItems: 'center',
-    shadowColor: COLORS.shadow,
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
     shadowRadius: 4,
@@ -315,12 +315,10 @@ const styles = StyleSheet.create({
   statNumber: {
     fontSize: FONT_SIZES.xxl,
     fontWeight: '700',
-    color: COLORS.terracotta,
     fontFamily: FONTS.sansBold,
   },
   statLabel: {
     fontSize: FONT_SIZES.xs,
-    color: COLORS.textMuted,
     marginTop: SPACING.xs,
   },
   filtersContainer: {
@@ -330,34 +328,23 @@ const styles = StyleSheet.create({
   filterChip: {
     paddingHorizontal: SPACING.md,
     paddingVertical: SPACING.sm,
-    backgroundColor: COLORS.white,
     borderRadius: RADIUS.full,
     marginRight: SPACING.sm,
     borderWidth: 1,
-    borderColor: COLORS.border,
-  },
-  filterChipActive: {
-    backgroundColor: COLORS.terracotta,
-    borderColor: COLORS.terracotta,
   },
   filterChipText: {
     fontSize: FONT_SIZES.sm,
-    color: COLORS.textPrimary,
     fontWeight: '500',
-  },
-  filterChipTextActive: {
-    color: COLORS.white,
   },
   listContent: {
     paddingBottom: SPACING.xxl,
   },
   quoteCard: {
-    backgroundColor: COLORS.white,
     borderRadius: RADIUS.lg,
     padding: SPACING.base,
     marginHorizontal: SPACING.base,
     marginBottom: SPACING.md,
-    shadowColor: COLORS.shadow,
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
     shadowRadius: 4,
@@ -370,28 +357,24 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.md,
   },
   categoryBadge: {
-    backgroundColor: COLORS.gradientStart,
     paddingHorizontal: SPACING.sm,
     paddingVertical: SPACING.xs,
     borderRadius: RADIUS.sm,
   },
   categoryBadgeText: {
     fontSize: FONT_SIZES.xs,
-    color: COLORS.terracotta,
     fontWeight: '500',
   },
   favoriteButton: {
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: COLORS.offWhite,
     justifyContent: 'center',
     alignItems: 'center',
   },
   quoteText: {
     fontSize: FONT_SIZES.base,
     fontStyle: 'italic',
-    color: COLORS.textPrimary,
     fontFamily: FONTS.serifItalic,
     lineHeight: 24,
     marginBottom: SPACING.md,
@@ -407,14 +390,12 @@ const styles = StyleSheet.create({
   },
   quoteAuthor: {
     fontSize: FONT_SIZES.sm,
-    color: COLORS.textSecondary,
     fontFamily: FONTS.sansMedium,
   },
   shareButton: {
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: COLORS.offWhite,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -429,7 +410,6 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: COLORS.gradientStart,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: SPACING.lg,
@@ -437,12 +417,10 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontSize: FONT_SIZES.lg,
     fontWeight: '600',
-    color: COLORS.textPrimary,
     marginBottom: SPACING.sm,
   },
   emptySubtitle: {
     fontSize: FONT_SIZES.sm,
-    color: COLORS.textMuted,
     textAlign: 'center',
     lineHeight: 22,
   },

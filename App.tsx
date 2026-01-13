@@ -23,6 +23,7 @@ import * as Notifications from 'expo-notifications';
 
 import { RootNavigator, navigationRef } from './src/navigation/RootNavigator';
 import { useAuthStore } from './src/stores';
+import { ThemeProvider, useTheme } from './src/contexts';
 
 // ============================================
 // NOTIFICATION CONFIGURATION
@@ -135,18 +136,16 @@ const toastConfig: ToastConfig = {
 };
 
 // ============================================
-// APP COMPONENT
+// APP CONTENT COMPONENT
 // ============================================
 
-export default function App() {
-  const initialize = useAuthStore((state) => state.initialize);
+/**
+ * Inner app content that has access to theme context
+ */
+function AppContent() {
+  const { isDark } = useTheme();
   const notificationListener = useRef<Notifications.Subscription | null>(null);
   const responseListener = useRef<Notifications.Subscription | null>(null);
-
-  // Initialize auth on app start
-  useEffect(() => {
-    initialize();
-  }, [initialize]);
 
   // Set up notification listeners
   useEffect(() => {
@@ -177,15 +176,36 @@ export default function App() {
   }, []);
 
   return (
-    <SafeAreaProvider>
-      {/* Status bar styling */}
-      <StatusBar style="dark" />
+    <>
+      {/* Status bar styling - adapts to theme */}
+      <StatusBar style={isDark ? 'light' : 'dark'} />
 
       {/* Root navigation - switches between Auth and Main based on auth state */}
       <RootNavigator />
 
       {/* Toast notifications */}
       <Toast config={toastConfig} position="top" topOffset={60} />
+    </>
+  );
+}
+
+// ============================================
+// APP COMPONENT
+// ============================================
+
+export default function App() {
+  const initialize = useAuthStore((state) => state.initialize);
+
+  // Initialize auth on app start
+  useEffect(() => {
+    initialize();
+  }, [initialize]);
+
+  return (
+    <SafeAreaProvider>
+      <ThemeProvider>
+        <AppContent />
+      </ThemeProvider>
     </SafeAreaProvider>
   );
 }

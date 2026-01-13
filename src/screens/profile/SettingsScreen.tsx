@@ -5,7 +5,7 @@
  * Matches design from image 11.
  */
 
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -25,7 +25,7 @@ import Slider from "@react-native-community/slider";
 import DateTimePicker, {
   DateTimePickerEvent,
 } from "@react-native-community/datetimepicker";
-import { useAuthStore } from "../../stores";
+import { useAuthStore, useSettingsStore } from "../../stores";
 import {
   COLORS,
   SPACING,
@@ -35,11 +35,7 @@ import {
   ACCENT_COLORS,
   scale,
 } from "../../constants/theme";
-import { UserSettings, ThemeMode, AccentColor, FontSize } from "../../types";
-import {
-  getUserSettings,
-  updateUserSettings,
-} from "../../services/settingsService";
+import { ThemeMode, AccentColor, FontSize } from "../../types";
 import {
   requestNotificationPermissions,
   scheduleDailyQuoteNotification,
@@ -83,11 +79,18 @@ export const SettingsScreen: React.FC = () => {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
 
-  // Zustand store
+  // Zustand stores
   const user = useAuthStore((state) => state.user);
+  const {
+    settings,
+    loading,
+    setTheme,
+    setAccentColor,
+    setFontSize,
+    setNotifications,
+    loadSettings,
+  } = useSettingsStore();
 
-  const [settings, setSettings] = useState<UserSettings | null>(null);
-  const [loading, setLoading] = useState(true);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([
     "wisdom",
   ]);
@@ -98,60 +101,52 @@ export const SettingsScreen: React.FC = () => {
   // Time picker state
   const [showTimePicker, setShowTimePicker] = useState(false);
 
-  const loadSettings = useCallback(async () => {
-    if (!user?.id) return;
-    try {
-      const data = await getUserSettings(user.id);
-      setSettings(data);
-      // Set font size slider value
+  // Load settings from store on mount
+  useEffect(() => {
+    if (user?.id) {
+      loadSettings(user.id);
+    }
+  }, [user?.id, loadSettings]);
+
+  // Sync font size slider with settings
+  useEffect(() => {
+    if (settings?.font_size) {
       const fontSizeMap: Record<FontSize, number> = {
         small: 0,
         medium: 0.5,
         large: 1,
       };
-      setFontSizeValue(fontSizeMap[data.font_size]);
-    } catch (error) {
-      console.error("Error loading settings:", error);
-    } finally {
-      setLoading(false);
+      setFontSizeValue(fontSizeMap[settings.font_size]);
     }
-  }, [user?.id]);
+  }, [settings?.font_size]);
 
-  useEffect(() => {
-    loadSettings();
-  }, [loadSettings]);
-
-  const handleUpdateSetting = async <K extends keyof UserSettings>(
-    key: K,
-    value: UserSettings[K]
-  ) => {
-    if (!user?.id || !settings) return;
-    try {
-      const updated = await updateUserSettings(user.id, { [key]: value });
-      setSettings(updated);
-    } catch (error) {
-      console.error("Error updating setting:", error);
-    }
-  };
-
+  // Theme change - uses Zustand store for instant update
   const handleThemeChange = (mode: ThemeMode) => {
-    handleUpdateSetting("theme", mode);
+    if (user?.id) {
+      setTheme(user.id, mode);
+    }
   };
 
+  // Accent color change - uses Zustand store for instant update
   const handleAccentColorChange = (color: AccentColor) => {
-    handleUpdateSetting("accent_color", color);
+    if (user?.id) {
+      setAccentColor(user.id, color);
+    }
   };
 
   const handleFontSizeChange = (value: number) => {
     setFontSizeValue(value);
   };
 
+  // Font size complete - uses Zustand store for instant update
   const handleFontSizeComplete = (value: number) => {
     let fontSize: FontSize;
     if (value < 0.33) fontSize = "small";
     else if (value < 0.67) fontSize = "medium";
     else fontSize = "large";
-    handleUpdateSetting("font_size", fontSize);
+    if (user?.id) {
+      setFontSize(user.id, fontSize);
+    }
   };
 
   const handleNotificationToggle = async (enabled: boolean) => {
@@ -183,7 +178,10 @@ export const SettingsScreen: React.FC = () => {
         text2: "You won't receive daily quote reminders",
       });
     }
-    handleUpdateSetting("notification_enabled", enabled);
+    // Use store to update notification setting
+    if (user?.id) {
+      setNotifications(user.id, enabled);
+    }
   };
 
   const handleTimeChange = async (
@@ -194,8 +192,10 @@ export const SettingsScreen: React.FC = () => {
 
     if (event.type === "set" && selectedDate) {
       const newTime = dateToTimeString(selectedDate);
-      // Update setting in database
-      await handleUpdateSetting("notification_time", newTime);
+      // Update setting via store
+      if (user?.id) {
+        setNotifications(user.id, settings?.notification_enabled ?? true, newTime);
+      }
       // Reschedule notification if enabled
       if (settings?.notification_enabled) {
         const scheduledFor = await scheduleDailyQuoteNotification(newTime);

@@ -17,7 +17,8 @@ import { SearchNavigator } from './SearchNavigator';
 import { CollectionsNavigator } from './CollectionsNavigator';
 import { ProfileNavigator } from './ProfileNavigator';
 import { FavoritesScreen } from '../screens/favorites';
-import { COLORS, SPACING, RADIUS, FONT_SIZES, scale } from '../constants/theme';
+import { SPACING, scale } from '../constants/theme';
+import { useTheme } from '../contexts';
 
 export type RootTabParamList = {
   HomeTab: undefined;
@@ -52,7 +53,9 @@ const TabButton: React.FC<{
   isFocused: boolean;
   onPress: () => void;
   routeName: keyof RootTabParamList;
-}> = ({ isFocused, onPress, routeName }) => {
+  activeColor: string;
+  inactiveColor: string;
+}> = ({ isFocused, onPress, routeName, activeColor, inactiveColor }) => {
   const scaleAnim = useRef(new Animated.Value(1)).current;
 
   const handlePressIn = () => {
@@ -71,6 +74,7 @@ const TabButton: React.FC<{
 
   const icons = TAB_ICONS[routeName];
   const label = TAB_LABELS[routeName];
+  const color = isFocused ? activeColor : inactiveColor;
 
   return (
     <Pressable
@@ -83,14 +87,9 @@ const TabButton: React.FC<{
         <Ionicons
           name={(isFocused ? icons.active : icons.inactive) as any}
           size={22}
-          color={isFocused ? COLORS.terracotta : COLORS.tabInactive}
+          color={color}
         />
-        <Text
-          style={[
-            styles.tabLabel,
-            { color: isFocused ? COLORS.terracotta : COLORS.tabInactive },
-          ]}
-        >
+        <Text style={[styles.tabLabel, { color }]}>
           {label}
         </Text>
       </Animated.View>
@@ -111,6 +110,7 @@ const CustomTabBar: React.FC<CustomTabBarProps> = ({
   navigation,
 }) => {
   const insets = useSafeAreaInsets();
+  const { colors, accent } = useTheme();
 
   // Cache the initial bottom inset to prevent jumping when share sheet opens
   // This is critical for Android where share sheet can cause inset changes
@@ -131,6 +131,8 @@ const CustomTabBar: React.FC<CustomTabBarProps> = ({
         styles.tabBarContainer,
         {
           paddingBottom: bottomPadding,
+          backgroundColor: colors.white,
+          borderTopColor: colors.border,
         },
       ]}
     >
@@ -155,6 +157,8 @@ const CustomTabBar: React.FC<CustomTabBarProps> = ({
             isFocused={isFocused}
             onPress={onPress}
             routeName={route.name as keyof RootTabParamList}
+            activeColor={accent.primary}
+            inactiveColor={colors.tabInactive}
           />
         );
       })}
@@ -182,9 +186,7 @@ export const AppNavigator: React.FC = () => {
 const styles = StyleSheet.create({
   tabBarContainer: {
     flexDirection: 'row',
-    backgroundColor: COLORS.white,
     borderTopWidth: 1,
-    borderTopColor: COLORS.border,
     paddingTop: SPACING.sm,
   },
   tabButton: {

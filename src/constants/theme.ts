@@ -83,6 +83,74 @@ export const COLORS = {
 } as const;
 
 /**
+ * Dark mode colors
+ */
+export const DARK_COLORS = {
+  // Primary accent colors (same as light mode)
+  terracotta: '#C4785A',
+  terracottaLight: '#D4927A',
+  terracottaDark: '#A45E40',
+
+  // Background gradients (dark versions)
+  gradientStart: '#1A1A1A',
+  gradientMiddle: '#242424',
+  gradientEnd: '#1E2420',
+
+  // Warm background tones (muted for dark mode)
+  warmPeach: '#8B6650',
+  dustyRose: '#8B7070',
+  mutedSage: '#5A6570',
+  warmBeige: '#6B5E50',
+
+  // Card and surface colors
+  white: '#2D2D2D',
+  offWhite: '#1A1A1A',
+  cardBackground: '#2D2D2D',
+  inputBackground: '#363636',
+  inputBorder: '#404040',
+
+  // Text colors
+  textPrimary: '#F5F5F5',
+  textSecondary: '#B0A090',
+  textMuted: '#8B8078',
+  textPlaceholder: '#6B6560',
+
+  // UI colors
+  border: '#404040',
+  divider: '#383838',
+  shadow: '#000000',
+
+  // Status colors (same as light mode)
+  success: '#7BAE7F',
+  error: '#D64545',
+  warning: '#E8A87C',
+  info: '#5A8EC4',
+
+  // Tab bar
+  tabActive: '#C4785A',
+  tabInactive: '#6E6E6E',
+
+  // Overlay
+  overlay: 'rgba(0, 0, 0, 0.7)',
+  overlayLight: 'rgba(0, 0, 0, 0.5)',
+} as const;
+
+/**
+ * Dark mode gradients
+ */
+export const DARK_GRADIENTS = {
+  background: ['#1A1A1A', '#242424', '#1E2420'],
+  auth: ['#1A1A1A', '#242424', '#202020'],
+  cardGradient: ['#8B6650', '#8B7070', '#6B5E50'],
+  cardSunset: ['#8B6650', '#8B7070', '#5A6570'],
+  motivation: ['#8B6650', '#A45E40'],
+  love: ['#8B7070', '#9B8080'],
+  success: ['#8B7840', '#9B8850'],
+  wisdom: ['#5A6570', '#6A7580'],
+  humor: ['#8B8050', '#9B9060'],
+} as const;
+
+/**
  * Accent color themes
  */
 export const ACCENT_COLORS = {
