@@ -24,6 +24,7 @@ import * as Notifications from 'expo-notifications';
 import { RootNavigator, navigationRef } from './src/navigation/RootNavigator';
 import { useAuthStore } from './src/stores';
 import { ThemeProvider, useTheme } from './src/contexts';
+import { OfflineBanner } from './src/components';
 
 // ============================================
 // NOTIFICATION CONFIGURATION
@@ -179,6 +180,9 @@ function AppContent() {
     <>
       {/* Status bar styling - adapts to theme */}
       <StatusBar style={isDark ? 'light' : 'dark'} />
+
+      {/* Offline connectivity banner */}
+      <OfflineBanner />
 
       {/* Root navigation - switches between Auth and Main based on auth state */}
       <RootNavigator />

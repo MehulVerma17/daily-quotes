@@ -17,6 +17,7 @@ import {
   Modal,
   TextInput,
   Dimensions,
+  ScrollView,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -216,7 +217,18 @@ export const CollectionsScreen: React.FC = () => {
 
       {/* Collections Grid */}
       {collections.length === 0 ? (
-        renderEmptyState()
+        <ScrollView
+          contentContainerStyle={styles.emptyScrollContainer}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              tintColor={accent.primary}
+            />
+          }
+        >
+          {renderEmptyState()}
+        </ScrollView>
       ) : (
         <FlatList
           data={collections}
@@ -432,11 +444,15 @@ const styles = StyleSheet.create({
     fontSize: FONT_SIZES.sm,
     fontWeight: '500',
   },
+  emptyScrollContainer: {
+    flexGrow: 1,
+  },
   emptyContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: SPACING.xxl,
+    paddingVertical: SPACING.xxxl,
   },
   emptyIconContainer: {
     width: 80,
