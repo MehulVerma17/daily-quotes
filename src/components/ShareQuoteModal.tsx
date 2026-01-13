@@ -23,7 +23,8 @@ import { Ionicons } from '@expo/vector-icons';
 import ViewShot from 'react-native-view-shot';
 import * as MediaLibrary from 'expo-media-library';
 import * as Sharing from 'expo-sharing';
-import { COLORS, SPACING, RADIUS, FONTS, FONT_SIZES } from '../constants/theme';
+import { SPACING, RADIUS, FONTS, FONT_SIZES } from '../constants/theme';
+import { useTheme } from '../contexts';
 import { Quote, CardTemplate } from '../types';
 
 const { width } = Dimensions.get('window');
@@ -33,13 +34,6 @@ interface ShareQuoteModalProps {
   onClose: () => void;
   quote: Quote | null;
 }
-
-// Template configurations
-const TEMPLATES: { id: CardTemplate; name: string; gradient: readonly [string, string] }[] = [
-  { id: 'gradient', name: 'Gradient', gradient: ['#E8A87C', '#D4A5A5'] as const },
-  { id: 'minimal', name: 'Minimal', gradient: ['#FFFFFF', '#F5F5F5'] as const },
-  { id: 'dark', name: 'Dark', gradient: ['#2D2D2D', '#1A1A1A'] as const },
-];
 
 export const ShareQuoteModal: React.FC<ShareQuoteModalProps> = ({
   visible,
@@ -52,10 +46,20 @@ export const ShareQuoteModal: React.FC<ShareQuoteModalProps> = ({
   const [saving, setSaving] = useState(false);
   const [sharing, setSharing] = useState(false);
 
+  // Theme
+  const { colors, accent } = useTheme();
+
+  // Template configurations - use theme accent colors
+  const TEMPLATES: { id: CardTemplate; name: string; gradient: readonly [string, string] }[] = [
+    { id: 'gradient', name: 'Gradient', gradient: [accent.light, accent.primary] as const },
+    { id: 'minimal', name: 'Minimal', gradient: [colors.white, colors.offWhite] as const },
+    { id: 'dark', name: 'Dark', gradient: ['#2D2D2D', '#1A1A1A'] as const },
+  ];
+
   const currentTemplate = TEMPLATES.find((t) => t.id === selectedTemplate) || TEMPLATES[0];
   const isLightTemplate = selectedTemplate === 'minimal';
-  const textColor = isLightTemplate ? COLORS.textPrimary : '#FFFFFF';
-  const subtextColor = isLightTemplate ? COLORS.textMuted : 'rgba(255, 255, 255, 0.7)';
+  const textColor = isLightTemplate ? colors.textPrimary : '#FFFFFF';
+  const subtextColor = isLightTemplate ? colors.textMuted : 'rgba(255, 255, 255, 0.7)';
 
   const captureAndSave = async () => {
     if (!viewShotRef.current) return null;
@@ -124,14 +128,14 @@ export const ShareQuoteModal: React.FC<ShareQuoteModalProps> = ({
       transparent
       onRequestClose={onClose}
     >
-      <View style={styles.overlay}>
-        <View style={[styles.container, { paddingBottom: insets.bottom + SPACING.lg }]}>
+      <View style={[styles.overlay, { backgroundColor: colors.overlay }]}>
+        <View style={[styles.container, { paddingBottom: insets.bottom + SPACING.lg, backgroundColor: colors.white }]}>
           {/* Header */}
           <View style={styles.header}>
             <Pressable onPress={onClose} style={styles.closeButton}>
-              <Ionicons name="close" size={24} color={COLORS.textPrimary} />
+              <Ionicons name="close" size={24} color={colors.textPrimary} />
             </Pressable>
-            <Text style={styles.headerTitle}>Share Quote</Text>
+            <Text style={[styles.headerTitle, { color: colors.textPrimary }]}>Share Quote</Text>
             <View style={styles.headerSpacer} />
           </View>
 
@@ -169,14 +173,14 @@ export const ShareQuoteModal: React.FC<ShareQuoteModalProps> = ({
 
           {/* Template Selector */}
           <View style={styles.templateSelector}>
-            <Text style={styles.templateLabel}>Choose a style</Text>
+            <Text style={[styles.templateLabel, { color: colors.textMuted }]}>Choose a style</Text>
             <View style={styles.templateOptions}>
               {TEMPLATES.map((template) => (
                 <Pressable
                   key={template.id}
                   style={[
                     styles.templateOption,
-                    selectedTemplate === template.id && styles.templateOptionActive,
+                    selectedTemplate === template.id && [styles.templateOptionActive, { borderColor: accent.primary }],
                   ]}
                   onPress={() => setSelectedTemplate(template.id)}
                 >
@@ -187,7 +191,8 @@ export const ShareQuoteModal: React.FC<ShareQuoteModalProps> = ({
                   <Text
                     style={[
                       styles.templateName,
-                      selectedTemplate === template.id && styles.templateNameActive,
+                      { color: colors.textMuted },
+                      selectedTemplate === template.id && { color: accent.primary, fontWeight: '600' },
                     ]}
                   >
                     {template.name}
@@ -200,31 +205,31 @@ export const ShareQuoteModal: React.FC<ShareQuoteModalProps> = ({
           {/* Action Buttons */}
           <View style={styles.actions}>
             <Pressable
-              style={styles.saveButton}
+              style={[styles.saveButton, { backgroundColor: accent.primary }]}
               onPress={handleSaveToPhotos}
               disabled={saving}
             >
               {saving ? (
-                <ActivityIndicator size="small" color={COLORS.white} />
+                <ActivityIndicator size="small" color={colors.white} />
               ) : (
                 <>
-                  <Ionicons name="download-outline" size={20} color={COLORS.white} />
-                  <Text style={styles.saveButtonText}>Save to Photos</Text>
+                  <Ionicons name="download-outline" size={20} color={colors.white} />
+                  <Text style={[styles.saveButtonText, { color: colors.white }]}>Save to Photos</Text>
                 </>
               )}
             </Pressable>
 
             <Pressable
-              style={styles.shareButton}
+              style={[styles.shareButton, { backgroundColor: colors.white, borderColor: accent.primary }]}
               onPress={handleShare}
               disabled={sharing}
             >
               {sharing ? (
-                <ActivityIndicator size="small" color={COLORS.terracotta} />
+                <ActivityIndicator size="small" color={accent.primary} />
               ) : (
                 <>
-                  <Ionicons name="share-outline" size={20} color={COLORS.terracotta} />
-                  <Text style={styles.shareButtonText}>Share via...</Text>
+                  <Ionicons name="share-outline" size={20} color={accent.primary} />
+                  <Text style={[styles.shareButtonText, { color: accent.primary }]}>Share via...</Text>
                 </>
               )}
             </Pressable>
@@ -241,11 +246,9 @@ const cardHeight = cardWidth * 1.2;
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: COLORS.overlay,
     justifyContent: 'flex-end',
   },
   container: {
-    backgroundColor: COLORS.white,
     borderTopLeftRadius: RADIUS.xxl,
     borderTopRightRadius: RADIUS.xxl,
     padding: SPACING.lg,
@@ -265,7 +268,6 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: FONT_SIZES.lg,
     fontWeight: '700',
-    color: COLORS.textPrimary,
   },
   headerSpacer: {
     width: 40,
@@ -319,7 +321,6 @@ const styles = StyleSheet.create({
   },
   templateLabel: {
     fontSize: FONT_SIZES.sm,
-    color: COLORS.textMuted,
     marginBottom: SPACING.sm,
     textAlign: 'center',
   },
@@ -336,7 +337,7 @@ const styles = StyleSheet.create({
     borderColor: 'transparent',
   },
   templateOptionActive: {
-    borderColor: COLORS.terracotta,
+    // borderColor set dynamically
   },
   templatePreview: {
     width: 60,
@@ -346,11 +347,6 @@ const styles = StyleSheet.create({
   },
   templateName: {
     fontSize: FONT_SIZES.xs,
-    color: COLORS.textMuted,
-  },
-  templateNameActive: {
-    color: COLORS.terracotta,
-    fontWeight: '600',
   },
   actions: {
     gap: SPACING.sm,
@@ -359,7 +355,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: COLORS.terracotta,
     borderRadius: RADIUS.lg,
     paddingVertical: SPACING.md,
     gap: SPACING.sm,
@@ -367,23 +362,19 @@ const styles = StyleSheet.create({
   saveButtonText: {
     fontSize: FONT_SIZES.md,
     fontWeight: '600',
-    color: COLORS.white,
   },
   shareButton: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: COLORS.white,
     borderRadius: RADIUS.lg,
     paddingVertical: SPACING.md,
     borderWidth: 1,
-    borderColor: COLORS.terracotta,
     gap: SPACING.sm,
   },
   shareButtonText: {
     fontSize: FONT_SIZES.md,
     fontWeight: '600',
-    color: COLORS.terracotta,
   },
 });
 

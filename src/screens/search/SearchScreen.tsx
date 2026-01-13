@@ -21,10 +21,11 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { COLORS, SPACING, RADIUS, FONTS, FONT_SIZES, scale } from '../../constants/theme';
+import { SPACING, RADIUS, FONTS, FONT_SIZES, scale } from '../../constants/theme';
 import { Quote } from '../../types';
 import { searchQuotes, getQuotesByAuthor } from '../../services/quoteService';
 import { useAuthStore, useFavoritesStore } from '../../stores';
+import { useTheme } from '../../contexts';
 import { CATEGORIES } from '../../config';
 import { AddToCollectionModal } from '../../components';
 
@@ -40,6 +41,9 @@ type SearchStackParamList = {
 export const SearchScreen: React.FC = () => {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<NativeStackNavigationProp<SearchStackParamList>>();
+
+  // Theme
+  const { colors, accent } = useTheme();
 
   // Zustand stores
   const user = useAuthStore((state) => state.user);
@@ -133,30 +137,30 @@ export const SearchScreen: React.FC = () => {
   };
 
   const renderQuoteItem = ({ item }: { item: Quote }) => (
-    <View style={styles.quoteCard}>
-      <Text style={styles.quoteText} numberOfLines={4}>
+    <View style={[styles.quoteCard, { backgroundColor: colors.white, shadowColor: colors.shadow }]}>
+      <Text style={[styles.quoteText, { color: colors.textPrimary }]} numberOfLines={4}>
         "{item.content}"
       </Text>
       <View style={styles.quoteFooter}>
         <View>
-          <Text style={styles.quoteAuthor}>— {item.author}</Text>
-          <View style={styles.categoryBadge}>
-            <Text style={styles.categoryBadgeText}>{item.category}</Text>
+          <Text style={[styles.quoteAuthor, { color: colors.textSecondary }]}>— {item.author}</Text>
+          <View style={[styles.categoryBadge, { backgroundColor: colors.gradientStart }]}>
+            <Text style={[styles.categoryBadgeText, { color: accent.primary }]}>{item.category}</Text>
           </View>
         </View>
         <View style={styles.quoteActions}>
-          <Pressable style={styles.actionButton} onPress={() => handleToggleFavorite(item)}>
+          <Pressable style={[styles.actionButton, { backgroundColor: colors.offWhite }]} onPress={() => handleToggleFavorite(item)}>
             <Ionicons
               name={isFavorite(item.id) ? 'heart' : 'heart-outline'}
               size={18}
-              color={isFavorite(item.id) ? COLORS.terracotta : COLORS.textMuted}
+              color={isFavorite(item.id) ? accent.primary : colors.textMuted}
             />
           </Pressable>
-          <Pressable style={styles.actionButton} onPress={() => handleAddToCollection(item)}>
-            <Ionicons name="folder-outline" size={18} color={COLORS.textMuted} />
+          <Pressable style={[styles.actionButton, { backgroundColor: colors.offWhite }]} onPress={() => handleAddToCollection(item)}>
+            <Ionicons name="folder-outline" size={18} color={colors.textMuted} />
           </Pressable>
-          <Pressable style={styles.actionButton} onPress={() => handleShareQuote(item)}>
-            <Ionicons name="share-outline" size={18} color={COLORS.textMuted} />
+          <Pressable style={[styles.actionButton, { backgroundColor: colors.offWhite }]} onPress={() => handleShareQuote(item)}>
+            <Ionicons name="share-outline" size={18} color={colors.textMuted} />
           </Pressable>
         </View>
       </View>
@@ -165,21 +169,21 @@ export const SearchScreen: React.FC = () => {
 
   const renderCategoryItem = ({ item }: { item: string }) => (
     <Pressable
-      style={styles.categoryCard}
+      style={[styles.categoryCard, { backgroundColor: colors.white, shadowColor: colors.shadow }]}
       onPress={() => handleCategorySelect(item)}
     >
-      <Text style={styles.categoryCardText}>{item}</Text>
-      <Ionicons name="chevron-forward" size={16} color={COLORS.terracotta} />
+      <Text style={[styles.categoryCardText, { color: colors.textPrimary }]}>{item}</Text>
+      <Ionicons name="chevron-forward" size={16} color={accent.primary} />
     </Pressable>
   );
 
   const renderEmptyState = () => (
     <View style={styles.emptyContainer}>
-      <Ionicons name="search" size={48} color={COLORS.textMuted} />
-      <Text style={styles.emptyTitle}>
+      <Ionicons name="search" size={48} color={colors.textMuted} />
+      <Text style={[styles.emptyTitle, { color: colors.textPrimary }]}>
         {hasSearched ? 'No results found' : 'Search for quotes'}
       </Text>
-      <Text style={styles.emptySubtitle}>
+      <Text style={[styles.emptySubtitle, { color: colors.textMuted }]}>
         {hasSearched
           ? `Try searching for something else`
           : 'Find quotes by keywords or authors'}
@@ -188,21 +192,21 @@ export const SearchScreen: React.FC = () => {
   );
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top }]}>
+    <View style={[styles.container, { paddingTop: insets.top, backgroundColor: colors.offWhite }]}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Search</Text>
+        <Text style={[styles.headerTitle, { color: colors.textPrimary }]}>Search</Text>
       </View>
 
       {/* Search Input */}
       <View style={styles.searchContainer}>
-        <View style={styles.searchInputWrapper}>
-          <Ionicons name="search" size={20} color={COLORS.textMuted} />
+        <View style={[styles.searchInputWrapper, { backgroundColor: colors.white, borderColor: colors.border }]}>
+          <Ionicons name="search" size={20} color={colors.textMuted} />
           <TextInput
             ref={searchInputRef}
-            style={styles.searchInput}
+            style={[styles.searchInput, { color: colors.textPrimary }]}
             placeholder="Search quotes, authors..."
-            placeholderTextColor={COLORS.textPlaceholder}
+            placeholderTextColor={colors.textPlaceholder}
             value={searchQuery}
             onChangeText={setSearchQuery}
             returnKeyType="search"
@@ -211,7 +215,7 @@ export const SearchScreen: React.FC = () => {
           />
           {searchQuery.length > 0 && (
             <Pressable onPress={handleClearSearch}>
-              <Ionicons name="close-circle" size={20} color={COLORS.textMuted} />
+              <Ionicons name="close-circle" size={20} color={colors.textMuted} />
             </Pressable>
           )}
         </View>
@@ -220,12 +224,17 @@ export const SearchScreen: React.FC = () => {
       {/* Filter Chips */}
       <View style={styles.filtersContainer}>
         <Pressable
-          style={[styles.filterChip, activeFilter === 'all' && styles.filterChipActive]}
+          style={[
+            styles.filterChip,
+            { backgroundColor: colors.white, borderColor: colors.border },
+            activeFilter === 'all' && { backgroundColor: accent.primary, borderColor: accent.primary },
+          ]}
           onPress={() => handleFilterChange('all')}
         >
           <Text
             style={[
               styles.filterChipText,
+              { color: colors.textPrimary },
               activeFilter === 'all' && styles.filterChipTextActive,
             ]}
           >
@@ -233,12 +242,17 @@ export const SearchScreen: React.FC = () => {
           </Text>
         </Pressable>
         <Pressable
-          style={[styles.filterChip, activeFilter === 'author' && styles.filterChipActive]}
+          style={[
+            styles.filterChip,
+            { backgroundColor: colors.white, borderColor: colors.border },
+            activeFilter === 'author' && { backgroundColor: accent.primary, borderColor: accent.primary },
+          ]}
           onPress={() => handleFilterChange('author')}
         >
           <Text
             style={[
               styles.filterChipText,
+              { color: colors.textPrimary },
               activeFilter === 'author' && styles.filterChipTextActive,
             ]}
           >
@@ -246,12 +260,17 @@ export const SearchScreen: React.FC = () => {
           </Text>
         </Pressable>
         <Pressable
-          style={[styles.filterChip, activeFilter === 'category' && styles.filterChipActive]}
+          style={[
+            styles.filterChip,
+            { backgroundColor: colors.white, borderColor: colors.border },
+            activeFilter === 'category' && { backgroundColor: accent.primary, borderColor: accent.primary },
+          ]}
           onPress={() => handleFilterChange('category')}
         >
           <Text
             style={[
               styles.filterChipText,
+              { color: colors.textPrimary },
               activeFilter === 'category' && styles.filterChipTextActive,
             ]}
           >
@@ -263,7 +282,7 @@ export const SearchScreen: React.FC = () => {
       {/* Content */}
       {loading ? (
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={COLORS.terracotta} />
+          <ActivityIndicator size="large" color={accent.primary} />
         </View>
       ) : activeFilter === 'category' ? (
         <FlatList
@@ -298,7 +317,6 @@ export const SearchScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.offWhite,
   },
   header: {
     paddingHorizontal: SPACING.base,
@@ -307,7 +325,6 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: FONT_SIZES.xxl,
     fontWeight: '700',
-    color: COLORS.textPrimary,
     fontFamily: FONTS.sansBold,
   },
   searchContainer: {
@@ -317,17 +334,14 @@ const styles = StyleSheet.create({
   searchInputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.white,
     borderRadius: RADIUS.lg,
     paddingHorizontal: SPACING.md,
     height: 48,
     borderWidth: 1,
-    borderColor: COLORS.border,
   },
   searchInput: {
     flex: 1,
     fontSize: FONT_SIZES.base,
-    color: COLORS.textPrimary,
     marginLeft: SPACING.sm,
     fontFamily: FONTS.sansRegular,
   },
@@ -340,33 +354,24 @@ const styles = StyleSheet.create({
   filterChip: {
     paddingHorizontal: SPACING.md,
     paddingVertical: SPACING.sm,
-    backgroundColor: COLORS.white,
     borderRadius: RADIUS.full,
     borderWidth: 1,
-    borderColor: COLORS.border,
-  },
-  filterChipActive: {
-    backgroundColor: COLORS.terracotta,
-    borderColor: COLORS.terracotta,
   },
   filterChipText: {
     fontSize: FONT_SIZES.sm,
-    color: COLORS.textPrimary,
     fontWeight: '500',
   },
   filterChipTextActive: {
-    color: COLORS.white,
+    color: '#FFFFFF',
   },
   listContent: {
     paddingHorizontal: SPACING.base,
     paddingBottom: SPACING.xxl,
   },
   quoteCard: {
-    backgroundColor: COLORS.white,
     borderRadius: RADIUS.lg,
     padding: SPACING.base,
     marginBottom: SPACING.md,
-    shadowColor: COLORS.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
     shadowRadius: 4,
@@ -375,7 +380,6 @@ const styles = StyleSheet.create({
   quoteText: {
     fontSize: FONT_SIZES.base,
     fontStyle: 'italic',
-    color: COLORS.textPrimary,
     fontFamily: FONTS.serifItalic,
     lineHeight: 24,
     marginBottom: SPACING.md,
@@ -387,12 +391,10 @@ const styles = StyleSheet.create({
   },
   quoteAuthor: {
     fontSize: FONT_SIZES.sm,
-    color: COLORS.textSecondary,
     fontFamily: FONTS.sansMedium,
     marginBottom: SPACING.xs,
   },
   categoryBadge: {
-    backgroundColor: COLORS.gradientStart,
     paddingHorizontal: SPACING.sm,
     paddingVertical: SPACING.xs,
     borderRadius: RADIUS.sm,
@@ -400,7 +402,6 @@ const styles = StyleSheet.create({
   },
   categoryBadgeText: {
     fontSize: FONT_SIZES.xs,
-    color: COLORS.terracotta,
     fontWeight: '500',
   },
   quoteActions: {
@@ -411,7 +412,6 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: COLORS.offWhite,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -419,11 +419,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: COLORS.white,
     borderRadius: RADIUS.lg,
     padding: SPACING.base,
     marginBottom: SPACING.sm,
-    shadowColor: COLORS.shadow,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
     shadowRadius: 2,
@@ -432,7 +430,6 @@ const styles = StyleSheet.create({
   categoryCardText: {
     fontSize: FONT_SIZES.md,
     fontWeight: '500',
-    color: COLORS.textPrimary,
   },
   loadingContainer: {
     flex: 1,
@@ -448,13 +445,11 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontSize: FONT_SIZES.lg,
     fontWeight: '600',
-    color: COLORS.textPrimary,
     marginTop: SPACING.md,
     marginBottom: SPACING.sm,
   },
   emptySubtitle: {
     fontSize: FONT_SIZES.sm,
-    color: COLORS.textMuted,
     textAlign: 'center',
   },
 });

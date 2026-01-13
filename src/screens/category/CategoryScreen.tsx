@@ -22,10 +22,11 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { COLORS, SPACING, RADIUS, FONTS, FONT_SIZES, GRADIENTS, scale } from '../../constants/theme';
+import { SPACING, RADIUS, FONTS, FONT_SIZES, GRADIENTS, scale } from '../../constants/theme';
 import { Quote } from '../../types';
 import { getQuotesByCategory } from '../../services/quoteService';
 import { useAuthStore, useFavoritesStore } from '../../stores';
+import { useTheme } from '../../contexts';
 import { AddToCollectionModal } from '../../components';
 
 const { width } = Dimensions.get('window');
@@ -34,19 +35,13 @@ type CategoryStackParamList = {
   Category: { category: string };
 };
 
-// Category gradient colors
-const CATEGORY_GRADIENTS: Record<string, readonly [string, string]> = {
-  Motivation: ['#E8A87C', '#D4927A'],
-  Love: ['#D4A5A5', '#E8B5B5'],
-  Success: ['#C4A85A', '#D4B87A'],
-  Wisdom: ['#A8B5C4', '#B8C5D4'],
-  Humor: ['#E8D87C', '#F0E0A0'],
-};
-
 export const CategoryScreen: React.FC = () => {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<NativeStackNavigationProp<CategoryStackParamList>>();
   const route = useRoute<RouteProp<CategoryStackParamList, 'Category'>>();
+
+  // Theme
+  const { colors, accent, gradients } = useTheme();
 
   // Zustand stores
   const user = useAuthStore((state) => state.user);
@@ -64,7 +59,10 @@ export const CategoryScreen: React.FC = () => {
   const [collectionModalVisible, setCollectionModalVisible] = useState(false);
   const [selectedQuoteForCollection, setSelectedQuoteForCollection] = useState<Quote | null>(null);
 
-  const gradientColors: readonly [string, string] = CATEGORY_GRADIENTS[category] || ['#E8A87C', '#D4927A'];
+  // Get gradient from theme based on category name
+  const categoryKey = category.toLowerCase() as keyof typeof gradients;
+  const gradientColors: readonly [string, string] =
+    (gradients[categoryKey] as readonly [string, string]) || gradients.motivation;
 
   const loadQuotes = useCallback(async (pageNum = 1, refresh = false) => {
     try {
@@ -124,25 +122,25 @@ export const CategoryScreen: React.FC = () => {
     // Alternating card sizes for masonry effect
     const isLarge = index % 3 === 0;
     return (
-      <View style={[styles.quoteCard, isLarge && styles.quoteCardLarge]}>
-        <Text style={[styles.quoteText, isLarge && styles.quoteTextLarge]} numberOfLines={isLarge ? 6 : 4}>
+      <View style={[styles.quoteCard, { backgroundColor: colors.white, shadowColor: colors.shadow }, isLarge && styles.quoteCardLarge]}>
+        <Text style={[styles.quoteText, { color: colors.textPrimary }, isLarge && styles.quoteTextLarge]} numberOfLines={isLarge ? 6 : 4}>
           "{item.content}"
         </Text>
         <View style={styles.quoteFooter}>
-          <Text style={styles.quoteAuthor}>— {item.author}</Text>
+          <Text style={[styles.quoteAuthor, { color: colors.textMuted }]}>— {item.author}</Text>
           <View style={styles.quoteActions}>
-            <Pressable style={styles.actionButton} onPress={() => handleToggleFavorite(item)}>
+            <Pressable style={[styles.actionButton, { backgroundColor: colors.offWhite }]} onPress={() => handleToggleFavorite(item)}>
               <Ionicons
                 name={isFavorite(item.id) ? 'heart' : 'heart-outline'}
                 size={16}
-                color={isFavorite(item.id) ? COLORS.terracotta : COLORS.textMuted}
+                color={isFavorite(item.id) ? accent.primary : colors.textMuted}
               />
             </Pressable>
-            <Pressable style={styles.actionButton} onPress={() => handleAddToCollection(item)}>
-              <Ionicons name="folder-outline" size={16} color={COLORS.textMuted} />
+            <Pressable style={[styles.actionButton, { backgroundColor: colors.offWhite }]} onPress={() => handleAddToCollection(item)}>
+              <Ionicons name="folder-outline" size={16} color={colors.textMuted} />
             </Pressable>
-            <Pressable style={styles.actionButton} onPress={() => handleShareQuote(item)}>
-              <Ionicons name="share-outline" size={16} color={COLORS.textMuted} />
+            <Pressable style={[styles.actionButton, { backgroundColor: colors.offWhite }]} onPress={() => handleShareQuote(item)}>
+              <Ionicons name="share-outline" size={16} color={colors.textMuted} />
             </Pressable>
           </View>
         </View>
@@ -159,7 +157,7 @@ export const CategoryScreen: React.FC = () => {
     >
       <View style={styles.headerContent}>
         <Pressable onPress={() => navigation.goBack()} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color="#FFFFFF" />
+          <Ionicons name="arrow-back" size={24} color={colors.white} />
         </Pressable>
         <View style={styles.headerTextContainer}>
           <Text style={styles.headerCategory}>{category}</Text>
@@ -173,17 +171,17 @@ export const CategoryScreen: React.FC = () => {
 
   if (loading && quotes.length === 0) {
     return (
-      <View style={styles.container}>
+      <View style={[styles.container, { backgroundColor: colors.offWhite }]}>
         {renderHeader()}
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={COLORS.terracotta} />
+          <ActivityIndicator size="large" color={accent.primary} />
         </View>
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.offWhite }]}>
       <FlatList
         data={quotes}
         keyExtractor={(item) => item.id}
@@ -197,7 +195,7 @@ export const CategoryScreen: React.FC = () => {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            tintColor={COLORS.terracotta}
+            tintColor={accent.primary}
           />
         }
         onEndReached={onLoadMore}
@@ -205,15 +203,15 @@ export const CategoryScreen: React.FC = () => {
         ListFooterComponent={
           loading && quotes.length > 0 ? (
             <View style={styles.footerLoader}>
-              <ActivityIndicator size="small" color={COLORS.terracotta} />
+              <ActivityIndicator size="small" color={accent.primary} />
             </View>
           ) : null
         }
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
-            <Ionicons name="document-text-outline" size={48} color={COLORS.textMuted} />
-            <Text style={styles.emptyTitle}>No quotes yet</Text>
-            <Text style={styles.emptySubtitle}>
+            <Ionicons name="document-text-outline" size={48} color={colors.textMuted} />
+            <Text style={[styles.emptyTitle, { color: colors.textPrimary }]}>No quotes yet</Text>
+            <Text style={[styles.emptySubtitle, { color: colors.textMuted }]}>
               Quotes in this category will appear here
             </Text>
           </View>
@@ -235,7 +233,6 @@ const cardWidth = (width - SPACING.base * 2 - SPACING.md) / 2;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.offWhite,
   },
   headerGradient: {
     paddingBottom: SPACING.xl,
@@ -280,11 +277,9 @@ const styles = StyleSheet.create({
   },
   quoteCard: {
     flex: 1,
-    backgroundColor: COLORS.white,
     borderRadius: RADIUS.lg,
     padding: SPACING.md,
     minHeight: 140,
-    shadowColor: COLORS.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
     shadowRadius: 4,
@@ -296,7 +291,6 @@ const styles = StyleSheet.create({
   quoteText: {
     fontSize: FONT_SIZES.sm,
     fontStyle: 'italic',
-    color: COLORS.textPrimary,
     fontFamily: FONTS.serifItalic,
     lineHeight: 20,
     flex: 1,
@@ -313,7 +307,6 @@ const styles = StyleSheet.create({
   },
   quoteAuthor: {
     fontSize: FONT_SIZES.xs,
-    color: COLORS.textMuted,
     fontFamily: FONTS.sansRegular,
     flex: 1,
   },
@@ -325,7 +318,6 @@ const styles = StyleSheet.create({
     width: 28,
     height: 28,
     borderRadius: 14,
-    backgroundColor: COLORS.offWhite,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -348,13 +340,11 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontSize: FONT_SIZES.lg,
     fontWeight: '600',
-    color: COLORS.textPrimary,
     marginTop: SPACING.md,
     marginBottom: SPACING.sm,
   },
   emptySubtitle: {
     fontSize: FONT_SIZES.sm,
-    color: COLORS.textMuted,
     textAlign: 'center',
   },
 });

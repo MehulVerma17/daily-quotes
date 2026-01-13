@@ -18,7 +18,8 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import Toast from 'react-native-toast-message';
-import { COLORS, SPACING, RADIUS, FONTS, FONT_SIZES } from '../constants/theme';
+import { SPACING, RADIUS, FONTS, FONT_SIZES } from '../constants/theme';
+import { useTheme } from '../contexts';
 import { Quote, Collection } from '../types';
 import { useAuthStore, useCollectionsStore } from '../stores';
 import {
@@ -47,6 +48,9 @@ export const AddToCollectionModal: React.FC<AddToCollectionModalProps> = ({
   const insets = useSafeAreaInsets();
   const user = useAuthStore((state) => state.user);
   const incrementQuoteCount = useCollectionsStore((state) => state.incrementQuoteCount);
+
+  // Theme
+  const { colors, accent } = useTheme();
 
   const [collections, setCollections] = useState<CollectionWithStatus[]>([]);
   const [loading, setLoading] = useState(true);
@@ -129,41 +133,42 @@ export const AddToCollectionModal: React.FC<AddToCollectionModalProps> = ({
     <Pressable
       style={[
         styles.collectionItem,
+        { backgroundColor: colors.white, borderColor: colors.border },
         item.hasQuote && styles.collectionItemDisabled,
       ]}
       onPress={() => handleAddToCollection(item)}
       disabled={item.hasQuote || adding === item.id}
     >
-      <View style={[styles.collectionIcon, { backgroundColor: item.color || COLORS.terracotta }]}>
+      <View style={[styles.collectionIcon, { backgroundColor: item.color || accent.primary }]}>
         <Ionicons
           name={(item.icon as any) || 'folder'}
           size={20}
-          color="#FFFFFF"
+          color={colors.white}
         />
       </View>
       <View style={styles.collectionInfo}>
-        <Text style={styles.collectionName}>{item.name}</Text>
-        <Text style={styles.collectionCount}>
+        <Text style={[styles.collectionName, { color: colors.textPrimary }]}>{item.name}</Text>
+        <Text style={[styles.collectionCount, { color: colors.textMuted }]}>
           {item.quote_count || 0} {(item.quote_count || 0) === 1 ? 'quote' : 'quotes'}
         </Text>
       </View>
       {adding === item.id ? (
-        <ActivityIndicator size="small" color={COLORS.terracotta} />
+        <ActivityIndicator size="small" color={accent.primary} />
       ) : item.hasQuote ? (
         <View style={styles.checkContainer}>
-          <Ionicons name="checkmark-circle" size={24} color={COLORS.success} />
+          <Ionicons name="checkmark-circle" size={24} color={colors.success} />
         </View>
       ) : (
-        <Ionicons name="add-circle-outline" size={24} color={COLORS.terracotta} />
+        <Ionicons name="add-circle-outline" size={24} color={accent.primary} />
       )}
     </Pressable>
   );
 
   const renderEmptyState = () => (
     <View style={styles.emptyContainer}>
-      <Ionicons name="folder-open-outline" size={48} color={COLORS.textMuted} />
-      <Text style={styles.emptyTitle}>No collections yet</Text>
-      <Text style={styles.emptySubtitle}>
+      <Ionicons name="folder-open-outline" size={48} color={colors.textMuted} />
+      <Text style={[styles.emptyTitle, { color: colors.textPrimary }]}>No collections yet</Text>
+      <Text style={[styles.emptySubtitle, { color: colors.textMuted }]}>
         Create a collection from the Collections tab to organize your quotes
       </Text>
     </View>
@@ -178,29 +183,29 @@ export const AddToCollectionModal: React.FC<AddToCollectionModalProps> = ({
       transparent
       onRequestClose={onClose}
     >
-      <View style={styles.overlay}>
-        <View style={[styles.container, { paddingBottom: insets.bottom + SPACING.lg }]}>
+      <View style={[styles.overlay, { backgroundColor: colors.overlay }]}>
+        <View style={[styles.container, { paddingBottom: insets.bottom + SPACING.lg, backgroundColor: colors.white }]}>
           {/* Header */}
           <View style={styles.header}>
             <Pressable onPress={onClose} style={styles.closeButton}>
-              <Ionicons name="close" size={24} color={COLORS.textPrimary} />
+              <Ionicons name="close" size={24} color={colors.textPrimary} />
             </Pressable>
-            <Text style={styles.headerTitle}>Add to Collection</Text>
+            <Text style={[styles.headerTitle, { color: colors.textPrimary }]}>Add to Collection</Text>
             <View style={styles.headerSpacer} />
           </View>
 
           {/* Quote Preview */}
-          <View style={styles.quotePreview}>
-            <Text style={styles.quoteText} numberOfLines={2}>
+          <View style={[styles.quotePreview, { backgroundColor: colors.offWhite }]}>
+            <Text style={[styles.quoteText, { color: colors.textPrimary }]} numberOfLines={2}>
               "{quote.content}"
             </Text>
-            <Text style={styles.quoteAuthor}>— {quote.author}</Text>
+            <Text style={[styles.quoteAuthor, { color: colors.textMuted }]}>— {quote.author}</Text>
           </View>
 
           {/* Collections List */}
           {loading ? (
             <View style={styles.loadingContainer}>
-              <ActivityIndicator size="large" color={COLORS.terracotta} />
+              <ActivityIndicator size="large" color={accent.primary} />
             </View>
           ) : (
             <FlatList
@@ -221,11 +226,9 @@ export const AddToCollectionModal: React.FC<AddToCollectionModalProps> = ({
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: COLORS.overlay,
     justifyContent: 'flex-end',
   },
   container: {
-    backgroundColor: COLORS.white,
     borderTopLeftRadius: RADIUS.xxl,
     borderTopRightRadius: RADIUS.xxl,
     padding: SPACING.lg,
@@ -246,13 +249,11 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: FONT_SIZES.lg,
     fontWeight: '700',
-    color: COLORS.textPrimary,
   },
   headerSpacer: {
     width: 40,
   },
   quotePreview: {
-    backgroundColor: COLORS.offWhite,
     borderRadius: RADIUS.lg,
     padding: SPACING.md,
     marginBottom: SPACING.lg,
@@ -260,14 +261,12 @@ const styles = StyleSheet.create({
   quoteText: {
     fontSize: FONT_SIZES.sm,
     fontStyle: 'italic',
-    color: COLORS.textPrimary,
     fontFamily: FONTS.serifItalic,
     lineHeight: 20,
     marginBottom: SPACING.xs,
   },
   quoteAuthor: {
     fontSize: FONT_SIZES.xs,
-    color: COLORS.textMuted,
   },
   loadingContainer: {
     paddingVertical: SPACING.xxl,
@@ -279,12 +278,10 @@ const styles = StyleSheet.create({
   collectionItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.white,
     borderRadius: RADIUS.lg,
     padding: SPACING.md,
     marginBottom: SPACING.sm,
     borderWidth: 1,
-    borderColor: COLORS.border,
   },
   collectionItemDisabled: {
     opacity: 0.7,
@@ -303,12 +300,10 @@ const styles = StyleSheet.create({
   collectionName: {
     fontSize: FONT_SIZES.md,
     fontWeight: '600',
-    color: COLORS.textPrimary,
     marginBottom: 2,
   },
   collectionCount: {
     fontSize: FONT_SIZES.xs,
-    color: COLORS.textMuted,
   },
   checkContainer: {
     marginLeft: SPACING.sm,
@@ -320,13 +315,11 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontSize: FONT_SIZES.lg,
     fontWeight: '600',
-    color: COLORS.textPrimary,
     marginTop: SPACING.md,
     marginBottom: SPACING.sm,
   },
   emptySubtitle: {
     fontSize: FONT_SIZES.sm,
-    color: COLORS.textMuted,
     textAlign: 'center',
     paddingHorizontal: SPACING.lg,
   },

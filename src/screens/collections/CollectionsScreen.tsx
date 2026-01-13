@@ -23,7 +23,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useAuthStore, useCollectionsStore } from '../../stores';
-import { COLORS, SPACING, RADIUS, FONTS, FONT_SIZES, scale } from '../../constants/theme';
+import { SPACING, RADIUS, FONTS, FONT_SIZES, scale } from '../../constants/theme';
+import { useTheme } from '../../contexts';
 import { Collection } from '../../types';
 import { createCollection, deleteCollection } from '../../services/collectionsService';
 
@@ -59,6 +60,9 @@ const COLLECTION_ICONS = [
 export const CollectionsScreen: React.FC = () => {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<NativeStackNavigationProp<CollectionsStackParamList>>();
+
+  // Theme
+  const { colors, accent } = useTheme();
 
   // Zustand stores
   const user = useAuthStore((state) => state.user);
@@ -134,7 +138,7 @@ export const CollectionsScreen: React.FC = () => {
 
   const renderCollectionCard = ({ item }: { item: Collection }) => (
     <Pressable
-      style={styles.collectionCard}
+      style={[styles.collectionCard, { backgroundColor: colors.white, shadowColor: colors.shadow }]}
       onPress={() => handleCollectionPress(item)}
     >
       <View style={[styles.collectionColorBar, { backgroundColor: item.color }]} />
@@ -146,10 +150,10 @@ export const CollectionsScreen: React.FC = () => {
             color={item.color}
           />
         </View>
-        <Text style={styles.collectionName} numberOfLines={1}>
+        <Text style={[styles.collectionName, { color: colors.textPrimary }]} numberOfLines={1}>
           {item.name}
         </Text>
-        <Text style={styles.quoteCount}>
+        <Text style={[styles.quoteCount, { color: colors.textMuted }]}>
           {item.quote_count || 0} {item.quote_count === 1 ? 'quote' : 'quotes'}
         </Text>
       </View>
@@ -158,55 +162,55 @@ export const CollectionsScreen: React.FC = () => {
 
   const renderCreateButton = () => (
     <Pressable
-      style={styles.createCard}
+      style={[styles.createCard, { backgroundColor: colors.white, borderColor: colors.border }]}
       onPress={() => setShowCreateModal(true)}
     >
-      <View style={styles.createIconContainer}>
-        <Ionicons name="add" size={32} color={COLORS.terracotta} />
+      <View style={[styles.createIconContainer, { backgroundColor: colors.gradientStart }]}>
+        <Ionicons name="add" size={32} color={accent.primary} />
       </View>
-      <Text style={styles.createText}>New Collection</Text>
+      <Text style={[styles.createText, { color: accent.primary }]}>New Collection</Text>
     </Pressable>
   );
 
   const renderEmptyState = () => (
     <View style={styles.emptyContainer}>
-      <View style={styles.emptyIconContainer}>
-        <Ionicons name="folder-outline" size={48} color={COLORS.terracotta} />
+      <View style={[styles.emptyIconContainer, { backgroundColor: colors.gradientStart }]}>
+        <Ionicons name="folder-outline" size={48} color={accent.primary} />
       </View>
-      <Text style={styles.emptyTitle}>No collections yet</Text>
-      <Text style={styles.emptySubtitle}>
+      <Text style={[styles.emptyTitle, { color: colors.textPrimary }]}>No collections yet</Text>
+      <Text style={[styles.emptySubtitle, { color: colors.textMuted }]}>
         Create collections to organize your favorite quotes
       </Text>
       <Pressable
-        style={styles.createButton}
+        style={[styles.createButton, { backgroundColor: accent.primary }]}
         onPress={() => setShowCreateModal(true)}
       >
-        <Ionicons name="add" size={20} color={COLORS.white} />
-        <Text style={styles.createButtonText}>Create Collection</Text>
+        <Ionicons name="add" size={20} color={colors.white} />
+        <Text style={[styles.createButtonText, { color: colors.white }]}>Create Collection</Text>
       </Pressable>
     </View>
   );
 
   if (loading) {
     return (
-      <View style={[styles.container, { paddingTop: insets.top }]}>
+      <View style={[styles.container, { paddingTop: insets.top, backgroundColor: colors.offWhite }]}>
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={COLORS.terracotta} />
+          <ActivityIndicator size="large" color={accent.primary} />
         </View>
       </View>
     );
   }
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top }]}>
+    <View style={[styles.container, { paddingTop: insets.top, backgroundColor: colors.offWhite }]}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>My Collections</Text>
+        <Text style={[styles.headerTitle, { color: colors.textPrimary }]}>My Collections</Text>
         <Pressable
-          style={styles.addButton}
+          style={[styles.addButton, { backgroundColor: colors.white, shadowColor: colors.shadow }]}
           onPress={() => setShowCreateModal(true)}
         >
-          <Ionicons name="add" size={24} color={COLORS.terracotta} />
+          <Ionicons name="add" size={24} color={accent.primary} />
         </Pressable>
       </View>
 
@@ -226,7 +230,7 @@ export const CollectionsScreen: React.FC = () => {
             <RefreshControl
               refreshing={refreshing}
               onRefresh={onRefresh}
-              tintColor={COLORS.terracotta}
+              tintColor={accent.primary}
             />
           }
           ListFooterComponent={renderCreateButton}
@@ -240,22 +244,22 @@ export const CollectionsScreen: React.FC = () => {
         transparent
         onRequestClose={() => setShowCreateModal(false)}
       >
-        <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { paddingBottom: insets.bottom + SPACING.lg }]}>
+        <View style={[styles.modalOverlay, { backgroundColor: colors.overlay }]}>
+          <View style={[styles.modalContent, { backgroundColor: colors.white, paddingBottom: insets.bottom + SPACING.lg }]}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>New Collection</Text>
+              <Text style={[styles.modalTitle, { color: colors.textPrimary }]}>New Collection</Text>
               <Pressable onPress={() => setShowCreateModal(false)}>
-                <Ionicons name="close" size={24} color={COLORS.textPrimary} />
+                <Ionicons name="close" size={24} color={colors.textPrimary} />
               </Pressable>
             </View>
 
             {/* Collection Name Input */}
             <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>Name</Text>
+              <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Name</Text>
               <TextInput
-                style={styles.input}
+                style={[styles.input, { backgroundColor: colors.offWhite, borderColor: colors.border, color: colors.textPrimary }]}
                 placeholder="Enter collection name"
-                placeholderTextColor={COLORS.textPlaceholder}
+                placeholderTextColor={colors.textPlaceholder}
                 value={newCollectionName}
                 onChangeText={setNewCollectionName}
                 autoFocus
@@ -264,21 +268,22 @@ export const CollectionsScreen: React.FC = () => {
 
             {/* Icon Selection */}
             <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>Icon</Text>
+              <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Icon</Text>
               <View style={styles.iconGrid}>
                 {COLLECTION_ICONS.map((icon) => (
                   <Pressable
                     key={icon}
                     style={[
                       styles.iconOption,
-                      selectedIcon === icon && styles.iconOptionSelected,
+                      { backgroundColor: colors.offWhite, borderColor: colors.border },
+                      selectedIcon === icon && { backgroundColor: accent.primary, borderColor: accent.primary },
                     ]}
                     onPress={() => setSelectedIcon(icon)}
                   >
                     <Ionicons
                       name={icon as any}
                       size={24}
-                      color={selectedIcon === icon ? COLORS.white : COLORS.textPrimary}
+                      color={selectedIcon === icon ? colors.white : colors.textPrimary}
                     />
                   </Pressable>
                 ))}
@@ -287,7 +292,7 @@ export const CollectionsScreen: React.FC = () => {
 
             {/* Color Selection */}
             <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>Color</Text>
+              <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Color</Text>
               <View style={styles.colorGrid}>
                 {COLLECTION_COLORS.map((color) => (
                   <Pressable
@@ -295,12 +300,12 @@ export const CollectionsScreen: React.FC = () => {
                     style={[
                       styles.colorOption,
                       { backgroundColor: color },
-                      selectedColor === color && styles.colorOptionSelected,
+                      selectedColor === color && [styles.colorOptionSelected, { borderColor: colors.white }],
                     ]}
                     onPress={() => setSelectedColor(color)}
                   >
                     {selectedColor === color && (
-                      <Ionicons name="checkmark" size={16} color={COLORS.white} />
+                      <Ionicons name="checkmark" size={16} color={colors.white} />
                     )}
                   </Pressable>
                 ))}
@@ -311,15 +316,16 @@ export const CollectionsScreen: React.FC = () => {
             <Pressable
               style={[
                 styles.createCollectionButton,
+                { backgroundColor: accent.primary },
                 (!newCollectionName.trim() || creating) && styles.createCollectionButtonDisabled,
               ]}
               onPress={handleCreateCollection}
               disabled={!newCollectionName.trim() || creating}
             >
               {creating ? (
-                <ActivityIndicator size="small" color={COLORS.white} />
+                <ActivityIndicator size="small" color={colors.white} />
               ) : (
-                <Text style={styles.createCollectionButtonText}>Create Collection</Text>
+                <Text style={[styles.createCollectionButtonText, { color: colors.white }]}>Create Collection</Text>
               )}
             </Pressable>
           </View>
@@ -334,7 +340,6 @@ const cardWidth = (width - SPACING.base * 2 - SPACING.md) / 2;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.offWhite,
   },
   loadingContainer: {
     flex: 1,
@@ -351,17 +356,14 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: FONT_SIZES.xxl,
     fontWeight: '700',
-    color: COLORS.textPrimary,
     fontFamily: FONTS.sansBold,
   },
   addButton: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: COLORS.white,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: COLORS.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
     shadowRadius: 4,
@@ -377,10 +379,8 @@ const styles = StyleSheet.create({
   },
   collectionCard: {
     width: cardWidth,
-    backgroundColor: COLORS.white,
     borderRadius: RADIUS.lg,
     overflow: 'hidden',
-    shadowColor: COLORS.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
     shadowRadius: 4,
@@ -404,17 +404,14 @@ const styles = StyleSheet.create({
   collectionName: {
     fontSize: FONT_SIZES.md,
     fontWeight: '600',
-    color: COLORS.textPrimary,
     textAlign: 'center',
     marginBottom: SPACING.xs,
   },
   quoteCount: {
     fontSize: FONT_SIZES.xs,
-    color: COLORS.textMuted,
   },
   createCard: {
     width: cardWidth,
-    backgroundColor: COLORS.white,
     borderRadius: RADIUS.lg,
     padding: SPACING.md,
     alignItems: 'center',
@@ -422,13 +419,11 @@ const styles = StyleSheet.create({
     minHeight: 130,
     borderWidth: 2,
     borderStyle: 'dashed',
-    borderColor: COLORS.border,
   },
   createIconContainer: {
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: COLORS.gradientStart,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: SPACING.sm,
@@ -436,7 +431,6 @@ const styles = StyleSheet.create({
   createText: {
     fontSize: FONT_SIZES.sm,
     fontWeight: '500',
-    color: COLORS.terracotta,
   },
   emptyContainer: {
     flex: 1,
@@ -448,7 +442,6 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: COLORS.gradientStart,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: SPACING.lg,
@@ -456,12 +449,10 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontSize: FONT_SIZES.lg,
     fontWeight: '600',
-    color: COLORS.textPrimary,
     marginBottom: SPACING.sm,
   },
   emptySubtitle: {
     fontSize: FONT_SIZES.sm,
-    color: COLORS.textMuted,
     textAlign: 'center',
     lineHeight: 22,
     marginBottom: SPACING.xl,
@@ -469,7 +460,6 @@ const styles = StyleSheet.create({
   createButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.terracotta,
     paddingHorizontal: SPACING.lg,
     paddingVertical: SPACING.md,
     borderRadius: RADIUS.full,
@@ -478,15 +468,12 @@ const styles = StyleSheet.create({
   createButtonText: {
     fontSize: FONT_SIZES.md,
     fontWeight: '600',
-    color: COLORS.white,
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: COLORS.overlay,
     justifyContent: 'flex-end',
   },
   modalContent: {
-    backgroundColor: COLORS.white,
     borderTopLeftRadius: RADIUS.xxl,
     borderTopRightRadius: RADIUS.xxl,
     padding: SPACING.lg,
@@ -500,7 +487,6 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: FONT_SIZES.xl,
     fontWeight: '700',
-    color: COLORS.textPrimary,
   },
   inputContainer: {
     marginBottom: SPACING.lg,
@@ -508,18 +494,14 @@ const styles = StyleSheet.create({
   inputLabel: {
     fontSize: FONT_SIZES.sm,
     fontWeight: '500',
-    color: COLORS.textSecondary,
     marginBottom: SPACING.sm,
   },
   input: {
-    backgroundColor: COLORS.offWhite,
     borderRadius: RADIUS.md,
     paddingHorizontal: SPACING.md,
     paddingVertical: SPACING.md,
     fontSize: FONT_SIZES.md,
-    color: COLORS.textPrimary,
     borderWidth: 1,
-    borderColor: COLORS.border,
   },
   iconGrid: {
     flexDirection: 'row',
@@ -530,15 +512,9 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: COLORS.offWhite,
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: COLORS.border,
-  },
-  iconOptionSelected: {
-    backgroundColor: COLORS.terracotta,
-    borderColor: COLORS.terracotta,
   },
   colorGrid: {
     flexDirection: 'row',
@@ -553,7 +529,6 @@ const styles = StyleSheet.create({
   },
   colorOptionSelected: {
     borderWidth: 3,
-    borderColor: COLORS.white,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
@@ -561,7 +536,6 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   createCollectionButton: {
-    backgroundColor: COLORS.terracotta,
     borderRadius: RADIUS.lg,
     paddingVertical: SPACING.md,
     alignItems: 'center',
@@ -573,7 +547,6 @@ const styles = StyleSheet.create({
   createCollectionButtonText: {
     fontSize: FONT_SIZES.md,
     fontWeight: '600',
-    color: COLORS.white,
   },
 });
 

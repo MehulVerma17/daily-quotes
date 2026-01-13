@@ -21,7 +21,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useAuthStore } from '../../stores';
-import { COLORS, SPACING, RADIUS, FONTS, FONT_SIZES, scale } from '../../constants/theme';
+import { SPACING, RADIUS, FONTS, FONT_SIZES, scale } from '../../constants/theme';
+import { useTheme } from '../../contexts';
 import { getFavoriteCount } from '../../services/favoritesService';
 import { getCollectionCount } from '../../services/collectionsService';
 
@@ -33,16 +34,19 @@ type ProfileStackParamList = {
   EditProfile: undefined;
 };
 
-// Achievement badges
-const ACHIEVEMENTS = [
-  { id: 'collector', icon: 'trophy', name: 'Quote Collector', level: 'Level 5', color: '#C4785A' },
-  { id: 'curator', icon: 'diamond', name: 'Curator', level: 'Expert', color: '#D4A5A5' },
-  { id: 'reader', icon: 'calendar', name: 'Daily Reader', level: '10+ Days', color: '#E8A87C' },
-];
-
 export const ProfileScreen: React.FC = () => {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<NativeStackNavigationProp<ProfileStackParamList>>();
+
+  // Theme
+  const { colors, accent } = useTheme();
+
+  // Achievement badges - use accent colors
+  const ACHIEVEMENTS = [
+    { id: 'collector', icon: 'trophy', name: 'Quote Collector', level: 'Level 5', color: accent.primary },
+    { id: 'curator', icon: 'diamond', name: 'Curator', level: 'Expert', color: accent.light },
+    { id: 'reader', icon: 'calendar', name: 'Daily Reader', level: '10+ Days', color: accent.dark },
+  ];
 
   // Zustand store
   const user = useAuthStore((state) => state.user);
@@ -113,7 +117,7 @@ export const ProfileScreen: React.FC = () => {
     : 'N/A';
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top }]}>
+    <View style={[styles.container, { paddingTop: insets.top, backgroundColor: colors.offWhite }]}>
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
@@ -122,75 +126,75 @@ export const ProfileScreen: React.FC = () => {
         {/* Header */}
         <View style={styles.header}>
           <Pressable onPress={() => navigation.navigate('Settings')} style={styles.settingsButton}>
-            <Ionicons name="settings-outline" size={24} color={COLORS.textPrimary} />
+            <Ionicons name="settings-outline" size={24} color={colors.textPrimary} />
           </Pressable>
-          <Text style={styles.headerTitle}>Profile</Text>
+          <Text style={[styles.headerTitle, { color: colors.textPrimary }]}>Profile</Text>
           <Pressable style={styles.editButton}>
-            <Ionicons name="pencil" size={20} color={COLORS.textPrimary} />
+            <Ionicons name="pencil" size={20} color={colors.textPrimary} />
           </Pressable>
         </View>
 
         {/* Profile Info */}
         <View style={styles.profileSection}>
           <View style={styles.avatarContainer}>
-            <View style={styles.avatar}>
+            <View style={[styles.avatar, { backgroundColor: colors.white, borderColor: colors.gradientStart }]}>
               {profile?.avatar_url ? (
                 <Image source={{ uri: profile.avatar_url }} style={styles.avatarImage} />
               ) : (
-                <Ionicons name="person" size={40} color={COLORS.textMuted} />
+                <Ionicons name="person" size={40} color={colors.textMuted} />
               )}
             </View>
-            <Pressable style={styles.cameraButton}>
-              <Ionicons name="camera" size={14} color={COLORS.white} />
+            <Pressable style={[styles.cameraButton, { backgroundColor: accent.primary, borderColor: colors.white }]}>
+              <Ionicons name="camera" size={14} color={colors.white} />
             </Pressable>
           </View>
-          <Text style={styles.userName}>{profile?.full_name || 'User'}</Text>
-          <Text style={styles.memberSince}>Member since {memberSince}</Text>
+          <Text style={[styles.userName, { color: colors.textPrimary }]}>{profile?.full_name || 'User'}</Text>
+          <Text style={[styles.memberSince, { color: colors.textMuted }]}>Member since {memberSince}</Text>
         </View>
 
         {/* Stats Grid */}
         <View style={styles.statsGrid}>
-          <View style={styles.statCard}>
-            <View style={[styles.statIcon, { backgroundColor: '#FCE4EC' }]}>
-              <Ionicons name="heart" size={18} color={COLORS.terracotta} />
+          <View style={[styles.statCard, { backgroundColor: colors.white, shadowColor: colors.shadow }]}>
+            <View style={[styles.statIcon, { backgroundColor: accent.primary + '20' }]}>
+              <Ionicons name="heart" size={18} color={accent.primary} />
             </View>
-            <Text style={styles.statNumber}>{favoriteCount}</Text>
-            <Text style={styles.statLabel}>Favorites</Text>
+            <Text style={[styles.statNumber, { color: colors.textPrimary }]}>{favoriteCount}</Text>
+            <Text style={[styles.statLabel, { color: colors.textMuted }]}>Favorites</Text>
           </View>
-          <View style={styles.statCard}>
-            <View style={[styles.statIcon, { backgroundColor: '#E8F5E9' }]}>
-              <Ionicons name="folder" size={18} color={COLORS.success} />
+          <View style={[styles.statCard, { backgroundColor: colors.white, shadowColor: colors.shadow }]}>
+            <View style={[styles.statIcon, { backgroundColor: colors.success + '20' }]}>
+              <Ionicons name="folder" size={18} color={colors.success} />
             </View>
-            <Text style={styles.statNumber}>{collectionCount}</Text>
-            <Text style={styles.statLabel}>Collections</Text>
+            <Text style={[styles.statNumber, { color: colors.textPrimary }]}>{collectionCount}</Text>
+            <Text style={[styles.statLabel, { color: colors.textMuted }]}>Collections</Text>
           </View>
-          <View style={styles.statCard}>
-            <View style={[styles.statIcon, { backgroundColor: '#E3F2FD' }]}>
-              <Ionicons name="share-social" size={18} color={COLORS.info} />
+          <View style={[styles.statCard, { backgroundColor: colors.white, shadowColor: colors.shadow }]}>
+            <View style={[styles.statIcon, { backgroundColor: colors.info + '20' }]}>
+              <Ionicons name="share-social" size={18} color={colors.info} />
             </View>
-            <Text style={styles.statNumber}>{sharedCount}</Text>
-            <Text style={styles.statLabel}>Shared</Text>
+            <Text style={[styles.statNumber, { color: colors.textPrimary }]}>{sharedCount}</Text>
+            <Text style={[styles.statLabel, { color: colors.textMuted }]}>Shared</Text>
           </View>
-          <View style={styles.statCard}>
-            <View style={[styles.statIcon, { backgroundColor: '#FFF3E0' }]}>
-              <Ionicons name="flame" size={18} color={COLORS.warning} />
+          <View style={[styles.statCard, { backgroundColor: colors.white, shadowColor: colors.shadow }]}>
+            <View style={[styles.statIcon, { backgroundColor: colors.warning + '20' }]}>
+              <Ionicons name="flame" size={18} color={colors.warning} />
             </View>
-            <Text style={styles.statNumber}>{dayStreak}</Text>
-            <Text style={styles.statLabel}>Day Streak</Text>
+            <Text style={[styles.statNumber, { color: colors.textPrimary }]}>{dayStreak}</Text>
+            <Text style={[styles.statLabel, { color: colors.textMuted }]}>Day Streak</Text>
           </View>
         </View>
 
         {/* Achievements */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Achievements</Text>
+          <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Achievements</Text>
           <View style={styles.achievementsRow}>
             {ACHIEVEMENTS.map((achievement) => (
               <View key={achievement.id} style={styles.achievementCard}>
                 <View style={[styles.achievementIcon, { backgroundColor: achievement.color + '20' }]}>
                   <Ionicons name={achievement.icon as any} size={24} color={achievement.color} />
                 </View>
-                <Text style={styles.achievementName}>{achievement.name}</Text>
-                <Text style={styles.achievementLevel}>{achievement.level}</Text>
+                <Text style={[styles.achievementName, { color: colors.textPrimary }]}>{achievement.name}</Text>
+                <Text style={[styles.achievementLevel, { color: colors.textMuted }]}>{achievement.level}</Text>
               </View>
             ))}
           </View>
@@ -198,44 +202,44 @@ export const ProfileScreen: React.FC = () => {
 
         {/* Menu Items */}
         <View style={styles.menuSection}>
-          <Pressable style={styles.menuItem}>
+          <Pressable style={[styles.menuItem, { backgroundColor: colors.white, shadowColor: colors.shadow }]}>
             <View style={styles.menuItemLeft}>
-              <Ionicons name="person-outline" size={22} color={COLORS.textPrimary} />
-              <Text style={styles.menuItemText}>Account</Text>
+              <Ionicons name="person-outline" size={22} color={colors.textPrimary} />
+              <Text style={[styles.menuItemText, { color: colors.textPrimary }]}>Account</Text>
             </View>
-            <Ionicons name="chevron-forward" size={20} color={COLORS.textMuted} />
+            <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
           </Pressable>
 
           <Pressable
-            style={styles.menuItem}
+            style={[styles.menuItem, { backgroundColor: colors.white, shadowColor: colors.shadow }]}
             onPress={() => navigation.navigate('Settings')}
           >
             <View style={styles.menuItemLeft}>
-              <Ionicons name="options-outline" size={22} color={COLORS.textPrimary} />
-              <Text style={styles.menuItemText}>Preferences</Text>
+              <Ionicons name="options-outline" size={22} color={colors.textPrimary} />
+              <Text style={[styles.menuItemText, { color: colors.textPrimary }]}>Preferences</Text>
             </View>
-            <Ionicons name="chevron-forward" size={20} color={COLORS.textMuted} />
+            <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
           </Pressable>
 
-          <Pressable style={styles.menuItem}>
+          <Pressable style={[styles.menuItem, { backgroundColor: colors.white, shadowColor: colors.shadow }]}>
             <View style={styles.menuItemLeft}>
-              <Ionicons name="help-circle-outline" size={22} color={COLORS.textPrimary} />
-              <Text style={styles.menuItemText}>Support</Text>
+              <Ionicons name="help-circle-outline" size={22} color={colors.textPrimary} />
+              <Text style={[styles.menuItemText, { color: colors.textPrimary }]}>Support</Text>
             </View>
-            <Ionicons name="chevron-forward" size={20} color={COLORS.textMuted} />
+            <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
           </Pressable>
         </View>
 
         {/* Danger Zone */}
         <View style={styles.dangerSection}>
-          <Pressable style={styles.dangerItem} onPress={handleLogout}>
-            <Ionicons name="log-out-outline" size={22} color={COLORS.terracotta} />
-            <Text style={styles.dangerText}>Log Out</Text>
+          <Pressable style={[styles.dangerItem, { backgroundColor: colors.white, shadowColor: colors.shadow }]} onPress={handleLogout}>
+            <Ionicons name="log-out-outline" size={22} color={accent.primary} />
+            <Text style={[styles.dangerText, { color: accent.primary }]}>Log Out</Text>
           </Pressable>
 
-          <Pressable style={styles.dangerItem} onPress={handleDeleteAccount}>
-            <Ionicons name="trash-outline" size={22} color={COLORS.error} />
-            <Text style={[styles.dangerText, { color: COLORS.error }]}>Delete Account</Text>
+          <Pressable style={[styles.dangerItem, { backgroundColor: colors.white, shadowColor: colors.shadow }]} onPress={handleDeleteAccount}>
+            <Ionicons name="trash-outline" size={22} color={colors.error} />
+            <Text style={[styles.dangerText, { color: colors.error }]}>Delete Account</Text>
           </Pressable>
         </View>
       </ScrollView>
@@ -246,7 +250,6 @@ export const ProfileScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.offWhite,
   },
   scrollView: {
     flex: 1,
@@ -264,7 +267,6 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: FONT_SIZES.lg,
     fontWeight: '600',
-    color: COLORS.textPrimary,
     fontFamily: FONTS.sansBold,
   },
   settingsButton: {
@@ -291,11 +293,9 @@ const styles = StyleSheet.create({
     width: 100,
     height: 100,
     borderRadius: 50,
-    backgroundColor: COLORS.white,
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 3,
-    borderColor: COLORS.gradientStart,
     overflow: 'hidden',
   },
   avatarImage: {
@@ -309,22 +309,18 @@ const styles = StyleSheet.create({
     width: 28,
     height: 28,
     borderRadius: 14,
-    backgroundColor: COLORS.terracotta,
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 2,
-    borderColor: COLORS.white,
   },
   userName: {
     fontSize: FONT_SIZES.xl,
     fontWeight: '700',
-    color: COLORS.textPrimary,
     fontFamily: FONTS.sansBold,
     marginBottom: SPACING.xs,
   },
   memberSince: {
     fontSize: FONT_SIZES.sm,
-    color: COLORS.textMuted,
   },
   statsGrid: {
     flexDirection: 'row',
@@ -335,10 +331,8 @@ const styles = StyleSheet.create({
   },
   statCard: {
     width: (width - SPACING.base * 2 - SPACING.sm) / 2,
-    backgroundColor: COLORS.white,
     borderRadius: RADIUS.lg,
     padding: SPACING.md,
-    shadowColor: COLORS.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
     shadowRadius: 4,
@@ -355,12 +349,10 @@ const styles = StyleSheet.create({
   statNumber: {
     fontSize: FONT_SIZES.xxl,
     fontWeight: '700',
-    color: COLORS.textPrimary,
     fontFamily: FONTS.sansBold,
   },
   statLabel: {
     fontSize: FONT_SIZES.xs,
-    color: COLORS.textMuted,
   },
   section: {
     paddingHorizontal: SPACING.base,
@@ -369,7 +361,6 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: FONT_SIZES.lg,
     fontWeight: '600',
-    color: COLORS.textPrimary,
     marginBottom: SPACING.md,
   },
   achievementsRow: {
@@ -391,13 +382,11 @@ const styles = StyleSheet.create({
   achievementName: {
     fontSize: FONT_SIZES.xs,
     fontWeight: '600',
-    color: COLORS.textPrimary,
     textAlign: 'center',
     marginBottom: 2,
   },
   achievementLevel: {
     fontSize: FONT_SIZES.xs,
-    color: COLORS.textMuted,
   },
   menuSection: {
     paddingHorizontal: SPACING.base,
@@ -407,11 +396,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: COLORS.white,
     borderRadius: RADIUS.lg,
     padding: SPACING.md,
     marginBottom: SPACING.sm,
-    shadowColor: COLORS.shadow,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
     shadowRadius: 2,
@@ -424,7 +411,6 @@ const styles = StyleSheet.create({
   },
   menuItemText: {
     fontSize: FONT_SIZES.md,
-    color: COLORS.textPrimary,
     fontWeight: '500',
   },
   dangerSection: {
@@ -433,12 +419,10 @@ const styles = StyleSheet.create({
   dangerItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.white,
     borderRadius: RADIUS.lg,
     padding: SPACING.md,
     marginBottom: SPACING.sm,
     gap: SPACING.md,
-    shadowColor: COLORS.shadow,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
     shadowRadius: 2,
@@ -446,7 +430,6 @@ const styles = StyleSheet.create({
   },
   dangerText: {
     fontSize: FONT_SIZES.md,
-    color: COLORS.terracotta,
     fontWeight: '500',
   },
 });

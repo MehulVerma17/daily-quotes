@@ -22,10 +22,11 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
-import { COLORS, SPACING, RADIUS, FONTS, FONT_SIZES, scale } from '../../constants/theme';
+import { SPACING, RADIUS, FONTS, FONT_SIZES, scale } from '../../constants/theme';
 import { Quote, CollectionWithQuotes } from '../../types';
 import { getCollectionWithQuotes, removeQuoteFromCollection, deleteCollection } from '../../services/collectionsService';
 import { useCollectionsStore } from '../../stores';
+import { useTheme } from '../../contexts';
 
 const { width } = Dimensions.get('window');
 
@@ -38,6 +39,9 @@ export const CollectionDetailScreen: React.FC = () => {
   const navigation = useNavigation();
   const route = useRoute<RouteProp<CollectionDetailParamList, 'CollectionDetail'>>();
   const { collectionId, collectionName } = route.params;
+
+  // Theme
+  const { colors, accent } = useTheme();
 
   // Zustand store
   const {
@@ -133,23 +137,23 @@ export const CollectionDetailScreen: React.FC = () => {
   };
 
   const renderQuoteCard = ({ item }: { item: Quote }) => (
-    <View style={styles.quoteCard}>
-      <Text style={styles.quoteText} numberOfLines={4}>
+    <View style={[styles.quoteCard, { backgroundColor: colors.white, shadowColor: colors.shadow }]}>
+      <Text style={[styles.quoteText, { color: colors.textPrimary }]} numberOfLines={4}>
         "{item.content}"
       </Text>
       <View style={styles.quoteFooter}>
         <View>
-          <Text style={styles.quoteAuthor}>— {item.author}</Text>
-          <View style={styles.categoryBadge}>
-            <Text style={styles.categoryBadgeText}>{item.category}</Text>
+          <Text style={[styles.quoteAuthor, { color: colors.textSecondary }]}>— {item.author}</Text>
+          <View style={[styles.categoryBadge, { backgroundColor: colors.gradientStart }]}>
+            <Text style={[styles.categoryBadgeText, { color: accent.primary }]}>{item.category}</Text>
           </View>
         </View>
         <View style={styles.quoteActions}>
-          <Pressable style={styles.actionButton} onPress={() => handleShareQuote(item)}>
-            <Ionicons name="share-outline" size={18} color={COLORS.textMuted} />
+          <Pressable style={[styles.actionButton, { backgroundColor: colors.offWhite }]} onPress={() => handleShareQuote(item)}>
+            <Ionicons name="share-outline" size={18} color={colors.textMuted} />
           </Pressable>
-          <Pressable style={styles.actionButton} onPress={() => handleRemoveQuote(item.id)}>
-            <Ionicons name="trash-outline" size={18} color={COLORS.error} />
+          <Pressable style={[styles.actionButton, { backgroundColor: colors.offWhite }]} onPress={() => handleRemoveQuote(item.id)}>
+            <Ionicons name="trash-outline" size={18} color={colors.error} />
           </Pressable>
         </View>
       </View>
@@ -158,7 +162,7 @@ export const CollectionDetailScreen: React.FC = () => {
 
   const renderHeader = () => (
     <LinearGradient
-      colors={[collection?.color || COLORS.terracotta, (collection?.color || COLORS.terracotta) + 'CC']}
+      colors={[collection?.color || accent.primary, (collection?.color || accent.primary) + 'CC']}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
       style={[styles.headerGradient, { paddingTop: insets.top }]}
@@ -166,10 +170,10 @@ export const CollectionDetailScreen: React.FC = () => {
       <View style={styles.headerContent}>
         <View style={styles.headerTopRow}>
           <Pressable onPress={() => navigation.goBack()} style={styles.backButton}>
-            <Ionicons name="arrow-back" size={24} color="#FFFFFF" />
+            <Ionicons name="arrow-back" size={24} color={colors.white} />
           </Pressable>
           <Pressable onPress={handleDeleteCollection} style={styles.moreButton}>
-            <Ionicons name="trash-outline" size={20} color="#FFFFFF" />
+            <Ionicons name="trash-outline" size={20} color={colors.white} />
           </Pressable>
         </View>
         <View style={styles.headerTextContainer}>
@@ -177,7 +181,7 @@ export const CollectionDetailScreen: React.FC = () => {
             <Ionicons
               name={(collection?.icon as any) || 'folder'}
               size={32}
-              color="#FFFFFF"
+              color={colors.white}
             />
           </View>
           <Text style={styles.headerTitle}>{collectionName}</Text>
@@ -191,9 +195,9 @@ export const CollectionDetailScreen: React.FC = () => {
 
   const renderEmptyState = () => (
     <View style={styles.emptyContainer}>
-      <Ionicons name="document-text-outline" size={48} color={COLORS.textMuted} />
-      <Text style={styles.emptyTitle}>No quotes yet</Text>
-      <Text style={styles.emptySubtitle}>
+      <Ionicons name="document-text-outline" size={48} color={colors.textMuted} />
+      <Text style={[styles.emptyTitle, { color: colors.textPrimary }]}>No quotes yet</Text>
+      <Text style={[styles.emptySubtitle, { color: colors.textMuted }]}>
         Add quotes to this collection from your favorites or browse
       </Text>
     </View>
@@ -201,26 +205,26 @@ export const CollectionDetailScreen: React.FC = () => {
 
   if (loading) {
     return (
-      <View style={styles.container}>
+      <View style={[styles.container, { backgroundColor: colors.offWhite }]}>
         <LinearGradient
-          colors={[COLORS.terracotta, COLORS.terracottaLight]}
+          colors={[accent.primary, accent.light]}
           style={[styles.headerGradient, { paddingTop: insets.top }]}
         >
           <View style={styles.headerContent}>
             <Pressable onPress={() => navigation.goBack()} style={styles.backButton}>
-              <Ionicons name="arrow-back" size={24} color="#FFFFFF" />
+              <Ionicons name="arrow-back" size={24} color={colors.white} />
             </Pressable>
           </View>
         </LinearGradient>
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={COLORS.terracotta} />
+          <ActivityIndicator size="large" color={accent.primary} />
         </View>
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.offWhite }]}>
       <FlatList
         data={collection?.quotes || []}
         keyExtractor={(item) => item.id}
@@ -232,7 +236,7 @@ export const CollectionDetailScreen: React.FC = () => {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            tintColor={COLORS.terracotta}
+            tintColor={accent.primary}
           />
         }
         ListEmptyComponent={renderEmptyState}
@@ -244,7 +248,6 @@ export const CollectionDetailScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.offWhite,
   },
   loadingContainer: {
     flex: 1,
@@ -312,12 +315,10 @@ const styles = StyleSheet.create({
     paddingBottom: SPACING.xxl,
   },
   quoteCard: {
-    backgroundColor: COLORS.white,
     borderRadius: RADIUS.lg,
     padding: SPACING.base,
     marginHorizontal: SPACING.base,
     marginTop: SPACING.md,
-    shadowColor: COLORS.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
     shadowRadius: 4,
@@ -326,7 +327,6 @@ const styles = StyleSheet.create({
   quoteText: {
     fontSize: FONT_SIZES.base,
     fontStyle: 'italic',
-    color: COLORS.textPrimary,
     fontFamily: FONTS.serifItalic,
     lineHeight: 24,
     marginBottom: SPACING.md,
@@ -338,12 +338,10 @@ const styles = StyleSheet.create({
   },
   quoteAuthor: {
     fontSize: FONT_SIZES.sm,
-    color: COLORS.textSecondary,
     fontFamily: FONTS.sansMedium,
     marginBottom: SPACING.xs,
   },
   categoryBadge: {
-    backgroundColor: COLORS.gradientStart,
     paddingHorizontal: SPACING.sm,
     paddingVertical: SPACING.xs,
     borderRadius: RADIUS.sm,
@@ -351,7 +349,6 @@ const styles = StyleSheet.create({
   },
   categoryBadgeText: {
     fontSize: FONT_SIZES.xs,
-    color: COLORS.terracotta,
     fontWeight: '500',
   },
   quoteActions: {
@@ -362,7 +359,6 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: COLORS.offWhite,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -376,13 +372,11 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontSize: FONT_SIZES.lg,
     fontWeight: '600',
-    color: COLORS.textPrimary,
     marginTop: SPACING.md,
     marginBottom: SPACING.sm,
   },
   emptySubtitle: {
     fontSize: FONT_SIZES.sm,
-    color: COLORS.textMuted,
     textAlign: 'center',
     lineHeight: 22,
   },

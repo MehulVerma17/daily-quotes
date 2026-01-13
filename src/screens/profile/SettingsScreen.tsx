@@ -27,7 +27,6 @@ import DateTimePicker, {
 } from "@react-native-community/datetimepicker";
 import { useAuthStore, useSettingsStore } from "../../stores";
 import {
-  COLORS,
   SPACING,
   RADIUS,
   FONTS,
@@ -35,6 +34,7 @@ import {
   ACCENT_COLORS,
   scale,
 } from "../../constants/theme";
+import { useTheme } from "../../contexts";
 import { ThemeMode, AccentColor, FontSize } from "../../types";
 import {
   requestNotificationPermissions,
@@ -78,6 +78,9 @@ const CATEGORY_OPTIONS = [
 export const SettingsScreen: React.FC = () => {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
+
+  // Theme
+  const { colors, accent } = useTheme();
 
   // Zustand stores
   const user = useAuthStore((state) => state.user);
@@ -244,25 +247,25 @@ export const SettingsScreen: React.FC = () => {
 
   if (loading) {
     return (
-      <View style={[styles.container, { paddingTop: insets.top }]}>
+      <View style={[styles.container, { paddingTop: insets.top, backgroundColor: colors.offWhite }]}>
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={COLORS.terracotta} />
+          <ActivityIndicator size="large" color={accent.primary} />
         </View>
       </View>
     );
   }
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top }]}>
+    <View style={[styles.container, { paddingTop: insets.top, backgroundColor: colors.offWhite }]}>
       {/* Header */}
       <View style={styles.header}>
         <Pressable
           onPress={() => navigation.goBack()}
           style={styles.backButton}
         >
-          <Ionicons name="chevron-back" size={24} color={COLORS.textPrimary} />
+          <Ionicons name="chevron-back" size={24} color={colors.textPrimary} />
         </Pressable>
-        <Text style={styles.headerTitle}>Settings</Text>
+        <Text style={[styles.headerTitle, { color: colors.textPrimary }]}>Settings</Text>
         <View style={styles.headerSpacer} />
       </View>
 
@@ -273,24 +276,24 @@ export const SettingsScreen: React.FC = () => {
       >
         {/* Appearance Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Appearance</Text>
-          <View style={styles.card}>
+          <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Appearance</Text>
+          <View style={[styles.card, { backgroundColor: colors.white, shadowColor: colors.shadow }]}>
             {/* Theme Toggle */}
-            <View style={styles.themeToggle}>
+            <View style={[styles.themeToggle, { backgroundColor: colors.offWhite }]}>
               {THEME_OPTIONS.map((option) => (
                 <Pressable
                   key={option.mode}
                   style={[
                     styles.themeOption,
-                    settings?.theme === option.mode && styles.themeOptionActive,
+                    settings?.theme === option.mode && [styles.themeOptionActive, { backgroundColor: colors.white, shadowColor: colors.shadow }],
                   ]}
                   onPress={() => handleThemeChange(option.mode)}
                 >
                   <Text
                     style={[
                       styles.themeOptionText,
-                      settings?.theme === option.mode &&
-                        styles.themeOptionTextActive,
+                      { color: colors.textMuted },
+                      settings?.theme === option.mode && { color: colors.textPrimary },
                     ]}
                   >
                     {option.label}
@@ -301,7 +304,7 @@ export const SettingsScreen: React.FC = () => {
 
             {/* Accent Color */}
             <View style={styles.settingRow}>
-              <Text style={styles.settingLabel}>Accent Color</Text>
+              <Text style={[styles.settingLabel, { color: colors.textMuted }]}>Accent Color</Text>
               <View style={styles.colorOptions}>
                 {ACCENT_COLOR_OPTIONS.map((option) => (
                   <Pressable
@@ -309,8 +312,7 @@ export const SettingsScreen: React.FC = () => {
                     style={[
                       styles.colorOption,
                       { backgroundColor: option.hex },
-                      settings?.accent_color === option.color &&
-                        styles.colorOptionActive,
+                      settings?.accent_color === option.color && [styles.colorOptionActive, { borderColor: colors.white }],
                     ]}
                     onPress={() => handleAccentColorChange(option.color)}
                   />
@@ -319,11 +321,11 @@ export const SettingsScreen: React.FC = () => {
             </View>
 
             {/* Font Size Preview */}
-            <View style={styles.previewContainer}>
+            <View style={[styles.previewContainer, { backgroundColor: colors.offWhite }]}>
               <Text
                 style={[
                   styles.previewText,
-                  { fontSize: 16 + fontSizeValue * 8 },
+                  { fontSize: 16 + fontSizeValue * 8, color: colors.textPrimary },
                 ]}
               >
                 "The journey is the reward"
@@ -332,7 +334,7 @@ export const SettingsScreen: React.FC = () => {
 
             {/* Font Size Slider */}
             <View style={styles.sliderContainer}>
-              <Text style={styles.sliderLabel}>Tr</Text>
+              <Text style={[styles.sliderLabel, { color: colors.textMuted }]}>Tr</Text>
               <Slider
                 style={styles.slider}
                 minimumValue={0}
@@ -340,11 +342,11 @@ export const SettingsScreen: React.FC = () => {
                 value={fontSizeValue}
                 onValueChange={handleFontSizeChange}
                 onSlidingComplete={handleFontSizeComplete}
-                minimumTrackTintColor={COLORS.terracotta}
-                maximumTrackTintColor={COLORS.border}
-                thumbTintColor={COLORS.terracotta}
+                minimumTrackTintColor={accent.primary}
+                maximumTrackTintColor={colors.border}
+                thumbTintColor={accent.primary}
               />
-              <Text style={[styles.sliderLabel, { fontSize: FONT_SIZES.lg }]}>
+              <Text style={[styles.sliderLabel, { fontSize: FONT_SIZES.lg, color: colors.textMuted }]}>
                 Tr
               </Text>
             </View>
@@ -353,13 +355,13 @@ export const SettingsScreen: React.FC = () => {
 
         {/* Notifications Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Notifications</Text>
-          <View style={styles.card}>
+          <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Notifications</Text>
+          <View style={[styles.card, { backgroundColor: colors.white, shadowColor: colors.shadow }]}>
             {/* Daily Quote Toggle */}
             <View style={styles.toggleRow}>
               <View>
-                <Text style={styles.toggleTitle}>Daily Quote</Text>
-                <Text style={styles.toggleSubtitle}>
+                <Text style={[styles.toggleTitle, { color: colors.textPrimary }]}>Daily Quote</Text>
+                <Text style={[styles.toggleSubtitle, { color: colors.textMuted }]}>
                   Receive a fresh quote every morning
                 </Text>
               </View>
@@ -367,28 +369,28 @@ export const SettingsScreen: React.FC = () => {
                 value={settings?.notification_enabled}
                 onValueChange={handleNotificationToggle}
                 trackColor={{
-                  false: COLORS.border,
-                  true: COLORS.terracotta + "50",
+                  false: colors.border,
+                  true: accent.primary + "50",
                 }}
                 thumbColor={
                   settings?.notification_enabled
-                    ? COLORS.terracotta
-                    : COLORS.white
+                    ? accent.primary
+                    : colors.white
                 }
               />
             </View>
 
             {/* Reminder Time */}
             <Pressable
-              style={styles.settingRowPressable}
+              style={[styles.settingRowPressable, { borderTopColor: colors.border }]}
               onPress={() => setShowTimePicker(true)}
               disabled={!settings?.notification_enabled}
             >
               <Text
                 style={[
                   styles.settingLabel,
-                  !settings?.notification_enabled &&
-                    styles.settingLabelDisabled,
+                  { color: colors.textMuted },
+                  !settings?.notification_enabled && { color: colors.textPlaceholder },
                 ]}
               >
                 Reminder Time
@@ -397,8 +399,8 @@ export const SettingsScreen: React.FC = () => {
                 <Text
                   style={[
                     styles.settingValue,
-                    !settings?.notification_enabled &&
-                      styles.settingValueDisabled,
+                    { color: accent.primary },
+                    !settings?.notification_enabled && { color: colors.textPlaceholder },
                   ]}
                 >
                   {formatNotificationTime(
@@ -410,8 +412,8 @@ export const SettingsScreen: React.FC = () => {
                   size={16}
                   color={
                     settings?.notification_enabled
-                      ? COLORS.terracotta
-                      : COLORS.textMuted
+                      ? accent.primary
+                      : colors.textMuted
                   }
                 />
               </View>
@@ -433,7 +435,7 @@ export const SettingsScreen: React.FC = () => {
               style={styles.testButton}
               onPress={handleTestNotification}
             >
-              <Ionicons name="notifications-outline" size={18} color={COLORS.terracotta} />
+              <Ionicons name="notifications-outline" size={18} color={accent.primary} />
               <Text style={styles.testButtonText}>Test Notification</Text>
             </Pressable> */}
 
@@ -469,34 +471,34 @@ export const SettingsScreen: React.FC = () => {
 
         {/* Data & Security Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Data & Security</Text>
-          <View style={styles.card}>
+          <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Data & Security</Text>
+          <View style={[styles.card, { backgroundColor: colors.white, shadowColor: colors.shadow }]}>
             {/* Cloud Sync Toggle */}
             <View style={styles.toggleRow}>
               <View>
-                <Text style={styles.toggleTitle}>Cloud Sync</Text>
-                <Text style={styles.toggleSubtitle}>
+                <Text style={[styles.toggleTitle, { color: colors.textPrimary }]}>Cloud Sync</Text>
+                <Text style={[styles.toggleSubtitle, { color: colors.textMuted }]}>
                   Keep quotes across all devices
                 </Text>
               </View>
               <Switch
                 value={true}
                 trackColor={{
-                  false: COLORS.border,
-                  true: COLORS.terracotta + "50",
+                  false: colors.border,
+                  true: accent.primary + "50",
                 }}
-                thumbColor={COLORS.terracotta}
+                thumbColor={accent.primary}
               />
             </View>
 
             {/* Last Sync */}
-            <View style={styles.syncRow}>
+            <View style={[styles.syncRow, { borderTopColor: colors.border }]}>
               <View style={styles.syncInfo}>
-                <Ionicons name="sync" size={16} color={COLORS.textMuted} />
-                <Text style={styles.syncText}>Last synced: 2 mins ago</Text>
+                <Ionicons name="sync" size={16} color={colors.textMuted} />
+                <Text style={[styles.syncText, { color: colors.textMuted }]}>Last synced: 2 mins ago</Text>
               </View>
-              <Pressable style={styles.syncButton}>
-                <Text style={styles.syncButtonText}>Sync Now</Text>
+              <Pressable style={[styles.syncButton, { borderColor: accent.primary }]}>
+                <Text style={[styles.syncButtonText, { color: accent.primary }]}>Sync Now</Text>
               </Pressable>
             </View>
           </View>
@@ -504,14 +506,14 @@ export const SettingsScreen: React.FC = () => {
 
         {/* App Info */}
         <View style={styles.appInfo}>
-          <Text style={styles.appName}>QUOTEVAULT V{APP_CONFIG.version}</Text>
+          <Text style={[styles.appName, { color: colors.textMuted }]}>QUOTEVAULT V{APP_CONFIG.version}</Text>
           <View style={styles.appLinks}>
             <Pressable>
-              <Text style={styles.appLink}>Privacy Policy</Text>
+              <Text style={[styles.appLink, { color: colors.textMuted }]}>Privacy Policy</Text>
             </Pressable>
-            <Text style={styles.linkDivider}>·</Text>
+            <Text style={[styles.linkDivider, { color: colors.textMuted }]}>·</Text>
             <Pressable>
-              <Text style={styles.appLink}>Terms of Service</Text>
+              <Text style={[styles.appLink, { color: colors.textMuted }]}>Terms of Service</Text>
             </Pressable>
           </View>
         </View>
@@ -523,7 +525,6 @@ export const SettingsScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.offWhite,
   },
   loadingContainer: {
     flex: 1,
@@ -546,7 +547,6 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: FONT_SIZES.lg,
     fontWeight: "700",
-    color: COLORS.textPrimary,
     fontFamily: FONTS.sansBold,
   },
   headerSpacer: {
@@ -565,14 +565,11 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: FONT_SIZES.lg,
     fontWeight: "700",
-    color: COLORS.textPrimary,
     marginBottom: SPACING.md,
   },
   card: {
-    backgroundColor: COLORS.white,
     borderRadius: RADIUS.xl,
     padding: SPACING.lg,
-    shadowColor: COLORS.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
     shadowRadius: 4,
@@ -580,7 +577,6 @@ const styles = StyleSheet.create({
   },
   themeToggle: {
     flexDirection: "row",
-    backgroundColor: COLORS.offWhite,
     borderRadius: RADIUS.full,
     padding: 4,
     marginBottom: SPACING.lg,
@@ -592,8 +588,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   themeOptionActive: {
-    backgroundColor: COLORS.white,
-    shadowColor: COLORS.shadow,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
@@ -601,11 +595,7 @@ const styles = StyleSheet.create({
   },
   themeOptionText: {
     fontSize: FONT_SIZES.sm,
-    color: COLORS.textMuted,
     fontWeight: "500",
-  },
-  themeOptionTextActive: {
-    color: COLORS.textPrimary,
   },
   settingRow: {
     marginBottom: SPACING.lg,
@@ -616,23 +606,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingVertical: SPACING.sm,
     borderTopWidth: 1,
-    borderTopColor: COLORS.border,
   },
   settingLabel: {
     fontSize: FONT_SIZES.sm,
-    color: COLORS.textMuted,
     marginBottom: SPACING.sm,
   },
   settingValue: {
     fontSize: FONT_SIZES.md,
-    color: COLORS.terracotta,
     fontWeight: "500",
-  },
-  settingLabelDisabled: {
-    color: COLORS.textPlaceholder,
-  },
-  settingValueDisabled: {
-    color: COLORS.textPlaceholder,
   },
   timeValueContainer: {
     flexDirection: "row",
@@ -650,7 +631,6 @@ const styles = StyleSheet.create({
   },
   colorOptionActive: {
     borderWidth: 3,
-    borderColor: COLORS.white,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
@@ -658,7 +638,6 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   previewContainer: {
-    backgroundColor: COLORS.offWhite,
     borderRadius: RADIUS.md,
     padding: SPACING.lg,
     alignItems: "center",
@@ -666,7 +645,6 @@ const styles = StyleSheet.create({
   },
   previewText: {
     fontStyle: "italic",
-    color: COLORS.textPrimary,
     fontFamily: FONTS.serifItalic,
   },
   sliderContainer: {
@@ -680,7 +658,6 @@ const styles = StyleSheet.create({
   },
   sliderLabel: {
     fontSize: FONT_SIZES.sm,
-    color: COLORS.textMuted,
     fontWeight: "500",
   },
   toggleRow: {
@@ -692,12 +669,10 @@ const styles = StyleSheet.create({
   toggleTitle: {
     fontSize: FONT_SIZES.md,
     fontWeight: "600",
-    color: COLORS.textPrimary,
     marginBottom: 2,
   },
   toggleSubtitle: {
     fontSize: FONT_SIZES.sm,
-    color: COLORS.textMuted,
   },
   testButton: {
     flexDirection: "row",
@@ -708,22 +683,17 @@ const styles = StyleSheet.create({
     marginVertical: SPACING.sm,
     borderRadius: RADIUS.md,
     borderWidth: 1,
-    borderColor: COLORS.terracotta,
-    backgroundColor: COLORS.terracotta + "10",
   },
   testButtonText: {
     fontSize: FONT_SIZES.sm,
-    color: COLORS.terracotta,
     fontWeight: "600",
   },
   categoriesSection: {
     borderTopWidth: 1,
-    borderTopColor: COLORS.border,
     paddingTop: SPACING.md,
   },
   categoriesLabel: {
     fontSize: FONT_SIZES.sm,
-    color: COLORS.textMuted,
     marginBottom: SPACING.sm,
   },
   categoryChips: {
@@ -736,26 +706,21 @@ const styles = StyleSheet.create({
     paddingVertical: SPACING.sm,
     borderRadius: RADIUS.full,
     borderWidth: 1,
-    borderColor: COLORS.border,
-    backgroundColor: COLORS.white,
   },
   categoryChipActive: {
-    backgroundColor: COLORS.terracotta,
-    borderColor: COLORS.terracotta,
+    // colors set dynamically
   },
   categoryChipText: {
     fontSize: FONT_SIZES.sm,
-    color: COLORS.textPrimary,
   },
   categoryChipTextActive: {
-    color: COLORS.white,
+    // colors set dynamically
   },
   syncRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     borderTopWidth: 1,
-    borderTopColor: COLORS.border,
     paddingTop: SPACING.md,
   },
   syncInfo: {
@@ -765,18 +730,15 @@ const styles = StyleSheet.create({
   },
   syncText: {
     fontSize: FONT_SIZES.sm,
-    color: COLORS.textMuted,
   },
   syncButton: {
     paddingHorizontal: SPACING.md,
     paddingVertical: SPACING.sm,
     borderRadius: RADIUS.full,
     borderWidth: 1,
-    borderColor: COLORS.terracotta,
   },
   syncButtonText: {
     fontSize: FONT_SIZES.sm,
-    color: COLORS.terracotta,
     fontWeight: "500",
   },
   appInfo: {
@@ -786,7 +748,6 @@ const styles = StyleSheet.create({
   appName: {
     fontSize: FONT_SIZES.xs,
     fontWeight: "600",
-    color: COLORS.textMuted,
     letterSpacing: 2,
     marginBottom: SPACING.sm,
   },
@@ -796,11 +757,9 @@ const styles = StyleSheet.create({
   },
   appLink: {
     fontSize: FONT_SIZES.sm,
-    color: COLORS.textMuted,
   },
   linkDivider: {
     marginHorizontal: SPACING.sm,
-    color: COLORS.textMuted,
   },
 });
 
