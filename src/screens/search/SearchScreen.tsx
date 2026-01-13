@@ -5,7 +5,7 @@
  * Matches design from image 5.
  */
 
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
   Text,
@@ -14,7 +14,6 @@ import {
   FlatList,
   Pressable,
   ActivityIndicator,
-  Keyboard,
   Share,
   Dimensions,
 } from 'react-native';
@@ -53,38 +52,47 @@ export const SearchScreen: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
 
-  const handleSearch = useCallback(async () => {
+  // Debounced search effect
+  useEffect(() => {
+    // Don't search when category filter is active (shows category list instead)
+    if (activeFilter === 'category') {
+      return;
+    }
+
+    // Clear results if search query is empty
     if (!searchQuery.trim()) {
       setResults([]);
       setHasSearched(false);
       return;
     }
 
-    setLoading(true);
-    setHasSearched(true);
-    Keyboard.dismiss();
+    // Set up debounce timer
+    const debounceTimer = setTimeout(async () => {
+      setLoading(true);
+      setHasSearched(true);
 
-    try {
-      let response;
-      if (activeFilter === 'author') {
-        response = await getQuotesByAuthor(searchQuery);
-      } else {
-        response = await searchQuotes(searchQuery);
+      try {
+        let response;
+        if (activeFilter === 'author') {
+          response = await getQuotesByAuthor(searchQuery);
+        } else {
+          response = await searchQuotes(searchQuery);
+        }
+        setResults(response.data);
+      } catch (error) {
+        console.error('Search error:', error);
+        setResults([]);
+      } finally {
+        setLoading(false);
       }
-      setResults(response.data);
-    } catch (error) {
-      console.error('Search error:', error);
-      setResults([]);
-    } finally {
-      setLoading(false);
-    }
+    }, 300);
+
+    // Cleanup: clear timer on re-render
+    return () => clearTimeout(debounceTimer);
   }, [searchQuery, activeFilter]);
 
   const handleFilterChange = (filter: FilterType) => {
     setActiveFilter(filter);
-    if (searchQuery.trim()) {
-      handleSearch();
-    }
   };
 
   const handleCategorySelect = (category: string) => {
@@ -184,7 +192,6 @@ export const SearchScreen: React.FC = () => {
             placeholderTextColor={COLORS.textPlaceholder}
             value={searchQuery}
             onChangeText={setSearchQuery}
-            onSubmitEditing={handleSearch}
             returnKeyType="search"
             autoCapitalize="none"
             autoCorrect={false}

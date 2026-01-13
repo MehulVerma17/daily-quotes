@@ -13,10 +13,10 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { HomeNavigator } from './HomeNavigator';
+import { SearchNavigator } from './SearchNavigator';
 import { CollectionsNavigator } from './CollectionsNavigator';
 import { ProfileNavigator } from './ProfileNavigator';
 import { FavoritesScreen } from '../screens/favorites';
-import { SearchScreen } from '../screens/search';
 import { COLORS, SPACING, RADIUS, FONT_SIZES, scale } from '../constants/theme';
 
 export type RootTabParamList = {
@@ -171,7 +171,7 @@ export const AppNavigator: React.FC = () => {
       }}
     >
       <Tab.Screen name="HomeTab" component={HomeNavigator} />
-      <Tab.Screen name="SearchTab" component={SearchScreen} />
+      <Tab.Screen name="SearchTab" component={SearchNavigator} />
       <Tab.Screen name="FavoritesTab" component={FavoritesScreen} />
       <Tab.Screen name="CollectionsTab" component={CollectionsNavigator} />
       <Tab.Screen name="ProfileTab" component={ProfileNavigator} />
