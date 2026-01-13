@@ -15,7 +15,6 @@ import {
   RefreshControl,
   Pressable,
   ActivityIndicator,
-  Share,
   ScrollView,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -28,7 +27,7 @@ import { COLORS, SPACING, RADIUS, FONTS, FONT_SIZES } from '../../constants/them
 import { Quote } from '../../types';
 import { getQuoteOfDay, getQuotes } from '../../services/quoteService';
 import { CATEGORIES } from '../../config';
-import { AddToCollectionModal } from '../../components';
+import { AddToCollectionModal, ShareQuoteModal } from '../../components';
 
 type HomeStackParamList = {
   Home: undefined;
@@ -59,6 +58,10 @@ export const HomeScreen: React.FC = () => {
   // Collection modal state
   const [collectionModalVisible, setCollectionModalVisible] = useState(false);
   const [selectedQuoteForCollection, setSelectedQuoteForCollection] = useState<Quote | null>(null);
+
+  // Share modal state
+  const [shareModalVisible, setShareModalVisible] = useState(false);
+  const [quoteToShare, setQuoteToShare] = useState<Quote | null>(null);
 
   // Get greeting based on time of day
   const getGreeting = () => {
@@ -137,14 +140,9 @@ export const HomeScreen: React.FC = () => {
     }
   };
 
-  const handleShareQuote = async (quote: Quote) => {
-    try {
-      await Share.share({
-        message: `"${quote.content}"\n\n— ${quote.author}`,
-      });
-    } catch (error) {
-      console.error('Error sharing:', error);
-    }
+  const handleShareQuote = (quote: Quote) => {
+    setQuoteToShare(quote);
+    setShareModalVisible(true);
   };
 
   const handleAddToCollection = (quote: Quote) => {
@@ -323,6 +321,13 @@ export const HomeScreen: React.FC = () => {
         visible={collectionModalVisible}
         quote={selectedQuoteForCollection}
         onClose={() => setCollectionModalVisible(false)}
+      />
+
+      {/* Share Quote Modal */}
+      <ShareQuoteModal
+        visible={shareModalVisible}
+        quote={quoteToShare}
+        onClose={() => setShareModalVisible(false)}
       />
     </View>
   );

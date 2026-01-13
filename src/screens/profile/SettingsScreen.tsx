@@ -5,7 +5,7 @@
  * Matches design from image 11.
  */
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -17,16 +17,29 @@ import {
   Dimensions,
   Platform,
   Alert,
-} from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
-import Slider from '@react-native-community/slider';
-import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
-import { useAuthStore } from '../../stores';
-import { COLORS, SPACING, RADIUS, FONTS, FONT_SIZES, ACCENT_COLORS, scale } from '../../constants/theme';
-import { UserSettings, ThemeMode, AccentColor, FontSize } from '../../types';
-import { getUserSettings, updateUserSettings } from '../../services/settingsService';
+} from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Ionicons } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
+import Slider from "@react-native-community/slider";
+import DateTimePicker, {
+  DateTimePickerEvent,
+} from "@react-native-community/datetimepicker";
+import { useAuthStore } from "../../stores";
+import {
+  COLORS,
+  SPACING,
+  RADIUS,
+  FONTS,
+  FONT_SIZES,
+  ACCENT_COLORS,
+  scale,
+} from "../../constants/theme";
+import { UserSettings, ThemeMode, AccentColor, FontSize } from "../../types";
+import {
+  getUserSettings,
+  updateUserSettings,
+} from "../../services/settingsService";
 import {
   requestNotificationPermissions,
   scheduleDailyQuoteNotification,
@@ -35,35 +48,35 @@ import {
   formatNotificationTime,
   timeStringToDate,
   dateToTimeString,
-} from '../../services/notificationService';
-import Toast from 'react-native-toast-message';
-import { APP_CONFIG } from '../../config';
+} from "../../services/notificationService";
+import Toast from "react-native-toast-message";
+import { APP_CONFIG } from "../../config";
 
-const { width } = Dimensions.get('window');
+const { width } = Dimensions.get("window");
 
 // Accent color options
 const ACCENT_COLOR_OPTIONS: { color: AccentColor; hex: string }[] = [
-  { color: 'terracotta', hex: ACCENT_COLORS.terracotta.primary },
-  { color: 'amber', hex: ACCENT_COLORS.amber.primary },
-  { color: 'ocean', hex: ACCENT_COLORS.ocean.primary },
-  { color: 'forest', hex: ACCENT_COLORS.forest.primary },
-  { color: 'purple', hex: ACCENT_COLORS.purple.primary },
+  { color: "terracotta", hex: ACCENT_COLORS.terracotta.primary },
+  { color: "amber", hex: ACCENT_COLORS.amber.primary },
+  { color: "ocean", hex: ACCENT_COLORS.ocean.primary },
+  { color: "forest", hex: ACCENT_COLORS.forest.primary },
+  { color: "purple", hex: ACCENT_COLORS.purple.primary },
 ];
 
 // Theme options
 const THEME_OPTIONS: { mode: ThemeMode; label: string }[] = [
-  { mode: 'light', label: 'Light' },
-  { mode: 'dark', label: 'Dark' },
-  { mode: 'system', label: 'System' },
+  { mode: "light", label: "Light" },
+  { mode: "dark", label: "Dark" },
+  { mode: "system", label: "System" },
 ];
 
 // Favorite categories (for notification preferences)
 const CATEGORY_OPTIONS = [
-  { id: 'wisdom', label: 'Wisdom' },
-  { id: 'motivation', label: 'Motivation' },
-  { id: 'philosophy', label: 'Philosophy' },
-  { id: 'stoicism', label: 'Stoicism' },
-  { id: 'poetry', label: 'Poetry' },
+  { id: "wisdom", label: "Wisdom" },
+  { id: "motivation", label: "Motivation" },
+  { id: "philosophy", label: "Philosophy" },
+  { id: "stoicism", label: "Stoicism" },
+  { id: "poetry", label: "Poetry" },
 ];
 
 export const SettingsScreen: React.FC = () => {
@@ -75,7 +88,9 @@ export const SettingsScreen: React.FC = () => {
 
   const [settings, setSettings] = useState<UserSettings | null>(null);
   const [loading, setLoading] = useState(true);
-  const [selectedCategories, setSelectedCategories] = useState<string[]>(['wisdom']);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([
+    "wisdom",
+  ]);
 
   // Font size preview value (0-1 range for slider)
   const [fontSizeValue, setFontSizeValue] = useState(0.5);
@@ -89,10 +104,14 @@ export const SettingsScreen: React.FC = () => {
       const data = await getUserSettings(user.id);
       setSettings(data);
       // Set font size slider value
-      const fontSizeMap: Record<FontSize, number> = { small: 0, medium: 0.5, large: 1 };
+      const fontSizeMap: Record<FontSize, number> = {
+        small: 0,
+        medium: 0.5,
+        large: 1,
+      };
       setFontSizeValue(fontSizeMap[data.font_size]);
     } catch (error) {
-      console.error('Error loading settings:', error);
+      console.error("Error loading settings:", error);
     } finally {
       setLoading(false);
     }
@@ -111,16 +130,16 @@ export const SettingsScreen: React.FC = () => {
       const updated = await updateUserSettings(user.id, { [key]: value });
       setSettings(updated);
     } catch (error) {
-      console.error('Error updating setting:', error);
+      console.error("Error updating setting:", error);
     }
   };
 
   const handleThemeChange = (mode: ThemeMode) => {
-    handleUpdateSetting('theme', mode);
+    handleUpdateSetting("theme", mode);
   };
 
   const handleAccentColorChange = (color: AccentColor) => {
-    handleUpdateSetting('accent_color', color);
+    handleUpdateSetting("accent_color", color);
   };
 
   const handleFontSizeChange = (value: number) => {
@@ -129,10 +148,10 @@ export const SettingsScreen: React.FC = () => {
 
   const handleFontSizeComplete = (value: number) => {
     let fontSize: FontSize;
-    if (value < 0.33) fontSize = 'small';
-    else if (value < 0.67) fontSize = 'medium';
-    else fontSize = 'large';
-    handleUpdateSetting('font_size', fontSize);
+    if (value < 0.33) fontSize = "small";
+    else if (value < 0.67) fontSize = "medium";
+    else fontSize = "large";
+    handleUpdateSetting("font_size", fontSize);
   };
 
   const handleNotificationToggle = async (enabled: boolean) => {
@@ -141,45 +160,48 @@ export const SettingsScreen: React.FC = () => {
       const granted = await requestNotificationPermissions();
       if (!granted) {
         Alert.alert(
-          'Permission Required',
-          'Please enable notifications in your device settings to receive daily quotes.',
-          [{ text: 'OK' }]
+          "Permission Required",
+          "Please enable notifications in your device settings to receive daily quotes.",
+          [{ text: "OK" }]
         );
         return;
       }
       // Schedule the notification
-      const time = settings?.notification_time || '09:00';
+      const time = settings?.notification_time || "09:00";
       const scheduledFor = await scheduleDailyQuoteNotification(time);
       Toast.show({
-        type: 'success',
-        text1: 'Daily Quote Enabled',
+        type: "success",
+        text1: "Daily Quote Enabled",
         text2: `Next notification: ${scheduledFor}`,
       });
     } else {
       // Cancel notifications
       await cancelDailyQuoteNotification();
       Toast.show({
-        type: 'info',
-        text1: 'Notifications Disabled',
-        text2: 'You won\'t receive daily quote reminders',
+        type: "info",
+        text1: "Notifications Disabled",
+        text2: "You won't receive daily quote reminders",
       });
     }
-    handleUpdateSetting('notification_enabled', enabled);
+    handleUpdateSetting("notification_enabled", enabled);
   };
 
-  const handleTimeChange = async (event: DateTimePickerEvent, selectedDate?: Date) => {
-    setShowTimePicker(Platform.OS === 'ios');
+  const handleTimeChange = async (
+    event: DateTimePickerEvent,
+    selectedDate?: Date
+  ) => {
+    setShowTimePicker(Platform.OS === "ios");
 
-    if (event.type === 'set' && selectedDate) {
+    if (event.type === "set" && selectedDate) {
       const newTime = dateToTimeString(selectedDate);
       // Update setting in database
-      await handleUpdateSetting('notification_time', newTime);
+      await handleUpdateSetting("notification_time", newTime);
       // Reschedule notification if enabled
       if (settings?.notification_enabled) {
         const scheduledFor = await scheduleDailyQuoteNotification(newTime);
         Toast.show({
-          type: 'success',
-          text1: 'Reminder Set',
+          type: "success",
+          text1: "Reminder Set",
           text2: `Next notification: ${scheduledFor}`,
         });
       }
@@ -191,23 +213,23 @@ export const SettingsScreen: React.FC = () => {
       const granted = await requestNotificationPermissions();
       if (!granted) {
         Alert.alert(
-          'Permission Required',
-          'Please enable notifications in your device settings.',
-          [{ text: 'OK' }]
+          "Permission Required",
+          "Please enable notifications in your device settings.",
+          [{ text: "OK" }]
         );
         return;
       }
       await sendTestNotification();
       Toast.show({
-        type: 'success',
-        text1: 'Test Sent',
-        text2: 'You should receive a notification now!',
+        type: "success",
+        text1: "Test Sent",
+        text2: "You should receive a notification now!",
       });
     } catch (error) {
       Toast.show({
-        type: 'error',
-        text1: 'Error',
-        text2: 'Failed to send test notification',
+        type: "error",
+        text1: "Error",
+        text2: "Failed to send test notification",
       });
     }
   };
@@ -234,7 +256,10 @@ export const SettingsScreen: React.FC = () => {
     <View style={[styles.container, { paddingTop: insets.top }]}>
       {/* Header */}
       <View style={styles.header}>
-        <Pressable onPress={() => navigation.goBack()} style={styles.backButton}>
+        <Pressable
+          onPress={() => navigation.goBack()}
+          style={styles.backButton}
+        >
           <Ionicons name="chevron-back" size={24} color={COLORS.textPrimary} />
         </Pressable>
         <Text style={styles.headerTitle}>Settings</Text>
@@ -264,7 +289,8 @@ export const SettingsScreen: React.FC = () => {
                   <Text
                     style={[
                       styles.themeOptionText,
-                      settings?.theme === option.mode && styles.themeOptionTextActive,
+                      settings?.theme === option.mode &&
+                        styles.themeOptionTextActive,
                     ]}
                   >
                     {option.label}
@@ -283,7 +309,8 @@ export const SettingsScreen: React.FC = () => {
                     style={[
                       styles.colorOption,
                       { backgroundColor: option.hex },
-                      settings?.accent_color === option.color && styles.colorOptionActive,
+                      settings?.accent_color === option.color &&
+                        styles.colorOptionActive,
                     ]}
                     onPress={() => handleAccentColorChange(option.color)}
                   />
@@ -293,7 +320,12 @@ export const SettingsScreen: React.FC = () => {
 
             {/* Font Size Preview */}
             <View style={styles.previewContainer}>
-              <Text style={[styles.previewText, { fontSize: 16 + fontSizeValue * 8 }]}>
+              <Text
+                style={[
+                  styles.previewText,
+                  { fontSize: 16 + fontSizeValue * 8 },
+                ]}
+              >
                 "The journey is the reward"
               </Text>
             </View>
@@ -312,7 +344,9 @@ export const SettingsScreen: React.FC = () => {
                 maximumTrackTintColor={COLORS.border}
                 thumbTintColor={COLORS.terracotta}
               />
-              <Text style={[styles.sliderLabel, { fontSize: FONT_SIZES.lg }]}>Tr</Text>
+              <Text style={[styles.sliderLabel, { fontSize: FONT_SIZES.lg }]}>
+                Tr
+              </Text>
             </View>
           </View>
         </View>
@@ -325,13 +359,22 @@ export const SettingsScreen: React.FC = () => {
             <View style={styles.toggleRow}>
               <View>
                 <Text style={styles.toggleTitle}>Daily Quote</Text>
-                <Text style={styles.toggleSubtitle}>Receive a fresh quote every morning</Text>
+                <Text style={styles.toggleSubtitle}>
+                  Receive a fresh quote every morning
+                </Text>
               </View>
               <Switch
                 value={settings?.notification_enabled}
                 onValueChange={handleNotificationToggle}
-                trackColor={{ false: COLORS.border, true: COLORS.terracotta + '50' }}
-                thumbColor={settings?.notification_enabled ? COLORS.terracotta : COLORS.white}
+                trackColor={{
+                  false: COLORS.border,
+                  true: COLORS.terracotta + "50",
+                }}
+                thumbColor={
+                  settings?.notification_enabled
+                    ? COLORS.terracotta
+                    : COLORS.white
+                }
               />
             </View>
 
@@ -341,21 +384,35 @@ export const SettingsScreen: React.FC = () => {
               onPress={() => setShowTimePicker(true)}
               disabled={!settings?.notification_enabled}
             >
-              <Text style={[
-                styles.settingLabel,
-                !settings?.notification_enabled && styles.settingLabelDisabled
-              ]}>Reminder Time</Text>
+              <Text
+                style={[
+                  styles.settingLabel,
+                  !settings?.notification_enabled &&
+                    styles.settingLabelDisabled,
+                ]}
+              >
+                Reminder Time
+              </Text>
               <View style={styles.timeValueContainer}>
-                <Text style={[
-                  styles.settingValue,
-                  !settings?.notification_enabled && styles.settingValueDisabled
-                ]}>
-                  {formatNotificationTime(settings?.notification_time || '09:00')}
+                <Text
+                  style={[
+                    styles.settingValue,
+                    !settings?.notification_enabled &&
+                      styles.settingValueDisabled,
+                  ]}
+                >
+                  {formatNotificationTime(
+                    settings?.notification_time || "09:00"
+                  )}
                 </Text>
                 <Ionicons
                   name="chevron-forward"
                   size={16}
-                  color={settings?.notification_enabled ? COLORS.terracotta : COLORS.textMuted}
+                  color={
+                    settings?.notification_enabled
+                      ? COLORS.terracotta
+                      : COLORS.textMuted
+                  }
                 />
               </View>
             </Pressable>
@@ -363,25 +420,25 @@ export const SettingsScreen: React.FC = () => {
             {/* Time Picker */}
             {showTimePicker && (
               <DateTimePicker
-                value={timeStringToDate(settings?.notification_time || '09:00')}
+                value={timeStringToDate(settings?.notification_time || "09:00")}
                 mode="time"
                 is24Hour={false}
-                display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                display={Platform.OS === "ios" ? "spinner" : "default"}
                 onChange={handleTimeChange}
               />
             )}
 
             {/* Test Notification Button */}
-            <Pressable
+            {/* <Pressable
               style={styles.testButton}
               onPress={handleTestNotification}
             >
               <Ionicons name="notifications-outline" size={18} color={COLORS.terracotta} />
               <Text style={styles.testButtonText}>Test Notification</Text>
-            </Pressable>
+            </Pressable> */}
 
             {/* Favorite Categories */}
-            <View style={styles.categoriesSection}>
+            {/* <View style={styles.categoriesSection}>
               <Text style={styles.categoriesLabel}>Favorite Categories</Text>
               <View style={styles.categoryChips}>
                 {CATEGORY_OPTIONS.map((category) => (
@@ -389,14 +446,16 @@ export const SettingsScreen: React.FC = () => {
                     key={category.id}
                     style={[
                       styles.categoryChip,
-                      selectedCategories.includes(category.id) && styles.categoryChipActive,
+                      selectedCategories.includes(category.id) &&
+                        styles.categoryChipActive,
                     ]}
                     onPress={() => toggleCategory(category.id)}
                   >
                     <Text
                       style={[
                         styles.categoryChipText,
-                        selectedCategories.includes(category.id) && styles.categoryChipTextActive,
+                        selectedCategories.includes(category.id) &&
+                          styles.categoryChipTextActive,
                       ]}
                     >
                       {category.label}
@@ -404,7 +463,7 @@ export const SettingsScreen: React.FC = () => {
                   </Pressable>
                 ))}
               </View>
-            </View>
+            </View> */}
           </View>
         </View>
 
@@ -416,11 +475,16 @@ export const SettingsScreen: React.FC = () => {
             <View style={styles.toggleRow}>
               <View>
                 <Text style={styles.toggleTitle}>Cloud Sync</Text>
-                <Text style={styles.toggleSubtitle}>Keep quotes across all devices</Text>
+                <Text style={styles.toggleSubtitle}>
+                  Keep quotes across all devices
+                </Text>
               </View>
               <Switch
                 value={true}
-                trackColor={{ false: COLORS.border, true: COLORS.terracotta + '50' }}
+                trackColor={{
+                  false: COLORS.border,
+                  true: COLORS.terracotta + "50",
+                }}
                 thumbColor={COLORS.terracotta}
               />
             </View>
@@ -463,25 +527,25 @@ const styles = StyleSheet.create({
   },
   loadingContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     paddingHorizontal: SPACING.base,
     paddingVertical: SPACING.md,
   },
   backButton: {
     width: 40,
     height: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   headerTitle: {
     fontSize: FONT_SIZES.lg,
-    fontWeight: '700',
+    fontWeight: "700",
     color: COLORS.textPrimary,
     fontFamily: FONTS.sansBold,
   },
@@ -500,7 +564,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: FONT_SIZES.lg,
-    fontWeight: '700',
+    fontWeight: "700",
     color: COLORS.textPrimary,
     marginBottom: SPACING.md,
   },
@@ -515,7 +579,7 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   themeToggle: {
-    flexDirection: 'row',
+    flexDirection: "row",
     backgroundColor: COLORS.offWhite,
     borderRadius: RADIUS.full,
     padding: 4,
@@ -525,7 +589,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: SPACING.sm,
     borderRadius: RADIUS.full,
-    alignItems: 'center',
+    alignItems: "center",
   },
   themeOptionActive: {
     backgroundColor: COLORS.white,
@@ -538,7 +602,7 @@ const styles = StyleSheet.create({
   themeOptionText: {
     fontSize: FONT_SIZES.sm,
     color: COLORS.textMuted,
-    fontWeight: '500',
+    fontWeight: "500",
   },
   themeOptionTextActive: {
     color: COLORS.textPrimary,
@@ -547,9 +611,9 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.lg,
   },
   settingRowPressable: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     paddingVertical: SPACING.sm,
     borderTopWidth: 1,
     borderTopColor: COLORS.border,
@@ -562,7 +626,7 @@ const styles = StyleSheet.create({
   settingValue: {
     fontSize: FONT_SIZES.md,
     color: COLORS.terracotta,
-    fontWeight: '500',
+    fontWeight: "500",
   },
   settingLabelDisabled: {
     color: COLORS.textPlaceholder,
@@ -571,12 +635,12 @@ const styles = StyleSheet.create({
     color: COLORS.textPlaceholder,
   },
   timeValueContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: SPACING.xs,
   },
   colorOptions: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: SPACING.md,
   },
   colorOption: {
@@ -587,7 +651,7 @@ const styles = StyleSheet.create({
   colorOptionActive: {
     borderWidth: 3,
     borderColor: COLORS.white,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 4,
@@ -597,17 +661,17 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.offWhite,
     borderRadius: RADIUS.md,
     padding: SPACING.lg,
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: SPACING.md,
   },
   previewText: {
-    fontStyle: 'italic',
+    fontStyle: "italic",
     color: COLORS.textPrimary,
     fontFamily: FONTS.serifItalic,
   },
   sliderContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: SPACING.sm,
   },
   slider: {
@@ -617,17 +681,17 @@ const styles = StyleSheet.create({
   sliderLabel: {
     fontSize: FONT_SIZES.sm,
     color: COLORS.textMuted,
-    fontWeight: '500',
+    fontWeight: "500",
   },
   toggleRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: SPACING.md,
   },
   toggleTitle: {
     fontSize: FONT_SIZES.md,
-    fontWeight: '600',
+    fontWeight: "600",
     color: COLORS.textPrimary,
     marginBottom: 2,
   },
@@ -636,21 +700,21 @@ const styles = StyleSheet.create({
     color: COLORS.textMuted,
   },
   testButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     gap: SPACING.sm,
     paddingVertical: SPACING.md,
     marginVertical: SPACING.sm,
     borderRadius: RADIUS.md,
     borderWidth: 1,
     borderColor: COLORS.terracotta,
-    backgroundColor: COLORS.terracotta + '10',
+    backgroundColor: COLORS.terracotta + "10",
   },
   testButtonText: {
     fontSize: FONT_SIZES.sm,
     color: COLORS.terracotta,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   categoriesSection: {
     borderTopWidth: 1,
@@ -663,8 +727,8 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.sm,
   },
   categoryChips: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+    flexDirection: "row",
+    flexWrap: "wrap",
     gap: SPACING.sm,
   },
   categoryChip: {
@@ -687,16 +751,16 @@ const styles = StyleSheet.create({
     color: COLORS.white,
   },
   syncRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     borderTopWidth: 1,
     borderTopColor: COLORS.border,
     paddingTop: SPACING.md,
   },
   syncInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: SPACING.xs,
   },
   syncText: {
@@ -713,22 +777,22 @@ const styles = StyleSheet.create({
   syncButtonText: {
     fontSize: FONT_SIZES.sm,
     color: COLORS.terracotta,
-    fontWeight: '500',
+    fontWeight: "500",
   },
   appInfo: {
-    alignItems: 'center',
+    alignItems: "center",
     paddingVertical: SPACING.xl,
   },
   appName: {
     fontSize: FONT_SIZES.xs,
-    fontWeight: '600',
+    fontWeight: "600",
     color: COLORS.textMuted,
     letterSpacing: 2,
     marginBottom: SPACING.sm,
   },
   appLinks: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
   appLink: {
     fontSize: FONT_SIZES.sm,
