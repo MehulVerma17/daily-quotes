@@ -15,13 +15,31 @@
  * @version 2.0.0
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import Toast, { BaseToast, ErrorToast, ToastConfig } from 'react-native-toast-message';
+import * as Notifications from 'expo-notifications';
 
 import { RootNavigator } from './src/navigation/RootNavigator';
 import { useAuthStore } from './src/stores';
+
+// ============================================
+// NOTIFICATION CONFIGURATION
+// ============================================
+
+/**
+ * Configure how notifications are handled when app is in foreground
+ */
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: true,
+    shouldSetBadge: false,
+    shouldShowBanner: true,
+    shouldShowList: true,
+  }),
+});
 
 // ============================================
 // TOAST CONFIGURATION
@@ -122,11 +140,37 @@ const toastConfig: ToastConfig = {
 
 export default function App() {
   const initialize = useAuthStore((state) => state.initialize);
+  const notificationListener = useRef<Notifications.Subscription | null>(null);
+  const responseListener = useRef<Notifications.Subscription | null>(null);
 
   // Initialize auth on app start
   useEffect(() => {
     initialize();
   }, [initialize]);
+
+  // Set up notification listeners
+  useEffect(() => {
+    // Listener for notifications received while app is in foreground
+    notificationListener.current = Notifications.addNotificationReceivedListener(notification => {
+      console.log('Notification received:', notification);
+    });
+
+    // Listener for when user taps on notification
+    responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
+      console.log('Notification tapped:', response);
+      // The app will automatically navigate to home when opened
+    });
+
+    // Cleanup listeners on unmount
+    return () => {
+      if (notificationListener.current) {
+        notificationListener.current.remove();
+      }
+      if (responseListener.current) {
+        responseListener.current.remove();
+      }
+    };
+  }, []);
 
   return (
     <SafeAreaProvider>

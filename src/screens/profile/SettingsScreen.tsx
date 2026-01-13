@@ -15,15 +15,26 @@ import {
   Switch,
   ActivityIndicator,
   Dimensions,
+  Platform,
+  Alert,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import Slider from '@react-native-community/slider';
+import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { useAuthStore } from '../../stores';
 import { COLORS, SPACING, RADIUS, FONTS, FONT_SIZES, ACCENT_COLORS, scale } from '../../constants/theme';
 import { UserSettings, ThemeMode, AccentColor, FontSize } from '../../types';
 import { getUserSettings, updateUserSettings } from '../../services/settingsService';
+import {
+  requestNotificationPermissions,
+  scheduleDailyQuoteNotification,
+  cancelDailyQuoteNotification,
+  formatNotificationTime,
+  timeStringToDate,
+  dateToTimeString,
+} from '../../services/notificationService';
 import { APP_CONFIG } from '../../config';
 
 const { width } = Dimensions.get('window');
@@ -66,6 +77,9 @@ export const SettingsScreen: React.FC = () => {
 
   // Font size preview value (0-1 range for slider)
   const [fontSizeValue, setFontSizeValue] = useState(0.5);
+
+  // Time picker state
+  const [showTimePicker, setShowTimePicker] = useState(false);
 
   const loadSettings = useCallback(async () => {
     if (!user?.id) return;
@@ -119,8 +133,40 @@ export const SettingsScreen: React.FC = () => {
     handleUpdateSetting('font_size', fontSize);
   };
 
-  const handleNotificationToggle = (enabled: boolean) => {
+  const handleNotificationToggle = async (enabled: boolean) => {
+    if (enabled) {
+      // Request permissions first
+      const granted = await requestNotificationPermissions();
+      if (!granted) {
+        Alert.alert(
+          'Permission Required',
+          'Please enable notifications in your device settings to receive daily quotes.',
+          [{ text: 'OK' }]
+        );
+        return;
+      }
+      // Schedule the notification
+      const time = settings?.notification_time || '09:00';
+      await scheduleDailyQuoteNotification(time);
+    } else {
+      // Cancel notifications
+      await cancelDailyQuoteNotification();
+    }
     handleUpdateSetting('notification_enabled', enabled);
+  };
+
+  const handleTimeChange = async (event: DateTimePickerEvent, selectedDate?: Date) => {
+    setShowTimePicker(Platform.OS === 'ios');
+
+    if (event.type === 'set' && selectedDate) {
+      const newTime = dateToTimeString(selectedDate);
+      // Update setting in database
+      await handleUpdateSetting('notification_time', newTime);
+      // Reschedule notification if enabled
+      if (settings?.notification_enabled) {
+        await scheduleDailyQuoteNotification(newTime);
+      }
+    }
   };
 
   const toggleCategory = (categoryId: string) => {
@@ -247,10 +293,40 @@ export const SettingsScreen: React.FC = () => {
             </View>
 
             {/* Reminder Time */}
-            <Pressable style={styles.settingRowPressable}>
-              <Text style={styles.settingLabel}>Reminder Time</Text>
-              <Text style={styles.settingValue}>{settings?.notification_time || '09:00'} AM</Text>
+            <Pressable
+              style={styles.settingRowPressable}
+              onPress={() => setShowTimePicker(true)}
+              disabled={!settings?.notification_enabled}
+            >
+              <Text style={[
+                styles.settingLabel,
+                !settings?.notification_enabled && styles.settingLabelDisabled
+              ]}>Reminder Time</Text>
+              <View style={styles.timeValueContainer}>
+                <Text style={[
+                  styles.settingValue,
+                  !settings?.notification_enabled && styles.settingValueDisabled
+                ]}>
+                  {formatNotificationTime(settings?.notification_time || '09:00')}
+                </Text>
+                <Ionicons
+                  name="chevron-forward"
+                  size={16}
+                  color={settings?.notification_enabled ? COLORS.terracotta : COLORS.textMuted}
+                />
+              </View>
             </Pressable>
+
+            {/* Time Picker */}
+            {showTimePicker && (
+              <DateTimePicker
+                value={timeStringToDate(settings?.notification_time || '09:00')}
+                mode="time"
+                is24Hour={false}
+                display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                onChange={handleTimeChange}
+              />
+            )}
 
             {/* Favorite Categories */}
             <View style={styles.categoriesSection}>
@@ -435,6 +511,17 @@ const styles = StyleSheet.create({
     fontSize: FONT_SIZES.md,
     color: COLORS.terracotta,
     fontWeight: '500',
+  },
+  settingLabelDisabled: {
+    color: COLORS.textPlaceholder,
+  },
+  settingValueDisabled: {
+    color: COLORS.textPlaceholder,
+  },
+  timeValueContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.xs,
   },
   colorOptions: {
     flexDirection: 'row',

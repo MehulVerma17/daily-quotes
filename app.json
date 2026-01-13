@@ -21,10 +21,34 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.mehulverma.dailyquotes"
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "@react-native-community/datetimepicker",
+      [
+        "react-native-android-widget",
+        {
+          "widgets": [
+            {
+              "name": "QuoteWidget",
+              "label": "Daily Quote",
+              "minWidth": "320dp",
+              "minHeight": "120dp",
+              "description": "Shows the quote of the day",
+              "updatePeriodMillis": 1800000
+            }
+          ]
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "dc8f92cf-118c-4429-8871-ecc5c288e037"
+      }
     }
   }
 }
