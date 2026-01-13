@@ -60,7 +60,6 @@ export const LoginScreen: React.FC = () => {
 
   // Zustand store
   const signIn = useAuthStore((state) => state.signIn);
-  const signInWithGoogle = useAuthStore((state) => state.signInWithGoogle);
   const isLoading = useAuthStore((state) => state.isLoading);
 
   // Form state
@@ -140,25 +139,6 @@ export const LoginScreen: React.FC = () => {
       });
     }
     // Navigation will happen automatically via auth state change
-  };
-
-  /**
-   * Handle Google sign in
-   */
-  const handleGoogleSignIn = async (): Promise<void> => {
-    setIsSubmitting(true);
-
-    const result = await signInWithGoogle();
-
-    setIsSubmitting(false);
-
-    if (!result.success) {
-      Toast.show({
-        type: 'error',
-        text1: 'Google Sign In Failed',
-        text2: result.error || 'Please try again',
-      });
-    }
   };
 
   /**
@@ -295,25 +275,6 @@ export const LoginScreen: React.FC = () => {
               )}
             </Pressable>
 
-            {/* Divider */}
-            <View style={styles.dividerContainer}>
-              <View style={styles.dividerLine} />
-              <Text style={styles.dividerText}>OR CONTINUE WITH</Text>
-              <View style={styles.dividerLine} />
-            </View>
-
-            {/* Google Sign In Button */}
-            <Pressable
-              style={[
-                styles.googleButton,
-                isFormDisabled && styles.buttonDisabled,
-              ]}
-              onPress={handleGoogleSignIn}
-              disabled={isFormDisabled}
-            >
-              <Ionicons name="logo-google" size={20} color={COLORS.textPrimary} />
-              <Text style={styles.googleButtonText}>Sign in with Google</Text>
-            </Pressable>
           </View>
 
           {/* Bottom Sign Up Link */}
@@ -448,44 +409,6 @@ const styles = StyleSheet.create({
   },
   buttonDisabled: {
     opacity: 0.6,
-  },
-
-  // Divider
-  dividerContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginVertical: SPACING.xl,
-  },
-  dividerLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: COLORS.divider,
-  },
-  dividerText: {
-    fontSize: moderateScale(11),
-    fontWeight: '500',
-    color: COLORS.textMuted,
-    letterSpacing: 1.5,
-    marginHorizontal: SPACING.md,
-  },
-
-  // Google Button
-  googleButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: COLORS.inputBackground,
-    height: moderateScale(56),
-    borderRadius: RADIUS.lg,
-    borderWidth: 1,
-    borderColor: COLORS.inputBorder,
-    gap: SPACING.sm,
-    ...SHADOWS.small,
-  },
-  googleButtonText: {
-    fontSize: FONT_SIZES.md,
-    fontWeight: '500',
-    color: COLORS.textPrimary,
   },
 
   // Bottom Section

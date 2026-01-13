@@ -71,7 +71,6 @@ export const SignUpScreen: React.FC = () => {
 
   // Zustand store
   const signUp = useAuthStore((state) => state.signUp);
-  const signInWithGoogle = useAuthStore((state) => state.signInWithGoogle);
   const isLoading = useAuthStore((state) => state.isLoading);
 
   // Form state
@@ -231,25 +230,6 @@ export const SignUpScreen: React.FC = () => {
       Toast.show({
         type: 'error',
         text1: 'Sign Up Failed',
-        text2: result.error || 'Please try again',
-      });
-    }
-  };
-
-  /**
-   * Handle Google sign in
-   */
-  const handleGoogleSignIn = async (): Promise<void> => {
-    setIsSubmitting(true);
-
-    const result = await signInWithGoogle();
-
-    setIsSubmitting(false);
-
-    if (!result.success) {
-      Toast.show({
-        type: 'error',
-        text1: 'Google Sign Up Failed',
         text2: result.error || 'Please try again',
       });
     }
@@ -490,39 +470,6 @@ export const SignUpScreen: React.FC = () => {
                 <Text style={styles.signInLink}>Sign In</Text>
               </Pressable>
             </View>
-
-            {/* Divider */}
-            <View style={styles.dividerContainer}>
-              <View style={styles.dividerLine} />
-              <Text style={styles.dividerText}>OR JOIN WITH</Text>
-              <View style={styles.dividerLine} />
-            </View>
-
-            {/* Social Sign Up Buttons */}
-            <View style={styles.socialButtonsContainer}>
-              {/* Apple Button */}
-              <Pressable
-                style={[
-                  styles.socialButton,
-                  isFormDisabled && styles.buttonDisabled,
-                ]}
-                disabled={isFormDisabled}
-              >
-                <Ionicons name="logo-apple" size={22} color={COLORS.textPrimary} />
-              </Pressable>
-
-              {/* Google Button */}
-              <Pressable
-                style={[
-                  styles.socialButton,
-                  isFormDisabled && styles.buttonDisabled,
-                ]}
-                onPress={handleGoogleSignIn}
-                disabled={isFormDisabled}
-              >
-                <Ionicons name="logo-google" size={20} color={COLORS.textPrimary} />
-              </Pressable>
-            </View>
           </View>
 
           {/* Bottom Padding */}
@@ -697,43 +644,6 @@ const styles = StyleSheet.create({
     fontSize: FONT_SIZES.base,
     fontWeight: '600',
     color: COLORS.terracotta,
-  },
-
-  // Divider
-  dividerContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginVertical: SPACING.xl,
-  },
-  dividerLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: COLORS.divider,
-  },
-  dividerText: {
-    fontSize: moderateScale(11),
-    fontWeight: '500',
-    color: COLORS.textMuted,
-    letterSpacing: 1.5,
-    marginHorizontal: SPACING.md,
-  },
-
-  // Social Buttons
-  socialButtonsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: SPACING.lg,
-  },
-  socialButton: {
-    width: moderateScale(70),
-    height: moderateScale(56),
-    borderRadius: RADIUS.lg,
-    backgroundColor: COLORS.inputBackground,
-    borderWidth: 1,
-    borderColor: COLORS.inputBorder,
-    justifyContent: 'center',
-    alignItems: 'center',
-    ...SHADOWS.small,
   },
 });
 

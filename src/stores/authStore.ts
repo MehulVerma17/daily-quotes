@@ -132,6 +132,24 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         return { success: false, error: 'Sign up failed. Please try again.' };
       }
 
+      // Create profile immediately after successful signup
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .upsert({
+          id: authData.user.id,
+          email: data.email,
+          full_name: data.fullName,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        });
+
+      if (profileError) {
+        log.error('AuthStore', 'Profile creation error', profileError);
+        // Don't fail signup if profile creation fails - it can be created later
+      } else {
+        log.info('AuthStore', 'Profile created successfully');
+      }
+
       log.info('AuthStore', 'Sign up successful');
       return { success: true };
     } catch (error) {
@@ -280,7 +298,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 }));
 
-// Helper function to fetch profile
+// Helper function to fetch profile (auto-creates if not found)
 async function fetchProfile(userId: string): Promise<UserProfile | null> {
   try {
     log.info('AuthStore', `Fetching profile for user: ${userId}`);
@@ -293,7 +311,32 @@ async function fetchProfile(userId: string): Promise<UserProfile | null> {
 
     if (error) {
       if (error.code === 'PGRST116') {
-        log.info('AuthStore', 'Profile not found, will be created on first update');
+        // Profile not found - try to create it from auth metadata
+        log.info('AuthStore', 'Profile not found, creating from auth metadata...');
+
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const fullName = user.user_metadata?.full_name || null;
+          const { data: newProfile, error: createError } = await supabase
+            .from('profiles')
+            .upsert({
+              id: userId,
+              email: user.email,
+              full_name: fullName,
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString(),
+            })
+            .select()
+            .single();
+
+          if (createError) {
+            log.error('AuthStore', 'Error creating profile', createError);
+            return null;
+          }
+
+          log.info('AuthStore', 'Profile created successfully');
+          return newProfile as UserProfile;
+        }
         return null;
       }
       throw error;
