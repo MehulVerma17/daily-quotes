@@ -9,6 +9,7 @@ import type { WidgetTaskHandlerProps } from 'react-native-android-widget';
 import { registerWidgetTaskHandler } from 'react-native-android-widget';
 
 import { QuoteWidget } from './QuoteWidget';
+import { getWidgetQuote } from '../services/widgetStorage';
 
 const nameToWidget: Record<string, React.FC<any>> = {
   QuoteWidget: QuoteWidget,
@@ -27,9 +28,16 @@ async function widgetTaskHandler(props: WidgetTaskHandlerProps) {
     case 'WIDGET_ADDED':
     case 'WIDGET_UPDATE':
     case 'WIDGET_RESIZED':
-      // Render widget with default quote
-      // In future, could fetch stored daily quote from AsyncStorage
-      props.renderWidget(<Widget />);
+      // Fetch stored Quote of the Day from AsyncStorage
+      const storedQuote = await getWidgetQuote();
+      if (storedQuote) {
+        props.renderWidget(
+          <Widget quote={storedQuote.content} author={storedQuote.author} />
+        );
+      } else {
+        // Fall back to default quote if none stored
+        props.renderWidget(<Widget />);
+      }
       break;
 
     case 'WIDGET_DELETED':

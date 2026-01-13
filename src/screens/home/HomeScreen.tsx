@@ -27,6 +27,8 @@ import { SPACING, RADIUS, FONTS, FONT_SIZES } from '../../constants/theme';
 import { useTheme } from '../../contexts';
 import { Quote } from '../../types';
 import { getQuoteOfDay, getQuotes } from '../../services/quoteService';
+import { saveWidgetQuote } from '../../services/widgetStorage';
+import { requestWidgetUpdate } from 'react-native-android-widget';
 import { CATEGORIES } from '../../config';
 import { AddToCollectionModal, ShareQuoteModal } from '../../components';
 
@@ -88,6 +90,12 @@ export const HomeScreen: React.FC = () => {
       setDiscoverQuotes(quotes.data);
       setHasMore(quotes.hasMore);
       setPage(1);
+
+      // Save QOTD to AsyncStorage for widget and trigger widget update
+      if (qotd) {
+        await saveWidgetQuote({ content: qotd.content, author: qotd.author });
+        requestWidgetUpdate({ widgetName: 'QuoteWidget' });
+      }
     } catch (error) {
       console.error('Error loading home data:', error);
     } finally {
