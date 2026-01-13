@@ -5,7 +5,7 @@
  * Matches design from image 10.
  */
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -15,18 +15,24 @@ import {
   Alert,
   Image,
   Dimensions,
-} from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { useAuthStore } from '../../stores';
-import { SPACING, RADIUS, FONTS, FONT_SIZES, scale } from '../../constants/theme';
-import { useTheme } from '../../contexts';
-import { getFavoriteCount } from '../../services/favoritesService';
-import { getCollectionCount } from '../../services/collectionsService';
+} from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Ionicons } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { useAuthStore } from "../../stores";
+import {
+  SPACING,
+  RADIUS,
+  FONTS,
+  FONT_SIZES,
+  scale,
+} from "../../constants/theme";
+import { useTheme } from "../../contexts";
+import { getFavoriteCount } from "../../services/favoritesService";
+import { getCollectionCount } from "../../services/collectionsService";
 
-const { width } = Dimensions.get('window');
+const { width } = Dimensions.get("window");
 
 type ProfileStackParamList = {
   Profile: undefined;
@@ -36,16 +42,35 @@ type ProfileStackParamList = {
 
 export const ProfileScreen: React.FC = () => {
   const insets = useSafeAreaInsets();
-  const navigation = useNavigation<NativeStackNavigationProp<ProfileStackParamList>>();
+  const navigation =
+    useNavigation<NativeStackNavigationProp<ProfileStackParamList>>();
 
   // Theme
   const { colors, accent } = useTheme();
 
   // Achievement badges - use accent colors
   const ACHIEVEMENTS = [
-    { id: 'collector', icon: 'trophy', name: 'Quote Collector', level: 'Level 5', color: accent.primary },
-    { id: 'curator', icon: 'diamond', name: 'Curator', level: 'Expert', color: accent.light },
-    { id: 'reader', icon: 'calendar', name: 'Daily Reader', level: '10+ Days', color: accent.dark },
+    {
+      id: "collector",
+      icon: "trophy",
+      name: "Quote Collector",
+      level: "Level 5",
+      color: accent.primary,
+    },
+    {
+      id: "curator",
+      icon: "diamond",
+      name: "Curator",
+      level: "Expert",
+      color: accent.light,
+    },
+    {
+      id: "reader",
+      icon: "calendar",
+      name: "Daily Reader",
+      level: "10+ Days",
+      color: accent.dark,
+    },
   ];
 
   // Zustand store
@@ -68,7 +93,7 @@ export const ProfileScreen: React.FC = () => {
       setFavoriteCount(favs);
       setCollectionCount(cols);
     } catch (error) {
-      console.error('Error loading stats:', error);
+      console.error("Error loading stats:", error);
     }
   }, [user?.id]);
 
@@ -77,32 +102,28 @@ export const ProfileScreen: React.FC = () => {
   }, [loadStats]);
 
   const handleLogout = () => {
-    Alert.alert(
-      'Log Out',
-      'Are you sure you want to log out?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Log Out',
-          style: 'destructive',
-          onPress: signOut,
-        },
-      ]
-    );
+    Alert.alert("Log Out", "Are you sure you want to log out?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Log Out",
+        style: "destructive",
+        onPress: signOut,
+      },
+    ]);
   };
 
   const handleDeleteAccount = () => {
     Alert.alert(
-      'Delete Account',
-      'Are you sure you want to delete your account? This action cannot be undone and all your data will be permanently deleted.',
+      "Delete Account",
+      "Are you sure you want to delete your account? This action cannot be undone and all your data will be permanently deleted.",
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: "Cancel", style: "cancel" },
         {
-          text: 'Delete',
-          style: 'destructive',
+          text: "Delete",
+          style: "destructive",
           onPress: () => {
             // TODO: Implement account deletion
-            console.log('Delete account');
+            console.log("Delete account");
           },
         },
       ]
@@ -110,14 +131,19 @@ export const ProfileScreen: React.FC = () => {
   };
 
   const memberSince = profile?.created_at
-    ? new Date(profile.created_at).toLocaleDateString('en-US', {
-        month: 'short',
-        year: 'numeric',
+    ? new Date(profile.created_at).toLocaleDateString("en-US", {
+        month: "short",
+        year: "numeric",
       })
-    : 'N/A';
+    : "N/A";
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top, backgroundColor: colors.offWhite }]}>
+    <View
+      style={[
+        styles.container,
+        { paddingTop: insets.top, backgroundColor: colors.offWhite },
+      ]}
+    >
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
@@ -125,67 +151,147 @@ export const ProfileScreen: React.FC = () => {
       >
         {/* Header */}
         <View style={styles.header}>
-          <Pressable onPress={() => navigation.navigate('Settings')} style={styles.settingsButton}>
-            <Ionicons name="settings-outline" size={24} color={colors.textPrimary} />
+          <Pressable
+            onPress={() => navigation.navigate("Settings")}
+            style={styles.settingsButton}
+          >
+            <Ionicons
+              name="settings-outline"
+              size={24}
+              color={colors.textPrimary}
+            />
           </Pressable>
-          <Text style={[styles.headerTitle, { color: colors.textPrimary }]}>Profile</Text>
-          <Pressable style={styles.editButton}>
-            <Ionicons name="pencil" size={20} color={colors.textPrimary} />
-          </Pressable>
+          <Text style={[styles.headerTitle, { color: colors.textPrimary }]}>
+            Profile
+          </Text>
+          <View style={styles.headerSpacer} />
         </View>
 
         {/* Profile Info */}
         <View style={styles.profileSection}>
           <View style={styles.avatarContainer}>
-            <View style={[styles.avatar, { backgroundColor: colors.white, borderColor: colors.gradientStart }]}>
+            <View
+              style={[
+                styles.avatar,
+                {
+                  backgroundColor: colors.white,
+                  borderColor: colors.gradientStart,
+                },
+              ]}
+            >
               {profile?.avatar_url ? (
-                <Image source={{ uri: profile.avatar_url }} style={styles.avatarImage} />
+                <Image
+                  source={{ uri: profile.avatar_url }}
+                  style={styles.avatarImage}
+                />
               ) : (
                 <Ionicons name="person" size={40} color={colors.textMuted} />
               )}
             </View>
-            <Pressable style={[styles.cameraButton, { backgroundColor: accent.primary, borderColor: colors.white }]}>
+            <Pressable
+              style={[
+                styles.cameraButton,
+                { backgroundColor: accent.primary, borderColor: colors.white },
+              ]}
+            >
               <Ionicons name="camera" size={14} color={colors.white} />
             </Pressable>
           </View>
-          <Text style={[styles.userName, { color: colors.textPrimary }]}>{profile?.full_name || 'User'}</Text>
-          <Text style={[styles.memberSince, { color: colors.textMuted }]}>Member since {memberSince}</Text>
+          <Text style={[styles.userName, { color: colors.textPrimary }]}>
+            {profile?.full_name || "User"}
+          </Text>
+          <Text style={[styles.memberSince, { color: colors.textMuted }]}>
+            Member since {memberSince}
+          </Text>
         </View>
 
         {/* Stats Grid */}
         <View style={styles.statsGrid}>
-          <View style={[styles.statCard, { backgroundColor: colors.white, shadowColor: colors.shadow }]}>
-            <View style={[styles.statIcon, { backgroundColor: accent.primary + '20' }]}>
+          <View
+            style={[
+              styles.statCard,
+              { backgroundColor: colors.white, shadowColor: colors.shadow },
+            ]}
+          >
+            <View
+              style={[
+                styles.statIcon,
+                { backgroundColor: accent.primary + "20" },
+              ]}
+            >
               <Ionicons name="heart" size={18} color={accent.primary} />
             </View>
-            <Text style={[styles.statNumber, { color: colors.textPrimary }]}>{favoriteCount}</Text>
-            <Text style={[styles.statLabel, { color: colors.textMuted }]}>Favorites</Text>
+            <Text style={[styles.statNumber, { color: colors.textPrimary }]}>
+              {favoriteCount}
+            </Text>
+            <Text style={[styles.statLabel, { color: colors.textMuted }]}>
+              Favorites
+            </Text>
           </View>
-          <View style={[styles.statCard, { backgroundColor: colors.white, shadowColor: colors.shadow }]}>
-            <View style={[styles.statIcon, { backgroundColor: colors.success + '20' }]}>
+          <View
+            style={[
+              styles.statCard,
+              { backgroundColor: colors.white, shadowColor: colors.shadow },
+            ]}
+          >
+            <View
+              style={[
+                styles.statIcon,
+                { backgroundColor: colors.success + "20" },
+              ]}
+            >
               <Ionicons name="folder" size={18} color={colors.success} />
             </View>
-            <Text style={[styles.statNumber, { color: colors.textPrimary }]}>{collectionCount}</Text>
-            <Text style={[styles.statLabel, { color: colors.textMuted }]}>Collections</Text>
+            <Text style={[styles.statNumber, { color: colors.textPrimary }]}>
+              {collectionCount}
+            </Text>
+            <Text style={[styles.statLabel, { color: colors.textMuted }]}>
+              Collections
+            </Text>
           </View>
-          <View style={[styles.statCard, { backgroundColor: colors.white, shadowColor: colors.shadow }]}>
-            <View style={[styles.statIcon, { backgroundColor: colors.info + '20' }]}>
+          <View
+            style={[
+              styles.statCard,
+              { backgroundColor: colors.white, shadowColor: colors.shadow },
+            ]}
+          >
+            <View
+              style={[styles.statIcon, { backgroundColor: colors.info + "20" }]}
+            >
               <Ionicons name="share-social" size={18} color={colors.info} />
             </View>
-            <Text style={[styles.statNumber, { color: colors.textPrimary }]}>{sharedCount}</Text>
-            <Text style={[styles.statLabel, { color: colors.textMuted }]}>Shared</Text>
+            <Text style={[styles.statNumber, { color: colors.textPrimary }]}>
+              {sharedCount}
+            </Text>
+            <Text style={[styles.statLabel, { color: colors.textMuted }]}>
+              Shared
+            </Text>
           </View>
-          <View style={[styles.statCard, { backgroundColor: colors.white, shadowColor: colors.shadow }]}>
-            <View style={[styles.statIcon, { backgroundColor: colors.warning + '20' }]}>
+          <View
+            style={[
+              styles.statCard,
+              { backgroundColor: colors.white, shadowColor: colors.shadow },
+            ]}
+          >
+            <View
+              style={[
+                styles.statIcon,
+                { backgroundColor: colors.warning + "20" },
+              ]}
+            >
               <Ionicons name="flame" size={18} color={colors.warning} />
             </View>
-            <Text style={[styles.statNumber, { color: colors.textPrimary }]}>{dayStreak}</Text>
-            <Text style={[styles.statLabel, { color: colors.textMuted }]}>Day Streak</Text>
+            <Text style={[styles.statNumber, { color: colors.textPrimary }]}>
+              {dayStreak}
+            </Text>
+            <Text style={[styles.statLabel, { color: colors.textMuted }]}>
+              Day Streak
+            </Text>
           </View>
         </View>
 
         {/* Achievements */}
-        <View style={styles.section}>
+        {/* <View style={styles.section}>
           <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Achievements</Text>
           <View style={styles.achievementsRow}>
             {ACHIEVEMENTS.map((achievement) => (
@@ -198,48 +304,113 @@ export const ProfileScreen: React.FC = () => {
               </View>
             ))}
           </View>
-        </View>
+        </View> */}
 
         {/* Menu Items */}
         <View style={styles.menuSection}>
-          <Pressable style={[styles.menuItem, { backgroundColor: colors.white, shadowColor: colors.shadow }]}>
-            <View style={styles.menuItemLeft}>
-              <Ionicons name="person-outline" size={22} color={colors.textPrimary} />
-              <Text style={[styles.menuItemText, { color: colors.textPrimary }]}>Account</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
-          </Pressable>
-
-          <Pressable
-            style={[styles.menuItem, { backgroundColor: colors.white, shadowColor: colors.shadow }]}
-            onPress={() => navigation.navigate('Settings')}
+          {/* <Pressable
+            style={[
+              styles.menuItem,
+              { backgroundColor: colors.white, shadowColor: colors.shadow },
+            ]}
           >
             <View style={styles.menuItemLeft}>
-              <Ionicons name="options-outline" size={22} color={colors.textPrimary} />
-              <Text style={[styles.menuItemText, { color: colors.textPrimary }]}>Preferences</Text>
+              <Ionicons
+                name="person-outline"
+                size={22}
+                color={colors.textPrimary}
+              />
+              <Text
+                style={[styles.menuItemText, { color: colors.textPrimary }]}
+              >
+                Account
+              </Text>
             </View>
-            <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
+            <Ionicons
+              name="chevron-forward"
+              size={20}
+              color={colors.textMuted}
+            />
+          </Pressable> */}
+
+          <Pressable
+            style={[
+              styles.menuItem,
+              { backgroundColor: colors.white, shadowColor: colors.shadow },
+            ]}
+            onPress={() => navigation.navigate("Settings")}
+          >
+            <View style={styles.menuItemLeft}>
+              <Ionicons
+                name="options-outline"
+                size={22}
+                color={colors.textPrimary}
+              />
+              <Text
+                style={[styles.menuItemText, { color: colors.textPrimary }]}
+              >
+                Preferences
+              </Text>
+            </View>
+            <Ionicons
+              name="chevron-forward"
+              size={20}
+              color={colors.textMuted}
+            />
           </Pressable>
 
-          <Pressable style={[styles.menuItem, { backgroundColor: colors.white, shadowColor: colors.shadow }]}>
+          {/* <Pressable
+            style={[
+              styles.menuItem,
+              { backgroundColor: colors.white, shadowColor: colors.shadow },
+            ]}
+          >
             <View style={styles.menuItemLeft}>
-              <Ionicons name="help-circle-outline" size={22} color={colors.textPrimary} />
-              <Text style={[styles.menuItemText, { color: colors.textPrimary }]}>Support</Text>
+              <Ionicons
+                name="help-circle-outline"
+                size={22}
+                color={colors.textPrimary}
+              />
+              <Text
+                style={[styles.menuItemText, { color: colors.textPrimary }]}
+              >
+                Support
+              </Text>
             </View>
-            <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
-          </Pressable>
+            <Ionicons
+              name="chevron-forward"
+              size={20}
+              color={colors.textMuted}
+            />
+          </Pressable> */}
         </View>
 
         {/* Danger Zone */}
         <View style={styles.dangerSection}>
-          <Pressable style={[styles.dangerItem, { backgroundColor: colors.white, shadowColor: colors.shadow }]} onPress={handleLogout}>
+          <Pressable
+            style={[
+              styles.dangerItem,
+              { backgroundColor: colors.white, shadowColor: colors.shadow },
+            ]}
+            onPress={handleLogout}
+          >
             <Ionicons name="log-out-outline" size={22} color={accent.primary} />
-            <Text style={[styles.dangerText, { color: accent.primary }]}>Log Out</Text>
+            <Text style={[styles.dangerText, { color: accent.primary }]}>
+              Log Out
+            </Text>
           </Pressable>
 
-          <Pressable style={[styles.dangerItem, { backgroundColor: colors.white, shadowColor: colors.shadow }]} onPress={handleDeleteAccount}>
+          <Pressable
+            style={[
+              styles.dangerItem,
+              { backgroundColor: colors.white, shadowColor: colors.shadow },
+            ]}
+            onPress={handleDeleteAccount}
+          >
             <Ionicons name="trash-outline" size={22} color={colors.error} />
-            <Text style={[styles.dangerText, { color: colors.error }]}>Delete Account</Text>
+            <Text style={[styles.dangerText, { color: colors.error }]}>
+              Delete Account
+            </Text>
           </Pressable>
         </View>
       </ScrollView>
@@ -258,64 +429,61 @@ const styles = StyleSheet.create({
     paddingBottom: SPACING.xxl,
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     paddingHorizontal: SPACING.base,
     paddingVertical: SPACING.md,
   },
   headerTitle: {
     fontSize: FONT_SIZES.lg,
-    fontWeight: '600',
+    fontWeight: "600",
     fontFamily: FONTS.sansBold,
   },
   settingsButton: {
     width: 40,
     height: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
-  editButton: {
+  headerSpacer: {
     width: 40,
-    height: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
   },
   profileSection: {
-    alignItems: 'center',
+    alignItems: "center",
     paddingVertical: SPACING.lg,
   },
   avatarContainer: {
-    position: 'relative',
+    position: "relative",
     marginBottom: SPACING.md,
   },
   avatar: {
     width: 100,
     height: 100,
     borderRadius: 50,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     borderWidth: 3,
-    overflow: 'hidden',
+    overflow: "hidden",
   },
   avatarImage: {
-    width: '100%',
-    height: '100%',
+    width: "100%",
+    height: "100%",
   },
   cameraButton: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 0,
     right: 0,
     width: 28,
     height: 28,
     borderRadius: 14,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     borderWidth: 2,
   },
   userName: {
     fontSize: FONT_SIZES.xl,
-    fontWeight: '700',
+    fontWeight: "700",
     fontFamily: FONTS.sansBold,
     marginBottom: SPACING.xs,
   },
@@ -323,8 +491,8 @@ const styles = StyleSheet.create({
     fontSize: FONT_SIZES.sm,
   },
   statsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+    flexDirection: "row",
+    flexWrap: "wrap",
     paddingHorizontal: SPACING.base,
     gap: SPACING.sm,
     marginBottom: SPACING.lg,
@@ -342,13 +510,13 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     marginBottom: SPACING.sm,
   },
   statNumber: {
     fontSize: FONT_SIZES.xxl,
-    fontWeight: '700',
+    fontWeight: "700",
     fontFamily: FONTS.sansBold,
   },
   statLabel: {
@@ -360,29 +528,29 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: FONT_SIZES.lg,
-    fontWeight: '600',
+    fontWeight: "600",
     marginBottom: SPACING.md,
   },
   achievementsRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
   },
   achievementCard: {
-    alignItems: 'center',
+    alignItems: "center",
     flex: 1,
   },
   achievementIcon: {
     width: 56,
     height: 56,
     borderRadius: 28,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     marginBottom: SPACING.sm,
   },
   achievementName: {
     fontSize: FONT_SIZES.xs,
-    fontWeight: '600',
-    textAlign: 'center',
+    fontWeight: "600",
+    textAlign: "center",
     marginBottom: 2,
   },
   achievementLevel: {
@@ -393,9 +561,9 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.lg,
   },
   menuItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     borderRadius: RADIUS.lg,
     padding: SPACING.md,
     marginBottom: SPACING.sm,
@@ -405,20 +573,20 @@ const styles = StyleSheet.create({
     elevation: 1,
   },
   menuItemLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: SPACING.md,
   },
   menuItemText: {
     fontSize: FONT_SIZES.md,
-    fontWeight: '500',
+    fontWeight: "500",
   },
   dangerSection: {
     paddingHorizontal: SPACING.base,
   },
   dangerItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     borderRadius: RADIUS.lg,
     padding: SPACING.md,
     marginBottom: SPACING.sm,
@@ -430,7 +598,7 @@ const styles = StyleSheet.create({
   },
   dangerText: {
     fontSize: FONT_SIZES.md,
-    fontWeight: '500',
+    fontWeight: "500",
   },
 });
 
