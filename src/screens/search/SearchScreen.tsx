@@ -28,6 +28,7 @@ import { useAuthStore, useFavoritesStore } from '../../stores';
 import { useTheme } from '../../contexts';
 import { CATEGORIES } from '../../config';
 import { AddToCollectionModal } from '../../components';
+import { STRINGS } from '../../constants/strings';
 
 const { width } = Dimensions.get('window');
 
@@ -181,12 +182,12 @@ export const SearchScreen: React.FC = () => {
     <View style={styles.emptyContainer}>
       <Ionicons name="search" size={48} color={colors.textMuted} />
       <Text style={[styles.emptyTitle, { color: colors.textPrimary }]}>
-        {hasSearched ? 'No results found' : 'Search for quotes'}
+        {hasSearched ? STRINGS.SEARCH.NO_RESULTS : STRINGS.SEARCH.SEARCH_PROMPT}
       </Text>
       <Text style={[styles.emptySubtitle, { color: colors.textMuted }]}>
         {hasSearched
-          ? `Try searching for something else`
-          : 'Find quotes by keywords or authors'}
+          ? STRINGS.SEARCH.TRY_AGAIN
+          : STRINGS.SEARCH.HINT}
       </Text>
     </View>
   );
@@ -195,7 +196,7 @@ export const SearchScreen: React.FC = () => {
     <View style={[styles.container, { paddingTop: insets.top, backgroundColor: colors.offWhite }]}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={[styles.headerTitle, { color: colors.textPrimary }]}>Search</Text>
+        <Text style={[styles.headerTitle, { color: colors.textPrimary }]}>{STRINGS.SEARCH.TITLE}</Text>
       </View>
 
       {/* Search Input */}
@@ -205,7 +206,7 @@ export const SearchScreen: React.FC = () => {
           <TextInput
             ref={searchInputRef}
             style={[styles.searchInput, { color: colors.textPrimary }]}
-            placeholder="Search quotes, authors..."
+            placeholder={STRINGS.SEARCH.PLACEHOLDER}
             placeholderTextColor={colors.textPlaceholder}
             value={searchQuery}
             onChangeText={setSearchQuery}
@@ -238,7 +239,7 @@ export const SearchScreen: React.FC = () => {
               activeFilter === 'all' && styles.filterChipTextActive,
             ]}
           >
-            All
+            {STRINGS.SEARCH.FILTER_ALL}
           </Text>
         </Pressable>
         <Pressable
@@ -256,7 +257,7 @@ export const SearchScreen: React.FC = () => {
               activeFilter === 'author' && styles.filterChipTextActive,
             ]}
           >
-            By Author
+            {STRINGS.SEARCH.FILTER_AUTHOR}
           </Text>
         </Pressable>
         <Pressable
@@ -274,7 +275,7 @@ export const SearchScreen: React.FC = () => {
               activeFilter === 'category' && styles.filterChipTextActive,
             ]}
           >
-            By Category
+            {STRINGS.SEARCH.FILTER_CATEGORY}
           </Text>
         </Pressable>
       </View>

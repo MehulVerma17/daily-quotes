@@ -37,6 +37,7 @@ import Toast from 'react-native-toast-message';
 import { useAuthStore } from '../../stores';
 import { AuthStackParamList } from '../../types';
 import { COLORS, SPACING, RADIUS, FONT_SIZES, SHADOWS, scale, moderateScale } from '../../constants/theme';
+import { STRINGS } from '../../constants/strings';
 
 // ============================================
 // TYPES
@@ -91,8 +92,8 @@ export const LoginScreen: React.FC = () => {
     if (!email.trim()) {
       Toast.show({
         type: 'error',
-        text1: 'Email Required',
-        text2: 'Please enter your email address',
+        text1: STRINGS.AUTH.EMAIL_REQUIRED,
+        text2: STRINGS.AUTH.EMAIL_REQUIRED_DESC,
       });
       return;
     }
@@ -100,8 +101,8 @@ export const LoginScreen: React.FC = () => {
     if (!isValidEmail(email)) {
       Toast.show({
         type: 'error',
-        text1: 'Invalid Email',
-        text2: 'Please enter a valid email address',
+        text1: STRINGS.AUTH.INVALID_EMAIL,
+        text2: STRINGS.AUTH.INVALID_EMAIL_DESC,
       });
       return;
     }
@@ -109,8 +110,8 @@ export const LoginScreen: React.FC = () => {
     if (!password) {
       Toast.show({
         type: 'error',
-        text1: 'Password Required',
-        text2: 'Please enter your password',
+        text1: STRINGS.AUTH.PASSWORD_REQUIRED,
+        text2: STRINGS.AUTH.PASSWORD_REQUIRED_DESC,
       });
       return;
     }
@@ -118,8 +119,8 @@ export const LoginScreen: React.FC = () => {
     if (password.length < 6) {
       Toast.show({
         type: 'error',
-        text1: 'Invalid Password',
-        text2: 'Password must be at least 6 characters',
+        text1: STRINGS.AUTH.INVALID_PASSWORD,
+        text2: STRINGS.AUTH.INVALID_PASSWORD_DESC,
       });
       return;
     }
@@ -134,8 +135,8 @@ export const LoginScreen: React.FC = () => {
     if (!result.success) {
       Toast.show({
         type: 'error',
-        text1: 'Sign In Failed',
-        text2: result.error || 'Please check your credentials and try again',
+        text1: STRINGS.AUTH.SIGN_IN_FAILED,
+        text2: result.error || STRINGS.AUTH.SIGN_IN_FAILED_DESC,
       });
     }
     // Navigation will happen automatically via auth state change
@@ -189,21 +190,21 @@ export const LoginScreen: React.FC = () => {
             <Text style={styles.decorativeQuote}>"</Text>
 
             {/* App Title */}
-            <Text style={styles.appTitle}>QuoteVault</Text>
+            <Text style={styles.appTitle}>{STRINGS.APP.NAME}</Text>
 
             {/* Tagline */}
-            <Text style={styles.tagline}>YOUR DAILY DOSE OF WISDOM</Text>
+            <Text style={styles.tagline}>{STRINGS.APP.TAGLINE}</Text>
           </View>
 
           {/* Form Section */}
           <View style={styles.formSection}>
             {/* Email Input */}
             <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Email</Text>
+              <Text style={styles.inputLabel}>{STRINGS.AUTH.EMAIL}</Text>
               <View style={styles.inputWrapper}>
                 <TextInput
                   style={styles.input}
-                  placeholder="Enter your email"
+                  placeholder={STRINGS.AUTH.ENTER_EMAIL}
                   placeholderTextColor={COLORS.textPlaceholder}
                   value={email}
                   onChangeText={setEmail}
@@ -220,12 +221,12 @@ export const LoginScreen: React.FC = () => {
 
             {/* Password Input */}
             <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Password</Text>
+              <Text style={styles.inputLabel}>{STRINGS.AUTH.PASSWORD}</Text>
               <View style={styles.inputWrapper}>
                 <TextInput
                   ref={passwordInputRef}
                   style={[styles.input, styles.passwordInput]}
-                  placeholder="Enter your password"
+                  placeholder={STRINGS.AUTH.ENTER_PASSWORD}
                   placeholderTextColor={COLORS.textPlaceholder}
                   value={password}
                   onChangeText={setPassword}
@@ -256,7 +257,7 @@ export const LoginScreen: React.FC = () => {
               style={styles.forgotPasswordButton}
               onPress={handleNavigateToForgotPassword}
             >
-              <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
+              <Text style={styles.forgotPasswordText}>{STRINGS.AUTH.FORGOT_PASSWORD}</Text>
             </Pressable>
 
             {/* Sign In Button */}
@@ -271,7 +272,7 @@ export const LoginScreen: React.FC = () => {
               {isSubmitting ? (
                 <ActivityIndicator color={COLORS.white} />
               ) : (
-                <Text style={styles.signInButtonText}>Sign In</Text>
+                <Text style={styles.signInButtonText}>{STRINGS.AUTH.SIGN_IN}</Text>
               )}
             </Pressable>
 
@@ -279,9 +280,9 @@ export const LoginScreen: React.FC = () => {
 
           {/* Bottom Sign Up Link */}
           <View style={[styles.bottomSection, { paddingBottom: insets.bottom + SPACING.lg }]}>
-            <Text style={styles.bottomText}>Don't have an account? </Text>
+            <Text style={styles.bottomText}>{STRINGS.AUTH.DONT_HAVE_ACCOUNT} </Text>
             <Pressable onPress={handleNavigateToSignUp}>
-              <Text style={styles.signUpLink}>Sign Up</Text>
+              <Text style={styles.signUpLink}>{STRINGS.AUTH.SIGN_UP}</Text>
             </Pressable>
           </View>
         </ScrollView>

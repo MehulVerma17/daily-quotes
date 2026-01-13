@@ -38,6 +38,7 @@ import Toast from 'react-native-toast-message';
 import { useAuthStore } from '../../stores';
 import { AuthStackParamList } from '../../types';
 import { COLORS, SPACING, RADIUS, FONT_SIZES, SHADOWS, moderateScale } from '../../constants/theme';
+import { STRINGS } from '../../constants/strings';
 
 // ============================================
 // TYPES
@@ -114,13 +115,13 @@ export const SignUpScreen: React.FC = () => {
 
     // Determine strength level
     if (score <= 2) {
-      return { strength: 'weak', label: 'Weak', score: 1 };
+      return { strength: 'weak', label: STRINGS.AUTH.PASSWORD_WEAK, score: 1 };
     } else if (score <= 4) {
-      return { strength: 'medium', label: 'Medium strength', score: 2 };
+      return { strength: 'medium', label: STRINGS.AUTH.PASSWORD_MEDIUM, score: 2 };
     } else if (score <= 5) {
-      return { strength: 'strong', label: 'Strong', score: 3 };
+      return { strength: 'strong', label: STRINGS.AUTH.PASSWORD_STRONG, score: 3 };
     } else {
-      return { strength: 'very-strong', label: 'Very strong', score: 4 };
+      return { strength: 'very-strong', label: STRINGS.AUTH.PASSWORD_VERY_STRONG, score: 4 };
     }
   }, [password]);
 
@@ -144,8 +145,8 @@ export const SignUpScreen: React.FC = () => {
     if (!fullName.trim()) {
       Toast.show({
         type: 'error',
-        text1: 'Name Required',
-        text2: 'Please enter your full name',
+        text1: STRINGS.AUTH.NAME_REQUIRED,
+        text2: STRINGS.AUTH.NAME_REQUIRED_DESC,
       });
       return;
     }
@@ -154,8 +155,8 @@ export const SignUpScreen: React.FC = () => {
     if (!email.trim()) {
       Toast.show({
         type: 'error',
-        text1: 'Email Required',
-        text2: 'Please enter your email address',
+        text1: STRINGS.AUTH.EMAIL_REQUIRED,
+        text2: STRINGS.AUTH.EMAIL_REQUIRED_DESC,
       });
       return;
     }
@@ -163,8 +164,8 @@ export const SignUpScreen: React.FC = () => {
     if (!isValidEmail(email)) {
       Toast.show({
         type: 'error',
-        text1: 'Invalid Email',
-        text2: 'Please enter a valid email address',
+        text1: STRINGS.AUTH.INVALID_EMAIL,
+        text2: STRINGS.AUTH.INVALID_EMAIL_DESC,
       });
       return;
     }
@@ -173,8 +174,8 @@ export const SignUpScreen: React.FC = () => {
     if (!password) {
       Toast.show({
         type: 'error',
-        text1: 'Password Required',
-        text2: 'Please create a password',
+        text1: STRINGS.AUTH.PASSWORD_REQUIRED,
+        text2: STRINGS.AUTH.PASSWORD_REQUIRED_DESC,
       });
       return;
     }
@@ -182,8 +183,8 @@ export const SignUpScreen: React.FC = () => {
     if (password.length < 6) {
       Toast.show({
         type: 'error',
-        text1: 'Weak Password',
-        text2: 'Password must be at least 6 characters',
+        text1: STRINGS.AUTH.WEAK_PASSWORD,
+        text2: STRINGS.AUTH.WEAK_PASSWORD_DESC,
       });
       return;
     }
@@ -192,8 +193,8 @@ export const SignUpScreen: React.FC = () => {
     if (password !== confirmPassword) {
       Toast.show({
         type: 'error',
-        text1: 'Passwords Don\'t Match',
-        text2: 'Please make sure your passwords match',
+        text1: STRINGS.AUTH.PASSWORDS_DONT_MATCH,
+        text2: STRINGS.AUTH.PASSWORDS_DONT_MATCH_DESC,
       });
       return;
     }
@@ -202,8 +203,8 @@ export const SignUpScreen: React.FC = () => {
     if (!agreedToTerms) {
       Toast.show({
         type: 'error',
-        text1: 'Terms Agreement Required',
-        text2: 'Please agree to the Terms of Service and Privacy Policy',
+        text1: STRINGS.AUTH.TERMS_REQUIRED,
+        text2: STRINGS.AUTH.TERMS_REQUIRED_DESC,
       });
       return;
     }
@@ -222,15 +223,15 @@ export const SignUpScreen: React.FC = () => {
     if (result.success) {
       Toast.show({
         type: 'success',
-        text1: 'Account Created!',
-        text2: 'Please check your email to verify your account',
+        text1: STRINGS.AUTH.ACCOUNT_CREATED,
+        text2: STRINGS.AUTH.ACCOUNT_CREATED_DESC,
       });
       // Navigation will happen automatically via auth state change
     } else {
       Toast.show({
         type: 'error',
-        text1: 'Sign Up Failed',
-        text2: result.error || 'Please try again',
+        text1: STRINGS.AUTH.SIGN_UP_FAILED,
+        text2: result.error || STRINGS.AUTH.SIGN_UP_FAILED_DESC,
       });
     }
   };
@@ -308,19 +309,19 @@ export const SignUpScreen: React.FC = () => {
 
           {/* Header Section */}
           <View style={styles.headerSection}>
-            <Text style={styles.title}>Create Account</Text>
-            <Text style={styles.subtitle}>Start your quote journey</Text>
+            <Text style={styles.title}>{STRINGS.AUTH.CREATE_ACCOUNT}</Text>
+            <Text style={styles.subtitle}>{STRINGS.AUTH.START_JOURNEY}</Text>
           </View>
 
           {/* Form Section */}
           <View style={styles.formSection}>
             {/* Full Name Input */}
             <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Full Name</Text>
+              <Text style={styles.inputLabel}>{STRINGS.AUTH.FULL_NAME}</Text>
               <View style={styles.inputWrapper}>
                 <TextInput
                   style={styles.input}
-                  placeholder="Enter your full name"
+                  placeholder={STRINGS.AUTH.ENTER_NAME}
                   placeholderTextColor={COLORS.textPlaceholder}
                   value={fullName}
                   onChangeText={setFullName}
@@ -336,12 +337,12 @@ export const SignUpScreen: React.FC = () => {
 
             {/* Email Input */}
             <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Email</Text>
+              <Text style={styles.inputLabel}>{STRINGS.AUTH.EMAIL}</Text>
               <View style={styles.inputWrapper}>
                 <TextInput
                   ref={emailInputRef}
                   style={styles.input}
-                  placeholder="Enter your email"
+                  placeholder={STRINGS.AUTH.ENTER_EMAIL}
                   placeholderTextColor={COLORS.textPlaceholder}
                   value={email}
                   onChangeText={setEmail}
@@ -358,12 +359,12 @@ export const SignUpScreen: React.FC = () => {
 
             {/* Password Input */}
             <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Password</Text>
+              <Text style={styles.inputLabel}>{STRINGS.AUTH.PASSWORD}</Text>
               <View style={styles.inputWrapper}>
                 <TextInput
                   ref={passwordInputRef}
                   style={[styles.input, styles.passwordInput]}
-                  placeholder="Create a password"
+                  placeholder={STRINGS.AUTH.CREATE_PASSWORD}
                   placeholderTextColor={COLORS.textPlaceholder}
                   value={password}
                   onChangeText={setPassword}
@@ -406,12 +407,12 @@ export const SignUpScreen: React.FC = () => {
 
             {/* Confirm Password Input */}
             <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Confirm Password</Text>
+              <Text style={styles.inputLabel}>{STRINGS.AUTH.CONFIRM_PASSWORD}</Text>
               <View style={styles.inputWrapper}>
                 <TextInput
                   ref={confirmPasswordInputRef}
                   style={styles.input}
-                  placeholder="Confirm your password"
+                  placeholder={STRINGS.AUTH.CONFIRM_PASSWORD_PLACEHOLDER}
                   placeholderTextColor={COLORS.textPlaceholder}
                   value={confirmPassword}
                   onChangeText={setConfirmPassword}
@@ -440,10 +441,10 @@ export const SignUpScreen: React.FC = () => {
                 )}
               </View>
               <Text style={styles.termsText}>
-                I agree to the{' '}
-                <Text style={styles.termsLink}>Terms of Service</Text>
-                {' '}and{' '}
-                <Text style={styles.termsLink}>Privacy Policy</Text>.
+                {STRINGS.AUTH.AGREE_TO}{' '}
+                <Text style={styles.termsLink}>{STRINGS.AUTH.TERMS_OF_SERVICE}</Text>
+                {' '}{STRINGS.COMMON.AND}{' '}
+                <Text style={styles.termsLink}>{STRINGS.AUTH.PRIVACY_POLICY}</Text>.
               </Text>
             </Pressable>
 
@@ -459,15 +460,15 @@ export const SignUpScreen: React.FC = () => {
               {isSubmitting ? (
                 <ActivityIndicator color={COLORS.white} />
               ) : (
-                <Text style={styles.createAccountButtonText}>Create Account</Text>
+                <Text style={styles.createAccountButtonText}>{STRINGS.AUTH.CREATE_ACCOUNT}</Text>
               )}
             </Pressable>
 
             {/* Sign In Link */}
             <View style={styles.signInContainer}>
-              <Text style={styles.signInText}>Already have an account? </Text>
+              <Text style={styles.signInText}>{STRINGS.AUTH.ALREADY_HAVE_ACCOUNT} </Text>
               <Pressable onPress={handleNavigateToLogin}>
-                <Text style={styles.signInLink}>Sign In</Text>
+                <Text style={styles.signInLink}>{STRINGS.AUTH.SIGN_IN}</Text>
               </Pressable>
             </View>
           </View>

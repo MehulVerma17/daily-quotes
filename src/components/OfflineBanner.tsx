@@ -11,6 +11,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useNetworkStatus } from '../hooks/useNetworkStatus';
 import { SPACING, FONT_SIZES, FONTS } from '../constants/theme';
+import { STRINGS } from '../constants/strings';
 
 interface OfflineBannerProps {
   /** Custom message to display when offline */
@@ -18,7 +19,7 @@ interface OfflineBannerProps {
 }
 
 export const OfflineBanner: React.FC<OfflineBannerProps> = ({
-  message = 'No internet connection',
+  message = STRINGS.OFFLINE.NO_CONNECTION,
 }) => {
   const { isConnected } = useNetworkStatus();
   const insets = useSafeAreaInsets();

@@ -47,6 +47,7 @@ import {
 } from "../../services/notificationService";
 import Toast from "react-native-toast-message";
 import { APP_CONFIG } from "../../config";
+import { STRINGS } from "../../constants/strings";
 
 const { width } = Dimensions.get("window");
 
@@ -59,11 +60,11 @@ const ACCENT_COLOR_OPTIONS: { color: AccentColor; hex: string }[] = [
   { color: "purple", hex: ACCENT_COLORS.purple.primary },
 ];
 
-// Theme options
-const THEME_OPTIONS: { mode: ThemeMode; label: string }[] = [
-  { mode: "light", label: "Light" },
-  { mode: "dark", label: "Dark" },
-  { mode: "system", label: "System" },
+// Theme options (labels set dynamically for STRINGS access)
+const THEME_OPTIONS: { mode: ThemeMode; labelKey: "THEME_LIGHT" | "THEME_DARK" | "THEME_SYSTEM" }[] = [
+  { mode: "light", labelKey: "THEME_LIGHT" },
+  { mode: "dark", labelKey: "THEME_DARK" },
+  { mode: "system", labelKey: "THEME_SYSTEM" },
 ];
 
 // Favorite categories (for notification preferences)
@@ -158,9 +159,9 @@ export const SettingsScreen: React.FC = () => {
       const granted = await requestNotificationPermissions();
       if (!granted) {
         Alert.alert(
-          "Permission Required",
-          "Please enable notifications in your device settings to receive daily quotes.",
-          [{ text: "OK" }]
+          STRINGS.SETTINGS.PERMISSION_REQUIRED,
+          STRINGS.SETTINGS.PERMISSION_REQUIRED_DESC,
+          [{ text: STRINGS.COMMON.OK }]
         );
         return;
       }
@@ -169,16 +170,16 @@ export const SettingsScreen: React.FC = () => {
       const scheduledFor = await scheduleDailyQuoteNotification(time);
       Toast.show({
         type: "success",
-        text1: "Daily Quote Enabled",
-        text2: `Next notification: ${scheduledFor}`,
+        text1: STRINGS.SETTINGS.NOTIFICATIONS_ENABLED,
+        text2: STRINGS.SETTINGS.NOTIFICATIONS_ENABLED_DESC(scheduledFor),
       });
     } else {
       // Cancel notifications
       await cancelDailyQuoteNotification();
       Toast.show({
         type: "info",
-        text1: "Notifications Disabled",
-        text2: "You won't receive daily quote reminders",
+        text1: STRINGS.SETTINGS.NOTIFICATIONS_DISABLED,
+        text2: STRINGS.SETTINGS.NOTIFICATIONS_DISABLED_DESC,
       });
     }
     // Use store to update notification setting
@@ -204,8 +205,8 @@ export const SettingsScreen: React.FC = () => {
         const scheduledFor = await scheduleDailyQuoteNotification(newTime);
         Toast.show({
           type: "success",
-          text1: "Reminder Set",
-          text2: `Next notification: ${scheduledFor}`,
+          text1: STRINGS.SETTINGS.REMINDER_SET,
+          text2: STRINGS.SETTINGS.NOTIFICATIONS_ENABLED_DESC(scheduledFor),
         });
       }
     }
@@ -216,23 +217,23 @@ export const SettingsScreen: React.FC = () => {
       const granted = await requestNotificationPermissions();
       if (!granted) {
         Alert.alert(
-          "Permission Required",
-          "Please enable notifications in your device settings.",
-          [{ text: "OK" }]
+          STRINGS.SETTINGS.PERMISSION_REQUIRED,
+          STRINGS.SETTINGS.PERMISSION_REQUIRED_DESC,
+          [{ text: STRINGS.COMMON.OK }]
         );
         return;
       }
       await sendTestNotification();
       Toast.show({
         type: "success",
-        text1: "Test Sent",
-        text2: "You should receive a notification now!",
+        text1: STRINGS.SETTINGS.TEST_SENT,
+        text2: STRINGS.SETTINGS.TEST_SENT_DESC,
       });
     } catch (error) {
       Toast.show({
         type: "error",
-        text1: "Error",
-        text2: "Failed to send test notification",
+        text1: STRINGS.COMMON.ERROR,
+        text2: STRINGS.SETTINGS.TEST_FAILED,
       });
     }
   };
@@ -276,7 +277,7 @@ export const SettingsScreen: React.FC = () => {
       >
         {/* Appearance Section */}
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Appearance</Text>
+          <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>{STRINGS.SETTINGS.APPEARANCE}</Text>
           <View style={[styles.card, { backgroundColor: colors.white, shadowColor: colors.shadow }]}>
             {/* Theme Toggle */}
             <View style={[styles.themeToggle, { backgroundColor: colors.offWhite }]}>
@@ -296,7 +297,7 @@ export const SettingsScreen: React.FC = () => {
                       settings?.theme === option.mode && { color: colors.textPrimary },
                     ]}
                   >
-                    {option.label}
+                    {STRINGS.SETTINGS[option.labelKey]}
                   </Text>
                 </Pressable>
               ))}
@@ -304,7 +305,7 @@ export const SettingsScreen: React.FC = () => {
 
             {/* Accent Color */}
             <View style={styles.settingRow}>
-              <Text style={[styles.settingLabel, { color: colors.textMuted }]}>Accent Color</Text>
+              <Text style={[styles.settingLabel, { color: colors.textMuted }]}>{STRINGS.SETTINGS.ACCENT_COLOR}</Text>
               <View style={styles.colorOptions}>
                 {ACCENT_COLOR_OPTIONS.map((option) => (
                   <Pressable
@@ -328,7 +329,7 @@ export const SettingsScreen: React.FC = () => {
                   { fontSize: 16 + fontSizeValue * 8, color: colors.textPrimary },
                 ]}
               >
-                "The journey is the reward"
+                "{STRINGS.SETTINGS.FONT_PREVIEW_QUOTE}"
               </Text>
             </View>
 
@@ -355,14 +356,14 @@ export const SettingsScreen: React.FC = () => {
 
         {/* Notifications Section */}
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Notifications</Text>
+          <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>{STRINGS.SETTINGS.NOTIFICATIONS}</Text>
           <View style={[styles.card, { backgroundColor: colors.white, shadowColor: colors.shadow }]}>
             {/* Daily Quote Toggle */}
             <View style={styles.toggleRow}>
               <View>
-                <Text style={[styles.toggleTitle, { color: colors.textPrimary }]}>Daily Quote</Text>
+                <Text style={[styles.toggleTitle, { color: colors.textPrimary }]}>{STRINGS.SETTINGS.DAILY_QUOTE}</Text>
                 <Text style={[styles.toggleSubtitle, { color: colors.textMuted }]}>
-                  Receive a fresh quote every morning
+                  {STRINGS.SETTINGS.DAILY_QUOTE_DESC}
                 </Text>
               </View>
               <Switch
@@ -393,7 +394,7 @@ export const SettingsScreen: React.FC = () => {
                   !settings?.notification_enabled && { color: colors.textPlaceholder },
                 ]}
               >
-                Reminder Time
+                {STRINGS.SETTINGS.REMINDER_TIME}
               </Text>
               <View style={styles.timeValueContainer}>
                 <Text
@@ -471,14 +472,14 @@ export const SettingsScreen: React.FC = () => {
 
         {/* Data & Security Section */}
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Data & Security</Text>
+          <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>{STRINGS.SETTINGS.DATA_SECURITY}</Text>
           <View style={[styles.card, { backgroundColor: colors.white, shadowColor: colors.shadow }]}>
             {/* Cloud Sync Toggle */}
             <View style={styles.toggleRow}>
               <View>
-                <Text style={[styles.toggleTitle, { color: colors.textPrimary }]}>Cloud Sync</Text>
+                <Text style={[styles.toggleTitle, { color: colors.textPrimary }]}>{STRINGS.SETTINGS.CLOUD_SYNC}</Text>
                 <Text style={[styles.toggleSubtitle, { color: colors.textMuted }]}>
-                  Keep quotes across all devices
+                  {STRINGS.SETTINGS.CLOUD_SYNC_DESC}
                 </Text>
               </View>
               <Switch
@@ -495,10 +496,10 @@ export const SettingsScreen: React.FC = () => {
             <View style={[styles.syncRow, { borderTopColor: colors.border }]}>
               <View style={styles.syncInfo}>
                 <Ionicons name="sync" size={16} color={colors.textMuted} />
-                <Text style={[styles.syncText, { color: colors.textMuted }]}>Last synced: 2 mins ago</Text>
+                <Text style={[styles.syncText, { color: colors.textMuted }]}>{STRINGS.SETTINGS.LAST_SYNCED}</Text>
               </View>
               <Pressable style={[styles.syncButton, { borderColor: accent.primary }]}>
-                <Text style={[styles.syncButtonText, { color: accent.primary }]}>Sync Now</Text>
+                <Text style={[styles.syncButtonText, { color: accent.primary }]}>{STRINGS.SETTINGS.SYNC_NOW}</Text>
               </Pressable>
             </View>
           </View>
@@ -506,14 +507,14 @@ export const SettingsScreen: React.FC = () => {
 
         {/* App Info */}
         <View style={styles.appInfo}>
-          <Text style={[styles.appName, { color: colors.textMuted }]}>QUOTEVAULT V{APP_CONFIG.version}</Text>
+          <Text style={[styles.appName, { color: colors.textMuted }]}>{STRINGS.APP.VERSION_PREFIX}{APP_CONFIG.version}</Text>
           <View style={styles.appLinks}>
             <Pressable>
-              <Text style={[styles.appLink, { color: colors.textMuted }]}>Privacy Policy</Text>
+              <Text style={[styles.appLink, { color: colors.textMuted }]}>{STRINGS.SETTINGS.PRIVACY_POLICY}</Text>
             </Pressable>
             <Text style={[styles.linkDivider, { color: colors.textMuted }]}>·</Text>
             <Pressable>
-              <Text style={[styles.appLink, { color: colors.textMuted }]}>Terms of Service</Text>
+              <Text style={[styles.appLink, { color: colors.textMuted }]}>{STRINGS.SETTINGS.TERMS_OF_SERVICE}</Text>
             </Pressable>
           </View>
         </View>

@@ -28,6 +28,7 @@ import { getQuotesByCategory } from '../../services/quoteService';
 import { useAuthStore, useFavoritesStore } from '../../stores';
 import { useTheme } from '../../contexts';
 import { AddToCollectionModal } from '../../components';
+import { STRINGS } from '../../constants/strings';
 
 const { width } = Dimensions.get('window');
 
@@ -162,7 +163,7 @@ export const CategoryScreen: React.FC = () => {
         <View style={styles.headerTextContainer}>
           <Text style={styles.headerCategory}>{category}</Text>
           <Text style={styles.headerQuoteCount}>
-            {quotes.length} {quotes.length === 1 ? 'quote' : 'quotes'}
+            {STRINGS.quoteCount(quotes.length)}
           </Text>
         </View>
       </View>
@@ -210,9 +211,9 @@ export const CategoryScreen: React.FC = () => {
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
             <Ionicons name="document-text-outline" size={48} color={colors.textMuted} />
-            <Text style={[styles.emptyTitle, { color: colors.textPrimary }]}>No quotes yet</Text>
+            <Text style={[styles.emptyTitle, { color: colors.textPrimary }]}>{STRINGS.CATEGORY.EMPTY_TITLE}</Text>
             <Text style={[styles.emptySubtitle, { color: colors.textMuted }]}>
-              Quotes in this category will appear here
+              {STRINGS.CATEGORY.EMPTY_DESC}
             </Text>
           </View>
         }

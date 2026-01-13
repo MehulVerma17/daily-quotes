@@ -27,6 +27,7 @@ import {
   addQuoteToCollection,
   isQuoteInCollection,
 } from '../services/collectionsService';
+import { STRINGS } from '../constants/strings';
 
 interface AddToCollectionModalProps {
   visible: boolean;
@@ -83,8 +84,8 @@ export const AddToCollectionModal: React.FC<AddToCollectionModalProps> = ({
       console.error('Error loading collections:', error);
       Toast.show({
         type: 'error',
-        text1: 'Error',
-        text2: 'Failed to load collections',
+        text1: STRINGS.COMMON.ERROR,
+        text2: STRINGS.COLLECTIONS.LOAD_FAILED,
       });
     } finally {
       setLoading(false);
@@ -112,8 +113,8 @@ export const AddToCollectionModal: React.FC<AddToCollectionModalProps> = ({
 
       Toast.show({
         type: 'success',
-        text1: 'Added to Collection',
-        text2: `Quote added to "${collection.name}"`,
+        text1: STRINGS.COLLECTIONS.ADDED_SUCCESS,
+        text2: STRINGS.COLLECTIONS.ADDED_SUCCESS_DESC(collection.name),
       });
 
       onQuoteAdded?.();
@@ -121,8 +122,8 @@ export const AddToCollectionModal: React.FC<AddToCollectionModalProps> = ({
       console.error('Error adding to collection:', error);
       Toast.show({
         type: 'error',
-        text1: 'Error',
-        text2: 'Failed to add quote to collection',
+        text1: STRINGS.COMMON.ERROR,
+        text2: STRINGS.COLLECTIONS.ADD_FAILED,
       });
     } finally {
       setAdding(null);
@@ -149,7 +150,7 @@ export const AddToCollectionModal: React.FC<AddToCollectionModalProps> = ({
       <View style={styles.collectionInfo}>
         <Text style={[styles.collectionName, { color: colors.textPrimary }]}>{item.name}</Text>
         <Text style={[styles.collectionCount, { color: colors.textMuted }]}>
-          {item.quote_count || 0} {(item.quote_count || 0) === 1 ? 'quote' : 'quotes'}
+          {STRINGS.quoteCount(item.quote_count || 0)}
         </Text>
       </View>
       {adding === item.id ? (
@@ -167,9 +168,9 @@ export const AddToCollectionModal: React.FC<AddToCollectionModalProps> = ({
   const renderEmptyState = () => (
     <View style={styles.emptyContainer}>
       <Ionicons name="folder-open-outline" size={48} color={colors.textMuted} />
-      <Text style={[styles.emptyTitle, { color: colors.textPrimary }]}>No collections yet</Text>
+      <Text style={[styles.emptyTitle, { color: colors.textPrimary }]}>{STRINGS.COLLECTIONS.EMPTY_TITLE}</Text>
       <Text style={[styles.emptySubtitle, { color: colors.textMuted }]}>
-        Create a collection from the Collections tab to organize your quotes
+        {STRINGS.COLLECTIONS.EMPTY_DESC}
       </Text>
     </View>
   );
@@ -190,7 +191,7 @@ export const AddToCollectionModal: React.FC<AddToCollectionModalProps> = ({
             <Pressable onPress={onClose} style={styles.closeButton}>
               <Ionicons name="close" size={24} color={colors.textPrimary} />
             </Pressable>
-            <Text style={[styles.headerTitle, { color: colors.textPrimary }]}>Add to Collection</Text>
+            <Text style={[styles.headerTitle, { color: colors.textPrimary }]}>{STRINGS.MODALS.ADD_TO_COLLECTION}</Text>
             <View style={styles.headerSpacer} />
           </View>
 

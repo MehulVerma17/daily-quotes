@@ -29,6 +29,7 @@ import {
   getFavoriteAuthors,
 } from '../../services/favoritesService';
 import { AddToCollectionModal } from '../../components';
+import { STRINGS } from '../../constants/strings';
 
 const { width } = Dimensions.get('window');
 
@@ -112,10 +113,10 @@ export const FavoritesScreen: React.FC = () => {
     <View style={styles.headerContainer}>
       {/* Title */}
       <View style={styles.titleRow}>
-        <Text style={[styles.headerTitle, { color: colors.textPrimary }]}>Saved Favorites</Text>
+        <Text style={[styles.headerTitle, { color: colors.textPrimary }]}>{STRINGS.FAVORITES.TITLE}</Text>
         <View style={styles.syncBadge}>
           <Ionicons name="cloud-done" size={14} color={colors.success} />
-          <Text style={[styles.syncText, { color: colors.success }]}>SYNCED</Text>
+          <Text style={[styles.syncText, { color: colors.success }]}>{STRINGS.COMMON.SYNCED}</Text>
         </View>
       </View>
 
@@ -123,15 +124,15 @@ export const FavoritesScreen: React.FC = () => {
       <View style={styles.statsContainer}>
         <View style={[styles.statCard, { backgroundColor: colors.white }]}>
           <Text style={[styles.statNumber, { color: accent.primary }]}>{favorites.length}</Text>
-          <Text style={[styles.statLabel, { color: colors.textMuted }]}>Favorites</Text>
+          <Text style={[styles.statLabel, { color: colors.textMuted }]}>{STRINGS.FAVORITES.STAT_FAVORITES}</Text>
         </View>
         <View style={[styles.statCard, { backgroundColor: colors.white }]}>
           <Text style={[styles.statNumber, { color: accent.primary }]}>{categories.length}</Text>
-          <Text style={[styles.statLabel, { color: colors.textMuted }]}>Categories</Text>
+          <Text style={[styles.statLabel, { color: colors.textMuted }]}>{STRINGS.FAVORITES.STAT_CATEGORIES}</Text>
         </View>
         <View style={[styles.statCard, { backgroundColor: colors.white }]}>
           <Text style={[styles.statNumber, { color: accent.primary }]}>{authors.length}</Text>
-          <Text style={[styles.statLabel, { color: colors.textMuted }]}>Authors</Text>
+          <Text style={[styles.statLabel, { color: colors.textMuted }]}>{STRINGS.FAVORITES.STAT_AUTHORS}</Text>
         </View>
       </View>
 
@@ -212,9 +213,9 @@ export const FavoritesScreen: React.FC = () => {
       <View style={[styles.emptyIconContainer, { backgroundColor: colors.gradientStart }]}>
         <Ionicons name="heart-outline" size={48} color={accent.primary} />
       </View>
-      <Text style={[styles.emptyTitle, { color: colors.textPrimary }]}>No favorites yet</Text>
+      <Text style={[styles.emptyTitle, { color: colors.textPrimary }]}>{STRINGS.FAVORITES.EMPTY_TITLE}</Text>
       <Text style={[styles.emptySubtitle, { color: colors.textMuted }]}>
-        Tap the heart icon on quotes you love to save them here
+        {STRINGS.FAVORITES.EMPTY_DESC}
       </Text>
     </View>
   );

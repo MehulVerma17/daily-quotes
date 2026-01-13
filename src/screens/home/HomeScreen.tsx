@@ -31,6 +31,7 @@ import { saveWidgetQuote } from '../../services/widgetStorage';
 import { requestWidgetUpdate } from 'react-native-android-widget';
 import { CATEGORIES } from '../../config';
 import { AddToCollectionModal, ShareQuoteModal } from '../../components';
+import { STRINGS } from '../../constants/strings';
 
 type HomeStackParamList = {
   Home: undefined;
@@ -72,9 +73,9 @@ export const HomeScreen: React.FC = () => {
   // Get greeting based on time of day
   const getGreeting = () => {
     const hour = new Date().getHours();
-    if (hour < 12) return 'Good Morning';
-    if (hour < 17) return 'Good Afternoon';
-    return 'Good Evening';
+    if (hour < 12) return STRINGS.HOME.GREETING_MORNING;
+    if (hour < 17) return STRINGS.HOME.GREETING_AFTERNOON;
+    return STRINGS.HOME.GREETING_EVENING;
   };
 
   const firstName = profile?.full_name?.split(' ')[0] || 'Friend';
@@ -183,7 +184,7 @@ export const HomeScreen: React.FC = () => {
 
       {/* Quote of the Day */}
       <View style={styles.section}>
-        <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Quote of the Day</Text>
+        <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>{STRINGS.HOME.QUOTE_OF_DAY}</Text>
         {quoteOfDay && (
           <LinearGradient
             colors={isDark ? [accent.dark, accent.primary] : [colors.warmPeach, colors.dustyRose]}
@@ -223,7 +224,7 @@ export const HomeScreen: React.FC = () => {
 
       {/* Categories */}
       <View style={styles.section}>
-        <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Today's Categories</Text>
+        <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>{STRINGS.HOME.TODAYS_CATEGORIES}</Text>
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -243,7 +244,7 @@ export const HomeScreen: React.FC = () => {
 
       {/* Discover More Title */}
       <View style={styles.discoverHeader}>
-        <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Discover More</Text>
+        <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>{STRINGS.HOME.DISCOVER_MORE}</Text>
       </View>
     </View>
   );

@@ -33,6 +33,7 @@ import {
 import { useTheme } from "../../contexts";
 import { getFavoriteCount } from "../../services/favoritesService";
 import { getCollectionCount } from "../../services/collectionsService";
+import { STRINGS } from "../../constants/strings";
 
 const AVATAR_STORAGE_KEY = "@profile_avatar";
 
@@ -119,13 +120,13 @@ export const ProfileScreen: React.FC = () => {
 
   const handlePickImage = async () => {
     // Show options for camera or gallery
-    Alert.alert("Change Profile Photo", "Choose an option", [
+    Alert.alert(STRINGS.PROFILE.CHANGE_PHOTO, STRINGS.PROFILE.CHOOSE_OPTION, [
       {
-        text: "Take Photo",
+        text: STRINGS.PROFILE.TAKE_PHOTO,
         onPress: async () => {
           const { status } = await ImagePicker.requestCameraPermissionsAsync();
           if (status !== "granted") {
-            Alert.alert("Permission needed", "Camera permission is required to take photos.");
+            Alert.alert(STRINGS.PROFILE.PERMISSION_NEEDED, STRINGS.PROFILE.CAMERA_PERMISSION);
             return;
           }
           const result = await ImagePicker.launchCameraAsync({
@@ -142,11 +143,11 @@ export const ProfileScreen: React.FC = () => {
         },
       },
       {
-        text: "Choose from Gallery",
+        text: STRINGS.PROFILE.CHOOSE_GALLERY,
         onPress: async () => {
           const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
           if (status !== "granted") {
-            Alert.alert("Permission needed", "Gallery permission is required to select photos.");
+            Alert.alert(STRINGS.PROFILE.PERMISSION_NEEDED, STRINGS.PROFILE.GALLERY_PERMISSION);
             return;
           }
           const result = await ImagePicker.launchImageLibraryAsync({
@@ -162,15 +163,15 @@ export const ProfileScreen: React.FC = () => {
           }
         },
       },
-      { text: "Cancel", style: "cancel" },
+      { text: STRINGS.COMMON.CANCEL, style: "cancel" },
     ]);
   };
 
   const handleLogout = () => {
-    Alert.alert("Log Out", "Are you sure you want to log out?", [
-      { text: "Cancel", style: "cancel" },
+    Alert.alert(STRINGS.AUTH.LOG_OUT, STRINGS.PROFILE.LOG_OUT_CONFIRM, [
+      { text: STRINGS.COMMON.CANCEL, style: "cancel" },
       {
-        text: "Log Out",
+        text: STRINGS.AUTH.LOG_OUT,
         style: "destructive",
         onPress: signOut,
       },
@@ -179,12 +180,12 @@ export const ProfileScreen: React.FC = () => {
 
   const handleDeleteAccount = () => {
     Alert.alert(
-      "Delete Account",
-      "Are you sure you want to delete your account? This action cannot be undone and all your data will be permanently deleted.",
+      STRINGS.PROFILE.DELETE_ACCOUNT,
+      STRINGS.PROFILE.DELETE_ACCOUNT_DESC,
       [
-        { text: "Cancel", style: "cancel" },
+        { text: STRINGS.COMMON.CANCEL, style: "cancel" },
         {
-          text: "Delete",
+          text: STRINGS.COMMON.DELETE,
           style: "destructive",
           onPress: () => {
             // TODO: Implement account deletion
@@ -227,7 +228,7 @@ export const ProfileScreen: React.FC = () => {
             />
           </Pressable>
           <Text style={[styles.headerTitle, { color: colors.textPrimary }]}>
-            Profile
+            {STRINGS.PROFILE.TITLE}
           </Text>
           <View style={styles.headerSpacer} />
         </View>
@@ -273,7 +274,7 @@ export const ProfileScreen: React.FC = () => {
             {profile?.full_name || "User"}
           </Text>
           <Text style={[styles.memberSince, { color: colors.textMuted }]}>
-            Member since {memberSince}
+            {STRINGS.PROFILE.MEMBER_SINCE} {memberSince}
           </Text>
         </View>
 
@@ -297,7 +298,7 @@ export const ProfileScreen: React.FC = () => {
               {favoriteCount}
             </Text>
             <Text style={[styles.statLabel, { color: colors.textMuted }]}>
-              Favorites
+              {STRINGS.FAVORITES.STAT_FAVORITES}
             </Text>
           </View>
           <View
@@ -318,7 +319,7 @@ export const ProfileScreen: React.FC = () => {
               {collectionCount}
             </Text>
             <Text style={[styles.statLabel, { color: colors.textMuted }]}>
-              Collections
+              {STRINGS.COLLECTIONS.TITLE.replace("My ", "")}
             </Text>
           </View>
         </View>
@@ -382,7 +383,7 @@ export const ProfileScreen: React.FC = () => {
               <Text
                 style={[styles.menuItemText, { color: colors.textPrimary }]}
               >
-                Preferences
+                {STRINGS.PROFILE.PREFERENCES}
               </Text>
             </View>
             <Ionicons
@@ -429,7 +430,7 @@ export const ProfileScreen: React.FC = () => {
           >
             <Ionicons name="log-out-outline" size={22} color={accent.primary} />
             <Text style={[styles.dangerText, { color: accent.primary }]}>
-              Log Out
+              {STRINGS.AUTH.LOG_OUT}
             </Text>
           </Pressable>
 
@@ -442,7 +443,7 @@ export const ProfileScreen: React.FC = () => {
           >
             <Ionicons name="trash-outline" size={22} color={colors.error} />
             <Text style={[styles.dangerText, { color: colors.error }]}>
-              Delete Account
+              {STRINGS.PROFILE.DELETE_ACCOUNT}
             </Text>
           </Pressable>
         </View>

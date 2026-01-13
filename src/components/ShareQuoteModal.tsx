@@ -26,6 +26,7 @@ import * as Sharing from 'expo-sharing';
 import { SPACING, RADIUS, FONTS, FONT_SIZES } from '../constants/theme';
 import { useTheme } from '../contexts';
 import { Quote, CardTemplate } from '../types';
+import { STRINGS } from '../constants/strings';
 
 const { width } = Dimensions.get('window');
 
@@ -51,9 +52,9 @@ export const ShareQuoteModal: React.FC<ShareQuoteModalProps> = ({
 
   // Template configurations - use theme accent colors
   const TEMPLATES: { id: CardTemplate; name: string; gradient: readonly [string, string] }[] = [
-    { id: 'gradient', name: 'Gradient', gradient: [accent.light, accent.primary] as const },
-    { id: 'minimal', name: 'Minimal', gradient: [colors.white, colors.offWhite] as const },
-    { id: 'dark', name: 'Dark', gradient: ['#2D2D2D', '#1A1A1A'] as const },
+    { id: 'gradient', name: STRINGS.MODALS.TEMPLATE_GRADIENT, gradient: [accent.light, accent.primary] as const },
+    { id: 'minimal', name: STRINGS.MODALS.TEMPLATE_MINIMAL, gradient: [colors.white, colors.offWhite] as const },
+    { id: 'dark', name: STRINGS.MODALS.TEMPLATE_DARK, gradient: ['#2D2D2D', '#1A1A1A'] as const },
   ];
 
   const currentTemplate = TEMPLATES.find((t) => t.id === selectedTemplate) || TEMPLATES[0];
@@ -78,18 +79,18 @@ export const ShareQuoteModal: React.FC<ShareQuoteModalProps> = ({
     try {
       const { status } = await MediaLibrary.requestPermissionsAsync();
       if (status !== 'granted') {
-        alert('Permission to access media library is required!');
+        alert(STRINGS.MODALS.MEDIA_PERMISSION);
         return;
       }
 
       const uri = await captureAndSave();
       if (uri) {
         await MediaLibrary.saveToLibraryAsync(uri);
-        alert('Quote card saved to photos!');
+        alert(STRINGS.MODALS.PHOTO_SAVED);
       }
     } catch (error) {
       console.error('Error saving to photos:', error);
-      alert('Failed to save image');
+      alert(STRINGS.MODALS.PHOTO_SAVE_FAILED);
     } finally {
       setSaving(false);
     }
@@ -135,7 +136,7 @@ export const ShareQuoteModal: React.FC<ShareQuoteModalProps> = ({
             <Pressable onPress={onClose} style={styles.closeButton}>
               <Ionicons name="close" size={24} color={colors.textPrimary} />
             </Pressable>
-            <Text style={[styles.headerTitle, { color: colors.textPrimary }]}>Share Quote</Text>
+            <Text style={[styles.headerTitle, { color: colors.textPrimary }]}>{STRINGS.MODALS.SHARE_QUOTE}</Text>
             <View style={styles.headerSpacer} />
           </View>
 
@@ -173,7 +174,7 @@ export const ShareQuoteModal: React.FC<ShareQuoteModalProps> = ({
 
           {/* Template Selector */}
           <View style={styles.templateSelector}>
-            <Text style={[styles.templateLabel, { color: colors.textMuted }]}>Choose a style</Text>
+            <Text style={[styles.templateLabel, { color: colors.textMuted }]}>{STRINGS.MODALS.CHOOSE_STYLE}</Text>
             <View style={styles.templateOptions}>
               {TEMPLATES.map((template) => (
                 <Pressable
@@ -214,7 +215,7 @@ export const ShareQuoteModal: React.FC<ShareQuoteModalProps> = ({
               ) : (
                 <>
                   <Ionicons name="download-outline" size={20} color={colors.white} />
-                  <Text style={[styles.saveButtonText, { color: colors.white }]}>Save to Photos</Text>
+                  <Text style={[styles.saveButtonText, { color: colors.white }]}>{STRINGS.MODALS.SAVE_TO_PHOTOS}</Text>
                 </>
               )}
             </Pressable>
@@ -229,7 +230,7 @@ export const ShareQuoteModal: React.FC<ShareQuoteModalProps> = ({
               ) : (
                 <>
                   <Ionicons name="share-outline" size={20} color={accent.primary} />
-                  <Text style={[styles.shareButtonText, { color: accent.primary }]}>Share via...</Text>
+                  <Text style={[styles.shareButtonText, { color: accent.primary }]}>{STRINGS.MODALS.SHARE_VIA}</Text>
                 </>
               )}
             </Pressable>

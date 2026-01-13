@@ -34,6 +34,7 @@ import Toast from 'react-native-toast-message';
 import { useAuthStore } from '../../stores';
 import { AuthStackParamList } from '../../types';
 import { COLORS, SPACING, RADIUS, FONT_SIZES, SHADOWS, moderateScale } from '../../constants/theme';
+import { STRINGS } from '../../constants/strings';
 
 // ============================================
 // TYPES
@@ -84,8 +85,8 @@ export const ForgotPasswordScreen: React.FC = () => {
     if (!email.trim()) {
       Toast.show({
         type: 'error',
-        text1: 'Email Required',
-        text2: 'Please enter your email address',
+        text1: STRINGS.AUTH.EMAIL_REQUIRED,
+        text2: STRINGS.AUTH.EMAIL_REQUIRED_DESC,
       });
       return;
     }
@@ -93,8 +94,8 @@ export const ForgotPasswordScreen: React.FC = () => {
     if (!isValidEmail(email)) {
       Toast.show({
         type: 'error',
-        text1: 'Invalid Email',
-        text2: 'Please enter a valid email address',
+        text1: STRINGS.AUTH.INVALID_EMAIL,
+        text2: STRINGS.AUTH.INVALID_EMAIL_DESC,
       });
       return;
     }
@@ -110,14 +111,14 @@ export const ForgotPasswordScreen: React.FC = () => {
       setIsEmailSent(true);
       Toast.show({
         type: 'success',
-        text1: 'Email Sent!',
-        text2: 'Check your inbox for password reset instructions',
+        text1: STRINGS.AUTH.EMAIL_SENT,
+        text2: STRINGS.AUTH.RESET_SENT_DESC,
       });
     } else {
       Toast.show({
         type: 'error',
-        text1: 'Reset Failed',
-        text2: result.error || 'Please try again',
+        text1: STRINGS.AUTH.RESET_FAILED,
+        text2: result.error || STRINGS.AUTH.RESET_FAILED_DESC,
       });
     }
   };
@@ -189,9 +190,9 @@ export const ForgotPasswordScreen: React.FC = () => {
 
           {/* Header Section */}
           <View style={styles.headerSection}>
-            <Text style={styles.title}>Reset Password</Text>
+            <Text style={styles.title}>{STRINGS.AUTH.RESET_PASSWORD}</Text>
             <Text style={styles.description}>
-              Enter the email associated with your account and we'll send an email with instructions to reset your password.
+              {STRINGS.AUTH.RESET_PASSWORD_DESC}
             </Text>
           </View>
 
@@ -199,11 +200,11 @@ export const ForgotPasswordScreen: React.FC = () => {
           <View style={styles.formSection}>
             {/* Email Input */}
             <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Email Address</Text>
+              <Text style={styles.inputLabel}>{STRINGS.AUTH.EMAIL_ADDRESS}</Text>
               <View style={styles.inputWrapper}>
                 <TextInput
                   style={styles.input}
-                  placeholder="email@example.com"
+                  placeholder={STRINGS.AUTH.ENTER_EMAIL_EXAMPLE}
                   placeholderTextColor={COLORS.textPlaceholder}
                   value={email}
                   onChangeText={setEmail}
@@ -232,10 +233,10 @@ export const ForgotPasswordScreen: React.FC = () => {
               ) : isEmailSent ? (
                 <View style={styles.sentContainer}>
                   <Ionicons name="checkmark-circle" size={20} color={COLORS.white} />
-                  <Text style={styles.resetButtonText}>Email Sent!</Text>
+                  <Text style={styles.resetButtonText}>{STRINGS.AUTH.EMAIL_SENT}</Text>
                 </View>
               ) : (
-                <Text style={styles.resetButtonText}>Send Reset Link</Text>
+                <Text style={styles.resetButtonText}>{STRINGS.AUTH.SEND_RESET_LINK}</Text>
               )}
             </Pressable>
 
@@ -247,7 +248,7 @@ export const ForgotPasswordScreen: React.FC = () => {
                   setIsEmailSent(false);
                 }}
               >
-                <Text style={styles.resendText}>Didn't receive email? Try again</Text>
+                <Text style={styles.resendText}>{STRINGS.AUTH.RESEND_EMAIL}</Text>
               </Pressable>
             )}
           </View>
@@ -255,7 +256,7 @@ export const ForgotPasswordScreen: React.FC = () => {
           {/* Bottom Section */}
           <View style={[styles.bottomSection, { paddingBottom: insets.bottom + SPACING.lg }]}>
             <Pressable onPress={handleNavigateToLogin}>
-              <Text style={styles.backToSignIn}>Back to Sign In</Text>
+              <Text style={styles.backToSignIn}>{STRINGS.AUTH.BACK_TO_SIGN_IN}</Text>
             </Pressable>
           </View>
         </ScrollView>

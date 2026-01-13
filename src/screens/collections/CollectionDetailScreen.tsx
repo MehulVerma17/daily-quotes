@@ -27,6 +27,7 @@ import { Quote, CollectionWithQuotes } from '../../types';
 import { getCollectionWithQuotes, removeQuoteFromCollection, deleteCollection } from '../../services/collectionsService';
 import { useCollectionsStore } from '../../stores';
 import { useTheme } from '../../contexts';
+import { STRINGS } from '../../constants/strings';
 
 const { width } = Dimensions.get('window');
 
@@ -76,12 +77,12 @@ export const CollectionDetailScreen: React.FC = () => {
 
   const handleRemoveQuote = async (quoteId: string) => {
     Alert.alert(
-      'Remove Quote',
-      'Are you sure you want to remove this quote from the collection?',
+      STRINGS.COLLECTIONS.REMOVE_QUOTE,
+      STRINGS.COLLECTIONS.REMOVE_QUOTE_DESC,
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: STRINGS.COMMON.CANCEL, style: 'cancel' },
         {
-          text: 'Remove',
+          text: STRINGS.COMMON.REMOVE,
           style: 'destructive',
           onPress: async () => {
             try {
@@ -104,12 +105,12 @@ export const CollectionDetailScreen: React.FC = () => {
 
   const handleDeleteCollection = () => {
     Alert.alert(
-      'Delete Collection',
-      'Are you sure you want to delete this collection? This cannot be undone.',
+      STRINGS.COLLECTIONS.DELETE_COLLECTION,
+      STRINGS.COLLECTIONS.DELETE_COLLECTION_DESC,
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: STRINGS.COMMON.CANCEL, style: 'cancel' },
         {
-          text: 'Delete',
+          text: STRINGS.COMMON.DELETE,
           style: 'destructive',
           onPress: async () => {
             try {
@@ -186,7 +187,7 @@ export const CollectionDetailScreen: React.FC = () => {
           </View>
           <Text style={styles.headerTitle}>{collectionName}</Text>
           <Text style={styles.headerQuoteCount}>
-            {collection?.quotes.length || 0} {(collection?.quotes.length || 0) === 1 ? 'quote' : 'quotes'}
+            {STRINGS.quoteCount(collection?.quotes.length || 0)}
           </Text>
         </View>
       </View>
@@ -196,9 +197,9 @@ export const CollectionDetailScreen: React.FC = () => {
   const renderEmptyState = () => (
     <View style={styles.emptyContainer}>
       <Ionicons name="document-text-outline" size={48} color={colors.textMuted} />
-      <Text style={[styles.emptyTitle, { color: colors.textPrimary }]}>No quotes yet</Text>
+      <Text style={[styles.emptyTitle, { color: colors.textPrimary }]}>{STRINGS.COLLECTIONS.NO_QUOTES_TITLE}</Text>
       <Text style={[styles.emptySubtitle, { color: colors.textMuted }]}>
-        Add quotes to this collection from your favorites or browse
+        {STRINGS.COLLECTIONS.NO_QUOTES_DESC}
       </Text>
     </View>
   );

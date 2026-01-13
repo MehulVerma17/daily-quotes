@@ -28,6 +28,7 @@ import { SPACING, RADIUS, FONTS, FONT_SIZES, scale } from '../../constants/theme
 import { useTheme } from '../../contexts';
 import { Collection } from '../../types';
 import { createCollection, deleteCollection } from '../../services/collectionsService';
+import { STRINGS } from '../../constants/strings';
 
 const { width } = Dimensions.get('window');
 
@@ -155,7 +156,7 @@ export const CollectionsScreen: React.FC = () => {
           {item.name}
         </Text>
         <Text style={[styles.quoteCount, { color: colors.textMuted }]}>
-          {item.quote_count || 0} {item.quote_count === 1 ? 'quote' : 'quotes'}
+          {STRINGS.quoteCount(item.quote_count || 0)}
         </Text>
       </View>
     </Pressable>
@@ -169,7 +170,7 @@ export const CollectionsScreen: React.FC = () => {
       <View style={[styles.createIconContainer, { backgroundColor: colors.gradientStart }]}>
         <Ionicons name="add" size={32} color={accent.primary} />
       </View>
-      <Text style={[styles.createText, { color: accent.primary }]}>New Collection</Text>
+      <Text style={[styles.createText, { color: accent.primary }]}>{STRINGS.COLLECTIONS.NEW_COLLECTION}</Text>
     </Pressable>
   );
 
@@ -178,16 +179,16 @@ export const CollectionsScreen: React.FC = () => {
       <View style={[styles.emptyIconContainer, { backgroundColor: colors.gradientStart }]}>
         <Ionicons name="folder-outline" size={48} color={accent.primary} />
       </View>
-      <Text style={[styles.emptyTitle, { color: colors.textPrimary }]}>No collections yet</Text>
+      <Text style={[styles.emptyTitle, { color: colors.textPrimary }]}>{STRINGS.COLLECTIONS.EMPTY_TITLE}</Text>
       <Text style={[styles.emptySubtitle, { color: colors.textMuted }]}>
-        Create collections to organize your favorite quotes
+        {STRINGS.COLLECTIONS.EMPTY_DESC}
       </Text>
       <Pressable
         style={[styles.createButton, { backgroundColor: accent.primary }]}
         onPress={() => setShowCreateModal(true)}
       >
         <Ionicons name="add" size={20} color={colors.white} />
-        <Text style={[styles.createButtonText, { color: colors.white }]}>Create Collection</Text>
+        <Text style={[styles.createButtonText, { color: colors.white }]}>{STRINGS.COLLECTIONS.CREATE_COLLECTION}</Text>
       </Pressable>
     </View>
   );
@@ -206,7 +207,7 @@ export const CollectionsScreen: React.FC = () => {
     <View style={[styles.container, { paddingTop: insets.top, backgroundColor: colors.offWhite }]}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={[styles.headerTitle, { color: colors.textPrimary }]}>My Collections</Text>
+        <Text style={[styles.headerTitle, { color: colors.textPrimary }]}>{STRINGS.COLLECTIONS.TITLE}</Text>
         <Pressable
           style={[styles.addButton, { backgroundColor: colors.white, shadowColor: colors.shadow }]}
           onPress={() => setShowCreateModal(true)}
@@ -259,7 +260,7 @@ export const CollectionsScreen: React.FC = () => {
         <View style={[styles.modalOverlay, { backgroundColor: colors.overlay }]}>
           <View style={[styles.modalContent, { backgroundColor: colors.white, paddingBottom: insets.bottom + SPACING.lg }]}>
             <View style={styles.modalHeader}>
-              <Text style={[styles.modalTitle, { color: colors.textPrimary }]}>New Collection</Text>
+              <Text style={[styles.modalTitle, { color: colors.textPrimary }]}>{STRINGS.COLLECTIONS.NEW_COLLECTION}</Text>
               <Pressable onPress={() => setShowCreateModal(false)}>
                 <Ionicons name="close" size={24} color={colors.textPrimary} />
               </Pressable>
@@ -267,10 +268,10 @@ export const CollectionsScreen: React.FC = () => {
 
             {/* Collection Name Input */}
             <View style={styles.inputContainer}>
-              <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Name</Text>
+              <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>{STRINGS.COLLECTIONS.NAME_LABEL}</Text>
               <TextInput
                 style={[styles.input, { backgroundColor: colors.offWhite, borderColor: colors.border, color: colors.textPrimary }]}
-                placeholder="Enter collection name"
+                placeholder={STRINGS.COLLECTIONS.NAME_PLACEHOLDER}
                 placeholderTextColor={colors.textPlaceholder}
                 value={newCollectionName}
                 onChangeText={setNewCollectionName}
@@ -280,7 +281,7 @@ export const CollectionsScreen: React.FC = () => {
 
             {/* Icon Selection */}
             <View style={styles.inputContainer}>
-              <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Icon</Text>
+              <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>{STRINGS.COLLECTIONS.ICON_LABEL}</Text>
               <View style={styles.iconGrid}>
                 {COLLECTION_ICONS.map((icon) => (
                   <Pressable
@@ -304,7 +305,7 @@ export const CollectionsScreen: React.FC = () => {
 
             {/* Color Selection */}
             <View style={styles.inputContainer}>
-              <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Color</Text>
+              <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>{STRINGS.COLLECTIONS.COLOR_LABEL}</Text>
               <View style={styles.colorGrid}>
                 {COLLECTION_COLORS.map((color) => (
                   <Pressable
@@ -337,7 +338,7 @@ export const CollectionsScreen: React.FC = () => {
               {creating ? (
                 <ActivityIndicator size="small" color={colors.white} />
               ) : (
-                <Text style={[styles.createCollectionButtonText, { color: colors.white }]}>Create Collection</Text>
+                <Text style={[styles.createCollectionButtonText, { color: colors.white }]}>{STRINGS.COLLECTIONS.CREATE_COLLECTION}</Text>
               )}
             </Pressable>
           </View>
